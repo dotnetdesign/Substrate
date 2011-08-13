@@ -13,29 +13,41 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityDataImplementation">The type of the entity data implementation.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
-    public class EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository, TEntityRepositoryService>
+    public class EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository,
+                                  TEntityRepositoryService>
         : IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
-        where TEntity : class, IEntity<TEntity,TId,TEntityData, TEntityRepository>, TEntityData where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
+        where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
+        where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityDataImplementation : class, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
-        where TEntityRepositoryService : class, IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation>
+        where TEntityRepositoryService : class,
+            IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation>
     {
-        /// <summary>
-        /// The entity factory
-        /// </summary>
-        protected readonly Func<TEntity> EntityFactory;
+        #region Protected Members
+
         /// <summary>
         /// The entity data factory.
         /// </summary>
         protected readonly Func<TEntityData> EntityDataFactory;
+
         /// <summary>
-        /// The entity repository service.
+        /// The entity factory
         /// </summary>
-        protected readonly TEntityRepositoryService EntityRepositoryService;
+        protected readonly Func<TEntity> EntityFactory;
+
         /// <summary>
         /// Registered entity observers.
         /// </summary>
         protected readonly IEnumerable<IEntityObserver<TEntity, TId>> EntityObservers;
+
+        /// <summary>
+        /// The entity repository service.
+        /// </summary>
+        protected readonly TEntityRepositoryService EntityRepositoryService;
+
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityRepository&lt;TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository, TEntityRepositoryService&gt;"/> class.
@@ -44,13 +56,19 @@ namespace DotNetDesign.EntityFramework
         /// <param name="entityDataFactory">The entity data factory.</param>
         /// <param name="entityRepositoryService">The entity repository service.</param>
         /// <param name="entityObservers">The entity observers.</param>
-        public EntityRepository(Func<TEntity> entityFactory, Func<TEntityData> entityDataFactory, TEntityRepositoryService entityRepositoryService, IEnumerable<IEntityObserver<TEntity, TId>> entityObservers)
+        public EntityRepository(Func<TEntity> entityFactory, Func<TEntityData> entityDataFactory,
+                                TEntityRepositoryService entityRepositoryService,
+                                IEnumerable<IEntityObserver<TEntity, TId>> entityObservers)
         {
             EntityFactory = entityFactory;
             EntityDataFactory = entityDataFactory;
             EntityRepositoryService = entityRepositoryService;
             EntityObservers = entityObservers;
         }
+
+        #endregion
+
+        #region Protected Methods
 
         /// <summary>
         /// Attaches the observers.
@@ -156,6 +174,8 @@ namespace DotNetDesign.EntityFramework
             yield break;
         }
 
+        #endregion
+
         #region Implementation of IEntityRepository<TEntityRepository,TEntity,in TId,TEntityData>
 
         /// <summary>
@@ -243,7 +263,8 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<TEntity> SaveAll(IEnumerable<TEntity> entities)
         {
-            var entityData = EntityRepositoryService.SaveAll(entities.Select(x=>x.EntityData).Cast<TEntityDataImplementation>());
+            var entityData =
+                EntityRepositoryService.SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
             return InitializeEntities(entityData);
         }
 

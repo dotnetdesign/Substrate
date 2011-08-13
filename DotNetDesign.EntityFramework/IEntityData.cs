@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -12,9 +9,9 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public interface IEntityData<TEntityData, out TEntity, TEntityRepository> : IEntityData<TEntityData, TEntity, Guid, TEntityRepository>
-        where TEntityData : class, IEntityData<TEntityData, TEntity, Guid, TEntityRepository>
-        where TEntity : class, IEntity<TEntity, Guid, TEntityData, TEntityRepository>, TEntityData
-        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, Guid, TEntityData>
+        where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
+        where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
+        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
     {
     }
 

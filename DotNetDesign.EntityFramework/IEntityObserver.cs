@@ -1,5 +1,16 @@
+using System;
+
 namespace DotNetDesign.EntityFramework
 {
+    /// <summary>
+    /// Defines methods for observing observable entities.
+    /// </summary>
+    /// <typeparam name="TObservableEntity">The type of the observable entity.</typeparam>
+    public interface IEntityObserver<in TObservableEntity> : IEntityObserver<TObservableEntity, Guid>
+        where TObservableEntity : class, IObservableEntity
+    {}
+
+
     /// <summary>
     /// Defines methods for observing observable entities.
     /// </summary>

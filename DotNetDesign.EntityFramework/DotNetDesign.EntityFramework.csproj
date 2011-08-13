@@ -35,6 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
@@ -53,8 +54,10 @@
     <Compile Include="IEntityObserver.cs" />
     <Compile Include="IEntityRepository.cs" />
     <Compile Include="IEntityRepositoryService.cs" />
+    <Compile Include="IEntityValidator.cs" />
     <Compile Include="IIdentifiable.cs" />
     <Compile Include="IObservableEntity.cs" />
+    <Compile Include="IValidatable.cs" />
     <Compile Include="IVersionable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

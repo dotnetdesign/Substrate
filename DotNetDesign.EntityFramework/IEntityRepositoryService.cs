@@ -1,8 +1,25 @@
+using System;
 using System.Collections.Generic;
 using System.ServiceModel;
 
 namespace DotNetDesign.EntityFramework
 {
+    /// <summary>
+    /// Defines methods for entity repository services.
+    /// </summary>
+    /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
+    /// <typeparam name="TEntityDataImplementation">The type of the entity data implementation.</typeparam>
+    [ServiceContract]
+    public interface IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation>
+        : IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, Guid, TEntityDataImplementation>
+        where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
+        where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
+        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
+        where TEntityDataImplementation : class, TEntityData
+    { }
+
     /// <summary>
     /// Defines methods for entity repository services.
     /// </summary>

@@ -1,6 +1,10 @@
 ﻿using System;
-using System.Linq.Expressions;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -10,18 +14,23 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
-    public abstract class BaseEntity<TEntity, TEntityData, TEntityRepository> : BaseEntity<TEntity, Guid, TEntityData, TEntityRepository>
-        where TEntityData : class, IEntityData<TEntityData, TEntity, Guid, TEntityRepository>
-        where TEntity : class, IEntity<TEntity, Guid, TEntityData, TEntityRepository>, TEntityData
-        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, Guid, TEntityData>
+    public abstract class BaseEntity<TEntity, TEntityData, TEntityRepository> :
+        BaseEntity<TEntity, Guid, TEntityData, TEntityRepository>
+        where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
+        where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
+        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TEntityData, TEntityRepository&gt;"/> class.
         /// </summary>
         /// <param name="entityRepository">The entity repository.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
-        protected BaseEntity(TEntityRepository entityRepository, Func<TEntityData> entityDataFactory)
-            :base(entityRepository, entityDataFactory)
+        /// <param name="entityValidators">The entity validators.</param>
+        protected BaseEntity(
+            TEntityRepository entityRepository,
+            Func<TEntityData> entityDataFactory,
+            IEnumerable<IEntityValidator<TEntity, TEntityData, TEntityRepository>> entityValidators)
+            : base(entityRepository, entityDataFactory, entityValidators)
         {
         }
     }
@@ -33,28 +42,32 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
-    public abstract class BaseEntity<TEntity, TId, TEntityData, TEntityRepository> : IEntity<TEntity, TId, TEntityData, TEntityRepository>
+    public abstract class BaseEntity<TEntity, TId, TEntityData, TEntityRepository> :
+        IEntity<TEntity, TId, TEntityData, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
     {
+        #region Private Members
+
+        private bool _init;
+        private bool _isDirty;
+        private bool _propertyChangedSinceIsDirtySet;
+        private IEnumerable<ValidationResult> _validationResults;
+
+        #endregion
+
+        #region Protected Members
+
         /// <summary>
         /// The entity data factory.
         /// </summary>
         protected readonly Func<TEntityData> EntityDataFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TId, TEntityData, TEntityRepository&gt;"/> class.
+        /// The entity validators.
         /// </summary>
-        /// <param name="entityRepository">The entity repository.</param>
-        /// <param name="entityDataFactory">The entity data factory.</param>
-        protected BaseEntity(TEntityRepository entityRepository, Func<TEntityData> entityDataFactory)
-        {
-            EntityDataFactory = entityDataFactory;
-            EntityRepository = entityRepository;
-
-            PropertyChanged += BaseEntityPropertyChanged;
-        }
+        protected readonly IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> EntityValidators;
 
         /// <summary>
         /// Gets or sets the original entity data.
@@ -63,6 +76,32 @@ namespace DotNetDesign.EntityFramework
         /// The original entity data.
         /// </value>
         protected TEntityData OriginalEntityData { get; set; }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TId, TEntityData, TEntityRepository&gt;"/> class.
+        /// </summary>
+        /// <param name="entityRepository">The entity repository.</param>
+        /// <param name="entityDataFactory">The entity data factory.</param>
+        /// <param name="entityValidators">The entity validators.</param>
+        protected BaseEntity(
+            TEntityRepository entityRepository,
+            Func<TEntityData> entityDataFactory,
+            IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators)
+        {
+            EntityDataFactory = entityDataFactory;
+            EntityRepository = entityRepository;
+            EntityValidators = entityValidators;
+
+            PropertyChanged += BaseEntityPropertyChanged;
+        }
+
+        #endregion
+
+        #region IEntity<TEntity,TId,TEntityData,TEntityRepository> Members
 
         /// <summary>
         /// Saves this instance.
@@ -103,12 +142,11 @@ namespace DotNetDesign.EntityFramework
             get { return (EntityData == null) ? default(TId) : EntityData.Id; }
             set
             {
-                if (!EntityData.Id.Equals(value))
-                {
-                    OnPropertyChanging("Id");
-                    EntityData.Id = value;
-                    OnPropertyChanged("Id");
-                }
+                if (EntityData.Id.Equals(value)) return;
+
+                OnPropertyChanging("Id");
+                EntityData.Id = value;
+                OnPropertyChanged("Id");
             }
         }
 
@@ -123,12 +161,11 @@ namespace DotNetDesign.EntityFramework
             get { return (EntityData == null) ? default(int) : EntityData.Version; }
             set
             {
-                if (!EntityData.Version.Equals(value))
-                {
-                    OnPropertyChanging("Version");
-                    EntityData.Version = value;
-                    OnPropertyChanged("Version");
-                }
+                if (EntityData.Version.Equals(value)) return;
+
+                OnPropertyChanging("Version");
+                EntityData.Version = value;
+                OnPropertyChanged("Version");
             }
         }
 
@@ -190,12 +227,15 @@ namespace DotNetDesign.EntityFramework
         /// <returns>
         ///   <c>true</c> if the specified property has changed; otherwise, <c>false</c>.
         /// </returns>
-        public virtual bool HasPropertyChanged<TProperty>(Expression<Func<TEntityData, TProperty>> property, out TProperty originalValue)
+        public virtual bool HasPropertyChanged<TProperty>(
+            Expression<Func<TEntityData, TProperty>> property,
+            out TProperty originalValue)
         {
-            var propertyName = ((MemberExpression)property.Body).Member.Name;
-            
-            originalValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
-            var currentValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
+            var propertyName = ((MemberExpression) property.Body).Member.Name;
+
+            originalValue =
+                (TProperty) typeof (TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
+            var currentValue = (TProperty) typeof (TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
             return !originalValue.Equals(currentValue);
         }
@@ -208,37 +248,21 @@ namespace DotNetDesign.EntityFramework
         {
             if (_init)
             {
-                throw new InvalidOperationException("Initialize has already been called on this instance. This can only be called once per instance.");
+                throw new InvalidOperationException(
+                    "Initialize has already been called on this instance. This can only be called once per instance.");
             }
+
             OnInitializing();
+
             OriginalEntityData = entityData;
             EntityData = CloneEntityData(entityData);
+
             _propertyChangedSinceIsDirtySet = false;
             _isDirty = false;
+            _validationResults = null;
             _init = true;
+
             OnInitialized();
-        }
-        private bool _init;
-
-        /// <summary>
-        /// Clones the entity data.
-        /// </summary>
-        /// <param name="entityData">The entity data.</param>
-        /// <returns></returns>
-        protected virtual TEntityData CloneEntityData(TEntityData entityData)
-        {
-            var newEntityData = EntityDataFactory();
-            
-            foreach (var property in typeof(TEntityData).GetProperties())
-            {
-                var value = property.GetValue(entityData, null);
-                property.SetValue(newEntityData, value, null);
-            }
-
-            newEntityData.Id = entityData.Id;
-            newEntityData.Version = entityData.Version;
-
-            return newEntityData;
         }
 
         /// <summary>
@@ -254,31 +278,15 @@ namespace DotNetDesign.EntityFramework
                 if (_propertyChangedSinceIsDirtySet)
                 {
                     _propertyChangedSinceIsDirtySet = false;
-                    _isDirty = false;
-                    foreach (var property in typeof(TEntityData).GetProperties())
-                    {
-                        if (property.Name != "Id" && property.GetValue(OriginalEntityData, null) != property.GetValue(EntityData, null))
-                        {
-                            _isDirty = true;
-                        }
-                    }
+                    _isDirty =
+                        typeof (TEntityData).GetProperties().Any(
+                            x =>
+                            x.GetValue(OriginalEntityData, null) != x.GetValue(EntityData, null));
                 }
 
                 return _isDirty;
             }
         }
-
-        /// <summary>
-        /// Bases the entity property changed.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
-        void BaseEntityPropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            _propertyChangedSinceIsDirtySet = true;
-        }
-        private bool _propertyChangedSinceIsDirtySet;
-        private bool _isDirty;
 
         /// <summary>
         /// Reverts the changes.
@@ -288,111 +296,177 @@ namespace DotNetDesign.EntityFramework
             Initialize(OriginalEntityData);
         }
 
-        #region Implementation of INotifyPropertyChanging
+        /// <summary>
+        /// Gets a value indicating whether this instance is valid.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is valid; otherwise, <c>false</c>.
+        /// </value>
+        public bool IsValid
+        {
+            get
+            {
+                if (_validationResults == null)
+                {
+                    _validationResults = Validate();
+                }
+
+                return !_validationResults.Any();
+            }
+        }
 
         /// <summary>
-        /// Occurs when a property value is changing.
+        /// Validates this instance.
         /// </summary>
-        public event PropertyChangingEventHandler PropertyChanging;
-        /// <summary>
-        /// Occurs when a property value changes.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        /// <returns></returns>
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return EntityValidators.SelectMany(x => x.Validate(this as TEntity));
+        }
 
-        /// <summary>
-        /// Called when [property changing].
-        /// </summary>
-        /// <param name="propertyName">Name of the property.</param>
-        protected virtual void OnPropertyChanging(string propertyName)
-        {
-            if (PropertyChanging != null)
-                PropertyChanging.Invoke(this, new PropertyChangingEventArgs(propertyName));
-        }
-        /// <summary>
-        /// Called when [property changed].
-        /// </summary>
-        /// <param name="propertyName">Name of the property.</param>
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
         #endregion
 
         #region Implementation of IObservableEntity
 
         /// <summary>
-        /// Occurs when [saving].
+        /// Occurs when a property value is changing.
         /// </summary>
-        public event EventHandler Saving;
+        public event PropertyChangingEventHandler PropertyChanging = delegate { }; 
+
         /// <summary>
-        /// Called when [saving].
+        /// Called when a property value is changing.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        protected virtual void OnPropertyChanging(string propertyName)
+        {
+            PropertyChanging.Invoke(this, new PropertyChangingEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Occurs when a property value changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged = delegate { }; 
+
+        /// <summary>
+        /// Called when a property value changed.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        /// <summary>
+        /// Occurs when saving.
+        /// </summary>
+        public event EventHandler Saving = delegate { };
+
+        /// <summary>
+        /// Called when saving.
         /// </summary>
         protected virtual void OnSaving()
         {
-            if(Saving!=null)
-                Saving.Invoke(this, EventArgs.Empty);
+            Saving.Invoke(this, EventArgs.Empty);
         }
+
         /// <summary>
-        /// Occurs when [saved].
+        /// Occurs when saved.
         /// </summary>
-        public event EventHandler Saved;
+        public event EventHandler Saved = delegate { };
+
         /// <summary>
-        /// Called when [saved].
+        /// Called when saved.
         /// </summary>
         protected virtual void OnSaved()
         {
-            if (Saved != null)
-                Saved.Invoke(this, EventArgs.Empty);
+            Saved.Invoke(this, EventArgs.Empty);
         }
+
         /// <summary>
-        /// Occurs when [deleting].
+        /// Occurs when deleting.
         /// </summary>
-        public event EventHandler Deleting;
+        public event EventHandler Deleting = delegate { };
+
         /// <summary>
-        /// Called when [deleting].
+        /// Called when deleting.
         /// </summary>
         protected virtual void OnDeleting()
         {
-            if (Deleting != null)
-                Deleting.Invoke(this, EventArgs.Empty);
+            Deleting.Invoke(this, EventArgs.Empty);
         }
+
         /// <summary>
-        /// Occurs when [deleted].
+        /// Occurs when deleted.
         /// </summary>
-        public event EventHandler Deleted;
+        public event EventHandler Deleted = delegate { };
+
         /// <summary>
-        /// Called when [deleted].
+        /// Called when deleted.
         /// </summary>
         protected virtual void OnDeleted()
         {
-            if (Deleted != null)
-                Deleted.Invoke(this, EventArgs.Empty);
+            Deleted.Invoke(this, EventArgs.Empty);
         }
+
         /// <summary>
-        /// Occurs when [initializing].
+        /// Occurs when initializing.
         /// </summary>
-        public event EventHandler Initializing;
+        public event EventHandler Initializing = delegate { };
+
         /// <summary>
-        /// Called when [initializing].
+        /// Called when initializing.
         /// </summary>
         protected virtual void OnInitializing()
         {
-            if (Initializing != null)
-                Initializing.Invoke(this, EventArgs.Empty);
+            Initializing.Invoke(this, EventArgs.Empty);
         }
-        /// <summary>
-        /// Occurs when [initialized].
-        /// </summary>
-        public event EventHandler Initialized;
 
         /// <summary>
-        /// Called when [initialized].
+        /// Occurs when initialized.
+        /// </summary>
+        public event EventHandler Initialized = delegate { };
+
+        /// <summary>
+        /// Called when initialized.
         /// </summary>
         protected virtual void OnInitialized()
         {
-            if (Initialized != null)
-                Initialized.Invoke(this, EventArgs.Empty);
+            Initialized.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Clones the entity data.
+        /// </summary>
+        /// <param name="entityData">The entity data.</param>
+        /// <returns></returns>
+        protected virtual TEntityData CloneEntityData(TEntityData entityData)
+        {
+            var newEntityData = EntityDataFactory();
+
+            foreach (var property in typeof (TEntityData).GetProperties())
+            {
+                var value = property.GetValue(entityData, null);
+                property.SetValue(newEntityData, value, null);
+            }
+
+            newEntityData.Id = entityData.Id;
+            newEntityData.Version = entityData.Version;
+
+            return newEntityData;
+        }
+
+        /// <summary>
+        /// Bases the entity property changed.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
+        private void BaseEntityPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            _propertyChangedSinceIsDirtySet = true;
         }
 
         #endregion

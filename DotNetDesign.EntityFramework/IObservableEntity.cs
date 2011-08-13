@@ -6,6 +6,12 @@ namespace DotNetDesign.EntityFramework
     /// <summary>
     /// Defines functionality for observable entity.
     /// </summary>
+    public interface IObservableEntity : IObservableEntity<Guid>
+    {}
+
+    /// <summary>
+    /// Defines functionality for observable entity.
+    /// </summary>
     /// <typeparam name="TId">The type of the id.</typeparam>
     public interface IObservableEntity<TId> : INotifyPropertyChanged, INotifyPropertyChanging, IIdentifiable<TId>
     {
