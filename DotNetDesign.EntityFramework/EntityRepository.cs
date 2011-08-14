@@ -9,6 +9,37 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
+    /// <typeparam name="TEntityDataImplementation">The type of the entity data implementation.</typeparam>
+    /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
+    /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
+    public class EntityRepository<TEntity, TEntityData, TEntityDataImplementation, TEntityRepository,
+                                  TEntityRepositoryService>
+        : EntityRepository<TEntity, TEntityData, Guid, TEntityDataImplementation, TEntityRepository,
+                                  TEntityRepositoryService>
+        where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData, IObservableEntity
+        where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
+        where TEntityDataImplementation : class, TEntityData
+        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
+        where TEntityRepositoryService : class,
+            IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityRepository&lt;TEntity, TEntityData, TEntityDataImplementation, TEntityRepository, TEntityRepositoryService&gt;"/> class.
+        /// </summary>
+        /// <param name="entityFactory">The entity factory.</param>
+        /// <param name="entityDataFactory">The entity data factory.</param>
+        /// <param name="entityRepositoryService">The entity repository service.</param>
+        /// <param name="entityObservers">The entity observers.</param>
+        public EntityRepository(Func<TEntity> entityFactory, Func<TEntityData> entityDataFactory, TEntityRepositoryService entityRepositoryService, IEnumerable<IEntityObserver<TEntity>> entityObservers) : base(entityFactory, entityDataFactory, entityRepositoryService, entityObservers)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Base implementation of IEntityRepository.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityDataImplementation">The type of the entity data implementation.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>

@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDesign.EntityFramewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C709F1D5-F296-427D-8B8D-451C47E00912}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDesign.EntityFramework.Tests", "DotNetDesign.EntityFramework.Tests\DotNetDesign.EntityFramework.Tests.csproj", "{F7FC9874-CF7E-4659-8173-991E7CB56AFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{0219FEAF-E377-46CB-B775-AFD912E051A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0219FEAF-E377-46CB-B775-AFD912E051A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0219FEAF-E377-46CB-B775-AFD912E051A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7FC9874-CF7E-4659-8173-991E7CB56AFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7FC9874-CF7E-4659-8173-991E7CB56AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7FC9874-CF7E-4659-8173-991E7CB56AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7FC9874-CF7E-4659-8173-991E7CB56AFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
