@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace DotNetDesign.EntityFramework.Tests
 {
@@ -10,6 +12,8 @@ namespace DotNetDesign.EntityFramework.Tests
 
     public interface IPersonData : IEntityData<IPersonData, IPerson, IPersonRepository>
     {
+        [DisplayName("First Name")]
+        [Required]
         string FirstName { get; set; }
         string LastName { get; set; }
     }
@@ -26,10 +30,6 @@ namespace DotNetDesign.EntityFramework.Tests
     {
         public Person(IPersonRepository entityRepository, Func<IPersonData> entityDataFactory, IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators)
             : base(entityRepository, entityDataFactory, entityValidators)
-        {
-        }
-        public Person(IPersonRepository entityRepository, Func<IPersonData> entityDataFactory)
-            : base(entityRepository, entityDataFactory, new List<IEntityValidator<IPerson, IPersonData, IPersonRepository>>())
         {
         }
 

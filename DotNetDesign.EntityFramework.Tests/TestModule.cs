@@ -10,6 +10,8 @@ namespace DotNetDesign.EntityFramework.Tests
             builder.RegisterType<PersonData>().As<IPersonData>();
             builder.RegisterType<PersonRepository>().As<IPersonRepository>();
             builder.RegisterType<PersonRepositoryService>().As<IPersonRepositoryService>();
+            builder.RegisterType<DataAnnotationEntityValidator<IPerson, IPersonData, IPersonRepository>>().As
+                <IEntityValidator<IPerson, IPersonData, IPersonRepository>>();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -6,6 +7,20 @@ using System.Reflection;
 
 namespace DotNetDesign.EntityFramework
 {
+    /// <summary>
+    /// Validates property data annotation validation attributes on TEntity and TEntityData.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
+    /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
+    public class DataAnnotationEntityValidator<TEntity, TEntityData, TEntityRepository> :
+        DataAnnotationEntityValidator<TEntity, TEntityData, Guid, TEntityRepository>, IEntityValidator<TEntity, TEntityData, TEntityRepository>
+        where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
+        where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
+        where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
+    {
+    }
+
     /// <summary>
     /// Validates property data annotation validation attributes on TEntity and TEntityData.
     /// </summary>
@@ -48,12 +63,13 @@ namespace DotNetDesign.EntityFramework
         {
             return from property in typeof(TValidatableType).GetProperties()
                    from validationAttribute in
-                       property.GetCustomAttributes(typeof (ValidationAttribute), true).OfType<ValidationAttribute>()
+                       property.GetCustomAttributes(typeof(ValidationAttribute), true).OfType<ValidationAttribute>()
                    where !validationAttribute.IsValid(property.GetValue(entity, null))
                    select
                        new ValidationResult(
                        validationAttribute.FormatErrorMessage(GetDisplayName(property)),
-                       new[] {property.Name});
+                       new[] { property.Name });
+
         }
 
         /// <summary>

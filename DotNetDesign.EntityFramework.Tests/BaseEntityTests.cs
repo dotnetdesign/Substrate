@@ -1,13 +1,20 @@
+using System;
 using Autofac;
 using NUnit.Framework;
 using NUnit.Mocks;
+using Moq;
+using Mock = Moq.Mock;
 
 namespace DotNetDesign.EntityFramework.Tests
 {
     [TestFixture]
     public class BaseEntityTests
     {
+        private IPerson _person;
+        private IPersonData _personData;
         private IContainer _container;
+
+        #region Setup
 
         [TestFixtureSetUp]
         public void SetUpTestFixture()
@@ -23,8 +30,6 @@ namespace DotNetDesign.EntityFramework.Tests
             _container.Dispose();
         }
 
-        private IPerson _person;
-        private IPersonData _personData;
         [SetUp]
         public void TestSetUp()
         {
@@ -33,6 +38,8 @@ namespace DotNetDesign.EntityFramework.Tests
             _personData.FirstName = "John";
             _personData.LastName = "Doe";
         }
+
+        #endregion
 
         [Test]
         public void PersonPropertyValuesShouldMatchDataPropertyValuesAfterInitialization()
@@ -68,6 +75,92 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.FirstName = newFirstName;
             Assert.AreEqual(newFirstName, _person.FirstName);
             Assert.IsTrue(_person.IsDirty);
+        }
+
+        [Test]
+        public void ValidPersonShouldCallSaveOnRepository()
+        {
+            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
+            _person.EntityRepository = personRepositoryMock.Object;
+
+            personRepositoryMock.Setup(x => x.Save(_person)).Returns(_person);
+            _person.Save();
+        }
+
+        [Test]
+        public void InvalidPersonShouldNotCallSaveOnRepository()
+        {
+            _person.Initialize(_personData);
+            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
+            _person.EntityRepository = personRepositoryMock.Object;
+            _person.FirstName = null;
+            _person.Save();
+
+        }
+
+        [Test]
+        public void VersionShouldNotIncrementIfNoChangesMade()
+        {
+            _person.Initialize(_personData);
+
+            var expectedVersion = _person.Version;
+            IPerson returnedPerson;
+            _person.Save(out returnedPerson);
+            Assert.AreEqual(expectedVersion, returnedPerson.Version);
+        }
+
+        [Test]
+        public void VersionShouldIncrementIfChangesMade()
+        {
+            _person.Initialize(_personData);
+            _person.FirstName = _person.FirstName + " more info";
+            var expectedVersion = _person.Version + 1;
+
+            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
+            _person.EntityRepository = personRepositoryMock.Object;
+            personRepositoryMock.Setup(x => x.Save(_person)).Returns(_person);
+
+            IPerson returnedPerson;
+            _person.Save(out returnedPerson);
+            Assert.AreEqual(expectedVersion, returnedPerson.Version);
+        }
+
+        [Test]
+        public void HasPropertyChangedShouldReturnFalseIfNotChanged()
+        {
+            _person.Initialize(_personData);
+            Assert.IsFalse(_person.HasPropertyChanged(x => x.FirstName));
+            Assert.IsFalse(_person.HasPropertyChanged(x => x.LastName));
+        }
+
+        [Test]
+        public void HasPropertyChangedShouldReturnTrueIfChanged()
+        {
+            _person.Initialize(_personData);
+            _person.FirstName = _person.FirstName + " more info";
+            Assert.IsTrue(_person.HasPropertyChanged(x => x.FirstName));
+            Assert.IsFalse(_person.HasPropertyChanged(x => x.LastName));
+        }
+
+        [Test]
+        public void InvalidOperationExceptionShouldBeThrownIfInitializeIsCalledTwice()
+        {
+            _person.Initialize(_personData);
+            Assert.Throws(typeof (InvalidOperationException), () => _person.Initialize(_personData));
+        }
+
+        [Test]
+        public void CallToGetVersionShouldPassInstanceAndVersionToEntityRepository()
+        {
+            _person.Initialize(_personData);
+
+            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
+            _person.EntityRepository = personRepositoryMock.Object;
+
+            const int version = 1;
+            personRepositoryMock.Setup(x => x.GetVersion(_person, version)).Returns(_person);
+
+            _person.GetVersion(version);
         }
     }
 }

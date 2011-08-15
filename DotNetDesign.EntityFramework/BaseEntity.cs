@@ -103,21 +103,38 @@ namespace DotNetDesign.EntityFramework
         #region IEntity<TEntity,TId,TEntityData,TEntityRepository> Members
 
         /// <summary>
-        /// Saves this instance.
+        /// Saves this instance. Returns if the save process was successful.
         /// </summary>
         /// <returns></returns>
-        public TEntity Save()
+        public bool Save()
+        {
+            TEntity returnedEntity;
+            return Save(out returnedEntity);
+        }
+
+        /// <summary>
+        /// Saves this instance. Returns if the save process was successful.
+        /// </summary>
+        /// <returns></returns>
+        public bool Save(out TEntity returnedEntity)
         {
             if (IsDirty)
             {
+                if (!IsValid)
+                {
+                    returnedEntity = this as TEntity;
+                    return false;
+                }
+
                 Version = Version + 1;
                 OnSaving();
-                var savedEntity = EntityRepository.Save(this as TEntity);
+                returnedEntity = EntityRepository.Save(this as TEntity);
                 OnSaved();
-                return savedEntity;
+                return true;
             }
 
-            return this as TEntity;
+            returnedEntity = this as TEntity;
+            return true;
         }
 
         /// <summary>
