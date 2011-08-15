@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Autofac;
 using NUnit.Framework;
 using NUnit.Mocks;
@@ -161,6 +162,63 @@ namespace DotNetDesign.EntityFramework.Tests
             personRepositoryMock.Setup(x => x.GetVersion(_person, version)).Returns(_person);
 
             _person.GetVersion(version);
+        }
+
+        [Test]
+        public void CallToGetPreviousVersionShouldPassInstanceToEntityRepository()
+        {
+            _person.Initialize(_personData);
+
+            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
+            _person.EntityRepository = personRepositoryMock.Object;
+
+            personRepositoryMock.Setup(x => x.GetPreviousVersion(_person)).Returns(_person);
+
+            _person.GetPreviousVersion();
+        }
+
+        [Test]
+        public void CallToDeleteShouldPassInstanceToEntityRepository()
+        {
+            _person.Initialize(_personData);
+
+            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
+            _person.EntityRepository = personRepositoryMock.Object;
+
+            personRepositoryMock.Setup(x => x.Delete(_person));
+
+            _person.Delete();   
+        }
+
+        [Test]
+        public void CallToRevertChangesShouldResetValuesAndSetIsDirtyToFalse()
+        {
+            _person.Initialize(_personData);
+
+            var originalFirstName = _person.FirstName;
+            var newFirstName = "NewFirstName";
+
+            var originalLastName = _person.LastName;
+            var newLastName = "NewLastName";
+
+            Assert.IsFalse(_person.IsDirty);
+
+            var originalValidationResults = _person.Validate();
+
+            _person.FirstName = newFirstName;
+            _person.LastName = newLastName;
+
+            Assert.IsTrue(_person.IsDirty);
+            Assert.AreEqual(newFirstName, _person.FirstName);
+            Assert.AreEqual(newLastName, _person.LastName);
+
+            _person.RevertChanges();
+
+            Assert.IsFalse(_person.IsDirty);
+            Assert.AreEqual(originalFirstName, _person.FirstName);
+            Assert.AreEqual(originalLastName, _person.LastName);
+
+            Assert.AreEqual(originalValidationResults.Count(), _person.Validate().Count());
         }
     }
 }

@@ -309,6 +309,7 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         public virtual void RevertChanges()
         {
+            _init = false;
             Initialize(OriginalEntityData);
         }
 
