@@ -15,10 +15,11 @@ namespace DotNetDesign.EntityFramework
         ///   <c>true</c> if this instance is valid; otherwise, <c>false</c>.
         /// </value>
         bool IsValid { get; }
+
         /// <summary>
         /// Validates this instance.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<ValidationResult> Validate();
+        IEnumerable<IValidationResult> Validate();
     }
 }

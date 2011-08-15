@@ -41,9 +41,9 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <returns></returns>
-        public IEnumerable<ValidationResult> Validate(TEntity entity)
+        public IEnumerable<IValidationResult> Validate(TEntity entity)
         {
-            var validationResults = new List<ValidationResult>();
+            var validationResults = new List<IValidationResult>();
 
             validationResults.AddRange(ValidateType<TEntityData>(entity));
             validationResults.AddRange(ValidateType<TEntity>(entity));
@@ -59,16 +59,16 @@ namespace DotNetDesign.EntityFramework
         /// <typeparam name="TValidatableType">The type of the validatable type.</typeparam>
         /// <param name="entity">The entity.</param>
         /// <returns></returns>
-        private IEnumerable<ValidationResult> ValidateType<TValidatableType>(TEntity entity)
+        private IEnumerable<IValidationResult> ValidateType<TValidatableType>(TEntity entity)
         {
-            return from property in typeof(TValidatableType).GetProperties()
+            return from property in typeof (TValidatableType).GetProperties()
                    from validationAttribute in
-                       property.GetCustomAttributes(typeof(ValidationAttribute), true).OfType<ValidationAttribute>()
+                       property.GetCustomAttributes(typeof (ValidationAttribute), true).OfType<ValidationAttribute>()
                    where !validationAttribute.IsValid(property.GetValue(entity, null))
                    select
-                       new ValidationResult(
-                       validationAttribute.FormatErrorMessage(GetDisplayName(property)),
-                       new[] { property.Name });
+                       ValidationResult.Error(
+                           validationAttribute.FormatErrorMessage(GetDisplayName(property)),
+                           new[] {property.Name});
 
         }
 

@@ -52,7 +52,7 @@ namespace DotNetDesign.EntityFramework
         private bool _init;
         private bool _isDirty;
         private bool _propertyChangedSinceIsDirtySet;
-        private IEnumerable<ValidationResult> _validationResults;
+        private IEnumerable<IValidationResult> _validationResults;
 
         #endregion
 
@@ -120,7 +120,7 @@ namespace DotNetDesign.EntityFramework
         {
             if (IsDirty)
             {
-                if (!IsValid)
+                if (!IsValid && Validate().Any(x => x.StatusType == ValidationResultStatusType.Error))
                 {
                     returnedEntity = this as TEntity;
                     return false;
@@ -335,9 +335,14 @@ namespace DotNetDesign.EntityFramework
         /// Validates this instance.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ValidationResult> Validate()
+        public IEnumerable<IValidationResult> Validate()
         {
-            return EntityValidators.SelectMany(x => x.Validate(this as TEntity));
+            if (_validationResults == null)
+            {
+                _validationResults = EntityValidators.SelectMany(x => x.Validate(this as TEntity));
+            }
+
+            return _validationResults;
         }
 
         #endregion
