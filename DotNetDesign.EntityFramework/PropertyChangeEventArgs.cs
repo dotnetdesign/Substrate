@@ -47,5 +47,15 @@ namespace DotNetDesign.EntityFramework
         public object NewValue { get; private set; }
 
         #endregion
+
+        /// <summary>
+        /// Converts <see cref="DotNetDesign.EntityFramework.PropertyChangeEventArgs"/> to <see cref="System.EventArgs"/>.
+        /// </summary>
+        /// <param name="propertyChangeEventArgs">The <see cref="DotNetDesign.EntityFramework.PropertyChangeEventArgs"/> instance containing the event data.</param>
+        /// <returns></returns>
+        public static EventArgs ToEventArgs(PropertyChangeEventArgs propertyChangeEventArgs)
+        {
+            return propertyChangeEventArgs;
+        }
     }
 }
