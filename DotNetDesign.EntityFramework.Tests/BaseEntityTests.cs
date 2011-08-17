@@ -220,5 +220,59 @@ namespace DotNetDesign.EntityFramework.Tests
 
             Assert.AreEqual(originalValidationResults.Count(), _person.Validate().Count());
         }
+
+        [Test]
+        public void CallToInitializeShouldCallInitializingAndInitializeOnceEach()
+        {
+            var initializingCallCount = 0;
+            var initializedCallCount = 0;
+
+            _person.Initializing += (sender, e) => initializingCallCount++;
+            _person.Initialized += (sender, e) => initializedCallCount++;
+
+            _person.Initialize(_personData);
+
+            Assert.AreEqual(1, initializingCallCount);
+            Assert.AreEqual(1, initializedCallCount);
+        }
+
+        [Test]
+        public void WhenPropertyValueChangesPropertyChangingAndPropertyChangedEventsShouldBeTriggered()
+        {
+            var propertyChangingCallCount = 0;
+            var propertyChangedCallCount = 0;
+
+            var propertyChangingPropertyName = string.Empty;
+            var propertyChangedPropertyName = string.Empty;
+
+            _person.PropertyChanging +=
+                (sender, e) =>
+                    {
+                        propertyChangingCallCount++;
+                        propertyChangingPropertyName = e.PropertyName;
+                    };
+            _person.PropertyChanged +=
+                (sender, e) =>
+                    {
+                        propertyChangedCallCount++;
+                        propertyChangedPropertyName = e.PropertyName;
+                    };
+
+            _person.Initialize(_personData);
+
+            _person.FirstName = _personData.FirstName;
+
+            Assert.AreEqual(0, propertyChangingCallCount);
+            Assert.AreEqual(0, propertyChangedCallCount);
+            Assert.IsEmpty(propertyChangingPropertyName);
+            Assert.IsEmpty(propertyChangedPropertyName);
+
+            _person.FirstName = _personData.FirstName + " more info";
+
+            Assert.AreEqual(1, propertyChangingCallCount);
+            Assert.AreEqual(1, propertyChangedCallCount);
+            Assert.AreEqual("FirstName", propertyChangingPropertyName);
+            Assert.AreEqual("FirstName", propertyChangedPropertyName);
+        }
     }
 }

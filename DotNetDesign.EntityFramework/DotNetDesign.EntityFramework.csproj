@@ -50,6 +50,7 @@
     <Compile Include="BaseEntityData.cs" />
     <Compile Include="DataAnnotationEntityValidator.cs" />
     <Compile Include="EntityRepository.cs" />
+    <Compile Include="EventHandlerExtensions.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IEntityData.cs" />
     <Compile Include="IEntityObserver.cs" />
@@ -61,9 +62,11 @@
     <Compile Include="IValidatable.cs" />
     <Compile Include="IValidationResult.cs" />
     <Compile Include="IVersionable.cs" />
+    <Compile Include="IWeakEventHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ValidationResult.cs" />
     <Compile Include="ValidationResultStatusType.cs" />
+    <Compile Include="WeakEventHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DotNetDesign.EntityFramework.nuspec" />
