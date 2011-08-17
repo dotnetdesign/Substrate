@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
@@ -160,9 +159,10 @@ namespace DotNetDesign.EntityFramework
             {
                 if (EntityData.Id.Equals(value)) return;
 
-                OnPropertyChanging("Id");
+                var oldValue = EntityData.Id;
+                OnPropertyChanging("Id", oldValue, value);
                 EntityData.Id = value;
-                OnPropertyChanged("Id");
+                OnPropertyChanged("Id", oldValue, value);
             }
         }
 
@@ -179,9 +179,10 @@ namespace DotNetDesign.EntityFramework
             {
                 if (EntityData.Version.Equals(value)) return;
 
-                OnPropertyChanging("Version");
+                var oldValue = EntityData.Version;
+                OnPropertyChanging("Version", oldValue, value);
                 EntityData.Version = value;
-                OnPropertyChanged("Version");
+                OnPropertyChanged("Version", oldValue, value);
             }
         }
 
@@ -353,35 +354,39 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Occurs when a property value is changing.
         /// </summary>
-        public event PropertyChangingEventHandler PropertyChanging = delegate { }; 
+        public event EventHandler<PropertyChangeEventArgs> PropertyChanging = delegate { };
 
         /// <summary>
         /// Called when a property value is changing.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
-        protected virtual void OnPropertyChanging(string propertyName)
+        /// <param name="oldValue">The old value.</param>
+        /// <param name="newValue">The new value.</param>
+        protected virtual void OnPropertyChanging(string propertyName, object oldValue, object newValue)
         {
-            PropertyChanging.Invoke(this, new PropertyChangingEventArgs(propertyName));
+            PropertyChanging.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
         }
 
         /// <summary>
         /// Occurs when a property value changed.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged = delegate { }; 
+        public event EventHandler<PropertyChangeEventArgs> PropertyChanged = delegate { };
 
         /// <summary>
         /// Called when a property value changed.
         /// </summary>
         /// <param name="propertyName">Name of the property.</param>
-        protected virtual void OnPropertyChanged(string propertyName)
+        /// <param name="oldValue">The old value.</param>
+        /// <param name="newValue">The new value.</param>
+        protected virtual void OnPropertyChanged(string propertyName, object oldValue, object newValue)
         {
-            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
         }
 
         /// <summary>
         /// Occurs when saving.
         /// </summary>
-        public event EventHandler Saving = delegate { };
+        public event EventHandler<EventArgs> Saving = delegate { };
 
         /// <summary>
         /// Called when saving.
@@ -394,7 +399,7 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Occurs when saved.
         /// </summary>
-        public event EventHandler Saved = delegate { };
+        public event EventHandler<EventArgs> Saved = delegate { };
 
         /// <summary>
         /// Called when saved.
@@ -407,7 +412,7 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Occurs when deleting.
         /// </summary>
-        public event EventHandler Deleting = delegate { };
+        public event EventHandler<EventArgs> Deleting = delegate { };
 
         /// <summary>
         /// Called when deleting.
@@ -420,7 +425,7 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Occurs when deleted.
         /// </summary>
-        public event EventHandler Deleted = delegate { };
+        public event EventHandler<EventArgs> Deleted = delegate { };
 
         /// <summary>
         /// Called when deleted.
@@ -433,7 +438,7 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Occurs when initializing.
         /// </summary>
-        public event EventHandler Initializing = delegate { };
+        public event EventHandler<EventArgs> Initializing = delegate { };
 
         /// <summary>
         /// Called when initializing.
@@ -446,7 +451,7 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Occurs when initialized.
         /// </summary>
-        public event EventHandler Initialized = delegate { };
+        public event EventHandler<EventArgs> Initialized = delegate { };
 
         /// <summary>
         /// Called when initialized.
@@ -486,7 +491,7 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
-        private void BaseEntityPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void BaseEntityPropertyChanged(object sender, PropertyChangeEventArgs e)
         {
             _propertyChangedSinceIsDirtySet = true;
         }

@@ -40,9 +40,10 @@ namespace DotNetDesign.EntityFramework.Tests
             {
                 if (EntityData.FirstName.Equals(value)) return;
 
-                OnPropertyChanging("FirstName");
+                var oldValue = EntityData.FirstName;
+                OnPropertyChanging("FirstName", oldValue, value);
                 EntityData.FirstName = value;
-                OnPropertyChanged("FirstName");
+                OnPropertyChanged("FirstName", oldValue, value);
             }
         }
 
@@ -53,9 +54,10 @@ namespace DotNetDesign.EntityFramework.Tests
             {
                 if (EntityData.LastName.Equals(value)) return;
 
-                OnPropertyChanging("LastName");
+                var oldValue = EntityData.LastName;
+                OnPropertyChanging("LastName", oldValue, value);
                 EntityData.LastName = value;
-                OnPropertyChanged("LastName");
+                OnPropertyChanged("LastName", oldValue, value);
             }
         }
     }
