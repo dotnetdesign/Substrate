@@ -27,5 +27,9 @@ namespace DotNetDesign.EntityFramework
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
     {
+        /// <summary>
+        /// Gets the version id.
+        /// </summary>
+        string VersionId { get; }
     }
 }

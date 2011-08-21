@@ -62,5 +62,13 @@ namespace DotNetDesign.EntityFramework
         /// </value>
         [DataMember]
         public TId Id { get; set; }
+
+        /// <summary>
+        /// Gets the version id.
+        /// </summary>
+        public string VersionId
+        {
+            get { return Id + "::" + Id; }
+        }
     }
 }
