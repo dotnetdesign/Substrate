@@ -187,6 +187,11 @@ namespace DotNetDesign.EntityFramework
         }
 
         /// <summary>
+        /// Gets the version id.
+        /// </summary>
+        public string VersionId { get { return EntityData.VersionId; } }
+
+        /// <summary>
         /// Gets the previous version.
         /// </summary>
         /// <returns></returns>
