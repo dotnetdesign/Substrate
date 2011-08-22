@@ -61,7 +61,7 @@ namespace DotNetDesign.EntityFramework
         /// The id.
         /// </value>
         [DataMember]
-        public TId Id { get; set; }
+        public virtual TId Id { get; set; }
 
         /// <summary>
         /// Gets the version id.
