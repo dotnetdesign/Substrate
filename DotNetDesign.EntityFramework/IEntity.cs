@@ -33,12 +33,12 @@ namespace DotNetDesign.EntityFramework
         #region Properties
 
         /// <summary>
-        /// Gets or sets the entity repository.
+        /// Gets or sets the entity repository factory.
         /// </summary>
         /// <value>
-        /// The entity repository.
+        /// The entity repository factory.
         /// </value>
-        TEntityRepository EntityRepository { get; set; }
+        Func<TEntityRepository> EntityRepositoryFactory { get; set; }
 
         /// <summary>
         /// Gets the entity data.

@@ -21,14 +21,14 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TEntityData, TEntityRepository&gt;"/> class.
         /// </summary>
-        /// <param name="entityRepository">The entity repository.</param>
+        /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
         /// <param name="entityValidators">The entity validators.</param>
         protected BaseEntity(
-            TEntityRepository entityRepository,
+            Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntityData> entityDataFactory,
             IEnumerable<IEntityValidator<TEntity, TEntityData, TEntityRepository>> entityValidators)
-            : base(entityRepository, entityDataFactory, entityValidators)
+            : base(entityRepositoryFactory, entityDataFactory, entityValidators)
         {
         }
     }
@@ -82,16 +82,16 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TId, TEntityData, TEntityRepository&gt;"/> class.
         /// </summary>
-        /// <param name="entityRepository">The entity repository.</param>
+        /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
         /// <param name="entityValidators">The entity validators.</param>
         protected BaseEntity(
-            TEntityRepository entityRepository,
+            Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntityData> entityDataFactory,
             IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators)
         {
             EntityDataFactory = entityDataFactory;
-            EntityRepository = entityRepository;
+            EntityRepositoryFactory = entityRepositoryFactory;
             EntityValidators = entityValidators;
 
             PropertyChanged += BaseEntityPropertyChanged;
@@ -127,7 +127,7 @@ namespace DotNetDesign.EntityFramework
 
                 Version = Version + 1;
                 OnSaving();
-                returnedEntity = EntityRepository.Save(this as TEntity);
+                returnedEntity = EntityRepositoryFactory().Save(this as TEntity);
                 OnSaved();
                 return true;
             }
@@ -142,7 +142,7 @@ namespace DotNetDesign.EntityFramework
         public void Delete()
         {
             OnDeleting();
-            EntityRepository.Delete(this as TEntity);
+            EntityRepositoryFactory().Delete(this as TEntity);
             OnDeleted();
         }
 
@@ -197,7 +197,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetPreviousVersion()
         {
-            return EntityRepository.GetPreviousVersion(this as TEntity);
+            return EntityRepositoryFactory().GetPreviousVersion(this as TEntity);
         }
 
         /// <summary>
@@ -207,16 +207,16 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetVersion(int version)
         {
-            return EntityRepository.GetVersion(this as TEntity, version);
+            return EntityRepositoryFactory().GetVersion(this as TEntity, version);
         }
 
         /// <summary>
-        /// Gets or sets the entity repository.
+        /// Gets or sets the entity repository factory.
         /// </summary>
         /// <value>
-        /// The entity repository.
+        /// The entity repository factory.
         /// </value>
-        public TEntityRepository EntityRepository { get; set; }
+        public Func<TEntityRepository> EntityRepositoryFactory { get; set; }
 
         /// <summary>
         /// Gets or sets the entity data.
