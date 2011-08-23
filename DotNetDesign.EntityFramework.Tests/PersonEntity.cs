@@ -70,8 +70,12 @@ namespace DotNetDesign.EntityFramework.Tests
 
     public class PersonRepository : EntityRepository<IPerson, IPersonData, PersonData, IPersonRepository, IPersonRepositoryService>, IPersonRepository
     {
-        public PersonRepository(Func<IPerson> entityFactory, Func<IPersonData> entityDataFactory, IPersonRepositoryService entityRepositoryService, IEnumerable<IEntityObserver<IPerson>> entityObservers)
-            : base(entityFactory, entityDataFactory, entityRepositoryService, entityObservers)
+        public PersonRepository(
+            Func<IPerson> entityFactory, 
+            Func<IPersonData> entityDataFactory, 
+            Func<IPersonRepositoryService> entityRepositoryServiceFactory, 
+            IEnumerable<IEntityObserver<IPerson>> entityObservers)
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers)
         {
         }
     }

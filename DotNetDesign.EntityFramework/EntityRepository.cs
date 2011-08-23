@@ -28,9 +28,14 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entityFactory">The entity factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
-        /// <param name="entityRepositoryService">The entity repository service.</param>
+        /// <param name="entityRepositoryServiceFactory">The entity repository service factory.</param>
         /// <param name="entityObservers">The entity observers.</param>
-        public EntityRepository(Func<TEntity> entityFactory, Func<TEntityData> entityDataFactory, TEntityRepositoryService entityRepositoryService, IEnumerable<IEntityObserver<TEntity>> entityObservers) : base(entityFactory, entityDataFactory, entityRepositoryService, entityObservers)
+        public EntityRepository(
+            Func<TEntity> entityFactory, 
+            Func<TEntityData> entityDataFactory, 
+            Func<TEntityRepositoryService> entityRepositoryServiceFactory, 
+            IEnumerable<IEntityObserver<TEntity>> entityObservers) 
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers)
         {
         }
     }
@@ -72,9 +77,9 @@ namespace DotNetDesign.EntityFramework
         protected readonly IEnumerable<IEntityObserver<TEntity, TId>> EntityObservers;
 
         /// <summary>
-        /// The entity repository service.
+        /// The entity repository service factory.
         /// </summary>
-        protected readonly TEntityRepositoryService EntityRepositoryService;
+        protected readonly Func<TEntityRepositoryService> EntityRepositoryServiceFactory;
 
         #endregion
 
@@ -85,15 +90,15 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entityFactory">The entity factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
-        /// <param name="entityRepositoryService">The entity repository service.</param>
+        /// <param name="entityRepositoryServiceFactory">The entity repository service factory.</param>
         /// <param name="entityObservers">The entity observers.</param>
         public EntityRepository(Func<TEntity> entityFactory, Func<TEntityData> entityDataFactory,
-                                TEntityRepositoryService entityRepositoryService,
+                                Func<TEntityRepositoryService> entityRepositoryServiceFactory,
                                 IEnumerable<IEntityObserver<TEntity, TId>> entityObservers)
         {
             EntityFactory = entityFactory;
             EntityDataFactory = entityDataFactory;
-            EntityRepositoryService = entityRepositoryService;
+            EntityRepositoryServiceFactory = entityRepositoryServiceFactory;
             EntityObservers = entityObservers;
         }
 
@@ -227,7 +232,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<TEntity> GetAll()
         {
-            var entityData = EntityRepositoryService.GetAll();
+            var entityData = EntityRepositoryServiceFactory().GetAll();
             return InitializeEntities(entityData);
         }
 
@@ -238,7 +243,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetById(TId id)
         {
-            var entityData = EntityRepositoryService.GetById(id);
+            var entityData = EntityRepositoryServiceFactory().GetById(id);
             return InitializeEntities(entityData);
         }
 
@@ -249,7 +254,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids)
         {
-            var entityData = EntityRepositoryService.GetByIds(ids);
+            var entityData = EntityRepositoryServiceFactory().GetByIds(ids);
             return InitializeEntities(entityData);
         }
 
@@ -261,7 +266,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetVersion(TEntity entity, int version)
         {
-            var entityData = EntityRepositoryService.GetVersion(entity.EntityData as TEntityDataImplementation, version);
+            var entityData = EntityRepositoryServiceFactory().GetVersion(entity.EntityData as TEntityDataImplementation, version);
             return InitializeEntities(entityData);
         }
 
@@ -272,7 +277,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetPreviousVersion(TEntity entity)
         {
-            var entityData = EntityRepositoryService.GetPreviousVersion(entity.EntityData as TEntityDataImplementation);
+            var entityData = EntityRepositoryServiceFactory().GetPreviousVersion(entity.EntityData as TEntityDataImplementation);
             return InitializeEntities(entityData);
         }
 
@@ -283,7 +288,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity Save(TEntity entity)
         {
-            var entityData = EntityRepositoryService.Save(entity.EntityData as TEntityDataImplementation);
+            var entityData = EntityRepositoryServiceFactory().Save(entity.EntityData as TEntityDataImplementation);
             return InitializeEntities(entityData);
         }
 
@@ -295,7 +300,7 @@ namespace DotNetDesign.EntityFramework
         public IEnumerable<TEntity> SaveAll(IEnumerable<TEntity> entities)
         {
             var entityData =
-                EntityRepositoryService.SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
+                EntityRepositoryServiceFactory().SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
             return InitializeEntities(entityData);
         }
 
@@ -305,7 +310,7 @@ namespace DotNetDesign.EntityFramework
         /// <param name="entity">The entity.</param>
         public void Delete(TEntity entity)
         {
-            EntityRepositoryService.Delete(entity.EntityData as TEntityDataImplementation);
+            EntityRepositoryServiceFactory().Delete(entity.EntityData as TEntityDataImplementation);
             DetatchObservers(entity);
         }
 
@@ -315,7 +320,7 @@ namespace DotNetDesign.EntityFramework
         /// <param name="entities">The entities.</param>
         public void DeleteAll(IEnumerable<TEntity> entities)
         {
-            EntityRepositoryService.DeleteAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
+            EntityRepositoryServiceFactory().DeleteAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
             DetatchObservers(entities);
         }
 
