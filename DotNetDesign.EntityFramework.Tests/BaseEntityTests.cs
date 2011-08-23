@@ -82,7 +82,7 @@ namespace DotNetDesign.EntityFramework.Tests
         public void ValidPersonShouldCallSaveOnRepository()
         {
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepository = personRepositoryMock.Object;
+            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             personRepositoryMock.Setup(x => x.Save(_person)).Returns(_person);
             _person.Save();
@@ -93,7 +93,7 @@ namespace DotNetDesign.EntityFramework.Tests
         {
             _person.Initialize(_personData);
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepository = personRepositoryMock.Object;
+            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
             _person.FirstName = null;
             _person.Save();
 
@@ -118,7 +118,7 @@ namespace DotNetDesign.EntityFramework.Tests
             var expectedVersion = _person.Version + 1;
 
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepository = personRepositoryMock.Object;
+            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
             personRepositoryMock.Setup(x => x.Save(_person)).Returns(_person);
 
             IPerson returnedPerson;
@@ -156,7 +156,7 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.Initialize(_personData);
 
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepository = personRepositoryMock.Object;
+            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             const int version = 1;
             personRepositoryMock.Setup(x => x.GetVersion(_person, version)).Returns(_person);
@@ -170,7 +170,7 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.Initialize(_personData);
 
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepository = personRepositoryMock.Object;
+            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             personRepositoryMock.Setup(x => x.GetPreviousVersion(_person)).Returns(_person);
 
@@ -183,7 +183,7 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.Initialize(_personData);
 
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepository = personRepositoryMock.Object;
+            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             personRepositoryMock.Setup(x => x.Delete(_person));
 
