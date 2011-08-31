@@ -49,9 +49,12 @@
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseEntityData.cs" />
     <Compile Include="DataAnnotationEntityValidator.cs" />
+    <Compile Include="DictionaryEntityCache.cs" />
+    <Compile Include="EntityIdentifier.cs" />
     <Compile Include="EntityRepository.cs" />
     <Compile Include="EventHandlerExtensions.cs" />
     <Compile Include="IEntity.cs" />
+    <Compile Include="IEntityCache.cs" />
     <Compile Include="IEntityData.cs" />
     <Compile Include="IEntityObserver.cs" />
     <Compile Include="IEntityRepository.cs" />
