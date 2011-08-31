@@ -11,8 +11,17 @@ namespace DotNetDesign.EntityFramework
         /// Initializes a new instance of the <see cref="EntityIdentifier"/> class.
         /// </summary>
         public EntityIdentifier()
+            : this(Guid.NewGuid())
         {
-            Id = Guid.NewGuid();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EntityIdentifier"/> class.
+        /// </summary>
+        /// <param name="id">The id.</param>
+        public EntityIdentifier(Guid id)
+        {
+            Id = id;
         }
     }
 
