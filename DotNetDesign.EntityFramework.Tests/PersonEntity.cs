@@ -75,14 +75,14 @@ namespace DotNetDesign.EntityFramework.Tests
             Func<IPersonData> entityDataFactory, 
             Func<IPersonRepositoryService> entityRepositoryServiceFactory, 
             IEnumerable<IEntityObserver<IPerson>> entityObservers)
-            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers)
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, new DictionaryEntityCache<IPerson, IPersonData, IPersonRepository>())
         {
         }
     }
 
     public class PersonRepositoryService : IPersonRepositoryService
     {
-        public PersonData GetById(Guid id)
+        public PersonData GetById(EntityIdentifier id)
         {
             throw new NotImplementedException();
         }
@@ -97,7 +97,7 @@ namespace DotNetDesign.EntityFramework.Tests
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PersonData> GetByIds(IEnumerable<Guid> ids)
+        public IEnumerable<PersonData> GetByIds(IEnumerable<EntityIdentifier> ids)
         {
             throw new NotImplementedException();
         }

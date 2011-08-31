@@ -13,7 +13,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityDataImplementation">The type of the entity data implementation.</typeparam>
     [ServiceContract]
     public interface IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation>
-        : IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, Guid, TEntityDataImplementation>
+        : IEntityRepositoryService<TEntityData, TEntity, TEntityRepository, EntityIdentifier, TEntityDataImplementation>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>

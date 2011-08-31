@@ -14,7 +14,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
     public class EntityRepository<TEntity, TEntityData, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService>
-        : EntityRepository<TEntity, TEntityData, Guid, TEntityDataImplementation, TEntityRepository,
+        : EntityRepository<TEntity, TEntityData, EntityIdentifier, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData, IObservableEntity
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
@@ -30,12 +30,14 @@ namespace DotNetDesign.EntityFramework
         /// <param name="entityDataFactory">The entity data factory.</param>
         /// <param name="entityRepositoryServiceFactory">The entity repository service factory.</param>
         /// <param name="entityObservers">The entity observers.</param>
+        /// <param name="entityCache">The entity cache.</param>
         public EntityRepository(
             Func<TEntity> entityFactory, 
             Func<TEntityData> entityDataFactory, 
             Func<TEntityRepositoryService> entityRepositoryServiceFactory, 
-            IEnumerable<IEntityObserver<TEntity>> entityObservers) 
-            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers)
+            IEnumerable<IEntityObserver<TEntity>> entityObservers,
+            IEntityCache<TEntity, TEntityData, TEntityRepository> entityCache) 
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCache)
         {
         }
     }
@@ -81,6 +83,11 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected readonly Func<TEntityRepositoryService> EntityRepositoryServiceFactory;
 
+        /// <summary>
+        /// The entity cache.
+        /// </summary>
+        protected readonly IEntityCache<TEntity, TId, TEntityData, TEntityRepository> EntityCache;
+
         #endregion
 
         #region Constructors
@@ -92,14 +99,19 @@ namespace DotNetDesign.EntityFramework
         /// <param name="entityDataFactory">The entity data factory.</param>
         /// <param name="entityRepositoryServiceFactory">The entity repository service factory.</param>
         /// <param name="entityObservers">The entity observers.</param>
-        public EntityRepository(Func<TEntity> entityFactory, Func<TEntityData> entityDataFactory,
-                                Func<TEntityRepositoryService> entityRepositoryServiceFactory,
-                                IEnumerable<IEntityObserver<TEntity, TId>> entityObservers)
+        /// <param name="entityCache">The entity cache.</param>
+        public EntityRepository(
+            Func<TEntity> entityFactory, 
+            Func<TEntityData> entityDataFactory,
+            Func<TEntityRepositoryService> entityRepositoryServiceFactory,
+            IEnumerable<IEntityObserver<TEntity, TId>> entityObservers,
+            IEntityCache<TEntity,TId, TEntityData, TEntityRepository> entityCache)
         {
             EntityFactory = entityFactory;
             EntityDataFactory = entityDataFactory;
             EntityRepositoryServiceFactory = entityRepositoryServiceFactory;
             EntityObservers = entityObservers;
+            EntityCache = entityCache;
         }
 
         #endregion
@@ -232,7 +244,16 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<TEntity> GetAll()
         {
-            var entityData = EntityRepositoryServiceFactory().GetAll();
+            var cacheKey = string.Format("GetAll_{0}", typeof (TEntity));
+
+            var entityData = EntityCache.Get(cacheKey);
+
+            if (entityData == null)
+            {
+                entityData = EntityRepositoryServiceFactory().GetAll();
+                EntityCache.Add(cacheKey, entityData);
+            }
+
             return InitializeEntities(entityData);
         }
 
@@ -243,8 +264,17 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetById(TId id)
         {
-            var entityData = EntityRepositoryServiceFactory().GetById(id);
-            return InitializeEntities(entityData);
+            var cacheKey = string.Format("GetById_{0}_{1}", typeof (TEntity), id);
+
+            var entityData = EntityCache.Get(cacheKey);
+
+            if (entityData == null)
+            {
+                entityData = new[] {EntityRepositoryServiceFactory().GetById(id)};
+                EntityCache.Add(cacheKey, entityData);
+            }
+
+            return InitializeEntities(entityData).FirstOrDefault();
         }
 
         /// <summary>
@@ -254,7 +284,16 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids)
         {
-            var entityData = EntityRepositoryServiceFactory().GetByIds(ids);
+            var cacheKey = string.Format("GetByIds_{0}_{1}", typeof (TEntity), string.Join("_", ids.OrderBy(x => x)));
+
+            var entityData = EntityCache.Get(cacheKey);
+
+            if (entityData == null)
+            {
+                entityData = EntityRepositoryServiceFactory().GetByIds(ids);
+                EntityCache.Add(cacheKey, entityData);
+            }
+
             return InitializeEntities(entityData);
         }
 
@@ -266,8 +305,21 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetVersion(TEntity entity, int version)
         {
-            var entityData = EntityRepositoryServiceFactory().GetVersion(entity.EntityData as TEntityDataImplementation, version);
-            return InitializeEntities(entityData);
+            var cacheKey = string.Format("GetVersion_{0}_{1}", entity, version);
+
+            var entityData = EntityCache.Get(cacheKey);
+
+            if (entityData == null)
+            {
+                entityData = new[]
+                                 {
+                                     EntityRepositoryServiceFactory().GetVersion(
+                                         entity.EntityData as TEntityDataImplementation, version)
+                                 };
+                EntityCache.Add(cacheKey, entityData);
+            }
+
+            return InitializeEntities(entityData).FirstOrDefault();
         }
 
         /// <summary>
@@ -277,8 +329,21 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetPreviousVersion(TEntity entity)
         {
-            var entityData = EntityRepositoryServiceFactory().GetPreviousVersion(entity.EntityData as TEntityDataImplementation);
-            return InitializeEntities(entityData);
+            var cacheKey = string.Format("GetPreviousVersion_{0}_{1}", entity);
+
+            var entityData = EntityCache.Get(cacheKey);
+
+            if (entityData == null)
+            {
+                entityData = new[]
+                                 {
+                                     EntityRepositoryServiceFactory().GetPreviousVersion(
+                                         entity.EntityData as TEntityDataImplementation)
+                                 };
+                EntityCache.Add(cacheKey, entityData);
+            }
+
+            return InitializeEntities(entityData).FirstOrDefault();
         }
 
         /// <summary>
@@ -289,6 +354,10 @@ namespace DotNetDesign.EntityFramework
         public TEntity Save(TEntity entity)
         {
             var entityData = EntityRepositoryServiceFactory().Save(entity.EntityData as TEntityDataImplementation);
+
+            var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityData.Id);
+            EntityCache.Add(cacheKey, new[] {entityData});
+
             return InitializeEntities(entityData);
         }
 
@@ -301,6 +370,13 @@ namespace DotNetDesign.EntityFramework
         {
             var entityData =
                 EntityRepositoryServiceFactory().SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
+
+            foreach (var entityDataImplementation in entityData)
+            {
+                var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityDataImplementation.Id);
+                EntityCache.Add(cacheKey, new[] { entityDataImplementation });
+            }
+
             return InitializeEntities(entityData);
         }
 
@@ -311,7 +387,11 @@ namespace DotNetDesign.EntityFramework
         public void Delete(TEntity entity)
         {
             EntityRepositoryServiceFactory().Delete(entity.EntityData as TEntityDataImplementation);
+
             DetatchObservers(entity);
+
+            var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entity.Id);
+            EntityCache.Remove(cacheKey);
         }
 
         /// <summary>
@@ -322,6 +402,12 @@ namespace DotNetDesign.EntityFramework
         {
             EntityRepositoryServiceFactory().DeleteAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
             DetatchObservers(entities);
+
+            foreach (var entity in entities)
+            {
+                var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entity.Id);
+                EntityCache.Remove(cacheKey);
+            }
         }
 
         #endregion

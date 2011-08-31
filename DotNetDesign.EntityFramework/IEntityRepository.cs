@@ -9,7 +9,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
-    public interface IEntityRepository<TEntityRepository, TEntity, TEntityData> : IEntityRepository<TEntityRepository, TEntity, Guid, TEntityData>
+    public interface IEntityRepository<TEntityRepository, TEntity, TEntityData> : IEntityRepository<TEntityRepository, TEntity, EntityIdentifier, TEntityData>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>

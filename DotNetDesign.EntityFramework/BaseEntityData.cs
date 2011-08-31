@@ -10,7 +10,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     [DataContract]
-    public abstract class BaseEntityData<TEntityData, TEntity, TEntityRepository> : BaseEntityData<TEntityData, TEntity, Guid, TEntityRepository>
+    public abstract class BaseEntityData<TEntityData, TEntity, TEntityRepository> : BaseEntityData<TEntityData, TEntity, EntityIdentifier, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
@@ -20,7 +20,7 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected BaseEntityData()
         {
-            Id = Guid.NewGuid();
+            Id = new EntityIdentifier();
         }
     }
 

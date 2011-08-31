@@ -13,7 +13,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public abstract class BaseEntity<TEntity, TEntityData, TEntityRepository> :
-        BaseEntity<TEntity, Guid, TEntityData, TEntityRepository>
+        BaseEntity<TEntity, EntityIdentifier, TEntityData, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
@@ -502,5 +502,27 @@ namespace DotNetDesign.EntityFramework
         }
 
         #endregion
+
+        /// <summary>
+        /// Returns a <see cref="System.String"/> that represents this instance.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="System.String"/> that represents this instance.
+        /// </returns>
+        public override string ToString()
+        {
+            return string.Format("{0}::{1}::{2}", typeof (TEntity), Id, Version);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table. 
+        /// </returns>
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
     }
 }
