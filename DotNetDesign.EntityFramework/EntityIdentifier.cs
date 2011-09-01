@@ -23,6 +23,18 @@ namespace DotNetDesign.EntityFramework
         {
             Id = id;
         }
+
+        /// <summary>
+        /// Performs an implicit conversion from <see cref="System.Guid"/> to <see cref="DotNetDesign.EntityFramework.EntityIdentifier"/>.
+        /// </summary>
+        /// <param name="guid">The GUID.</param>
+        /// <returns>
+        /// The result of the conversion.
+        /// </returns>
+        public static implicit operator EntityIdentifier(Guid guid)
+        {
+            return new EntityIdentifier(guid);
+        }
     }
 
     /// <summary>
