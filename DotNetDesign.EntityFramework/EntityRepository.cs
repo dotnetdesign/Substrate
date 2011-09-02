@@ -189,7 +189,9 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         protected virtual TEntity InitializeEntities(TEntityData entityData)
         {
-            return InitializeEntities(new[] {entityData}).Single();
+            return entityData == null
+                       ? null
+                       : InitializeEntities(new[] {entityData}).Single();
         }
 
         /// <summary>
