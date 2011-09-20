@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -23,12 +22,14 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
+        /// <param name="entityConcurrencyManagerFactory">The entity concurrency manager factory.</param>
         /// <param name="entityValidators">The entity validators.</param>
         protected BaseEntity(
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntityData> entityDataFactory,
+            Func<IConcurrencyManager<TEntity, TEntityData, TEntityRepository>> entityConcurrencyManagerFactory,
             IEnumerable<IEntityValidator<TEntity, TEntityData, TEntityRepository>> entityValidators)
-            : base(entityRepositoryFactory, entityDataFactory, entityValidators)
+            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
         {
         }
     }
@@ -41,7 +42,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public abstract class BaseEntity<TEntity, TId, TEntityData, TEntityRepository> :
-        IEntity<TEntity, TId, TEntityData, TEntityRepository>
+        IEntity<TEntity, TId, TEntityData, TEntityRepository>, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
@@ -84,14 +85,17 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
+        /// <param name="entityConcurrencyManagerFactory">The concurrency manager factory.</param>
         /// <param name="entityValidators">The entity validators.</param>
         protected BaseEntity(
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntityData> entityDataFactory,
+            Func<IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>> entityConcurrencyManagerFactory,
             IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators)
         {
             EntityDataFactory = entityDataFactory;
             EntityRepositoryFactory = entityRepositoryFactory;
+            EntityConcurrencyManagerFactory = entityConcurrencyManagerFactory;
             EntityValidators = entityValidators;
 
             PropertyChanged += BaseEntityPropertyChanged;
@@ -125,7 +129,15 @@ namespace DotNetDesign.EntityFramework
                     return false;
                 }
 
+                EntityConcurrencyManagerFactory().Verify(this as TEntity);
+
                 Version = Version + 1;
+                if (Version == 1)
+                {
+                    CreatedAt = DateTime.Now;
+                }
+                LastUpdatedAt = DateTime.Now;
+
                 OnSaving();
                 returnedEntity = EntityRepositoryFactory().Save(this as TEntity);
                 OnSaved();
@@ -187,6 +199,46 @@ namespace DotNetDesign.EntityFramework
         }
 
         /// <summary>
+        /// Gets or sets the created at.
+        /// </summary>
+        /// <value>
+        /// The created at.
+        /// </value>
+        public DateTime CreatedAt
+        {
+            get { return (EntityData == null) ? DateTime.MinValue : EntityData.CreatedAt; }
+            set
+            {
+                if (EntityData.CreatedAt.Equals(value)) return;
+
+                var oldValue = EntityData.Version;
+                OnPropertyChanging("CreatedAt", oldValue, value);
+                EntityData.CreatedAt = value;
+                OnPropertyChanged("CreatedAt", oldValue, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the last updated at.
+        /// </summary>
+        /// <value>
+        /// The last updated at.
+        /// </value>
+        public DateTime LastUpdatedAt
+        {
+            get { return (EntityData == null) ? DateTime.MinValue : EntityData.LastUpdatedAt; }
+            set
+            {
+                if (EntityData.LastUpdatedAt.Equals(value)) return;
+
+                var oldValue = EntityData.LastUpdatedAt;
+                OnPropertyChanging("LastUpdatedAt", oldValue, value);
+                EntityData.LastUpdatedAt = value;
+                OnPropertyChanged("LastUpdatedAt", oldValue, value);
+            }
+        }
+
+        /// <summary>
         /// Gets the version id.
         /// </summary>
         public string VersionId { get { return EntityData.VersionId; } }
@@ -219,12 +271,49 @@ namespace DotNetDesign.EntityFramework
         public Func<TEntityRepository> EntityRepositoryFactory { get; set; }
 
         /// <summary>
+        /// Gets or sets the entity concurrency manager factory.
+        /// </summary>
+        /// <value>
+        /// The entity concurrency manager factory.
+        /// </value>
+        public Func<IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>> EntityConcurrencyManagerFactory { get; set; }
+
+        /// <summary>
         /// Gets or sets the entity data.
         /// </summary>
         /// <value>
         /// The entity data.
         /// </value>
         public TEntityData EntityData { get; protected set; }
+
+        /// <summary>
+        /// Determines whether the specified property has changed.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified property has changed; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool HasPropertyChanged(string propertyName)
+        {
+            object originalValue;
+            return HasPropertyChanged(propertyName, out originalValue);
+        }
+
+        /// <summary>
+        /// Determines whether the specified property has changed.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="originalValue">The original value.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified property has changed; otherwise, <c>false</c>.
+        /// </returns>
+        public virtual bool HasPropertyChanged(string propertyName, out object originalValue)
+        {
+            originalValue = typeof (TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
+            var currentValue = typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
+
+            return !originalValue.Equals(currentValue);
+        }
 
         /// <summary>
         /// Determines whether the specified property has changed.
@@ -253,11 +342,11 @@ namespace DotNetDesign.EntityFramework
             Expression<Func<TEntityData, TProperty>> property,
             out TProperty originalValue)
         {
-            var propertyName = ((MemberExpression) property.Body).Member.Name;
+            var propertyName = ((MemberExpression)property.Body).Member.Name;
 
             originalValue =
-                (TProperty) typeof (TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
-            var currentValue = (TProperty) typeof (TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
+                (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
+            var currentValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
             return !originalValue.Equals(currentValue);
         }

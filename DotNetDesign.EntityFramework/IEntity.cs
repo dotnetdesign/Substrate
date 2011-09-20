@@ -41,6 +41,14 @@ namespace DotNetDesign.EntityFramework
         Func<TEntityRepository> EntityRepositoryFactory { get; set; }
 
         /// <summary>
+        /// Gets or sets the entity concurrency manager factory.
+        /// </summary>
+        /// <value>
+        /// The entity concurrency manager factory.
+        /// </value>
+        Func<IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>> EntityConcurrencyManagerFactory { get; set; }
+
+        /// <summary>
         /// Gets the entity data.
         /// </summary>
         TEntityData EntityData { get; }
@@ -62,6 +70,25 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entityData">The entity data.</param>
         void Initialize(TEntityData entityData);
+
+        /// <summary>
+        /// Determines whether the specified property has changed.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified property has changed; otherwise, <c>false</c>.
+        /// </returns>
+        bool HasPropertyChanged(string propertyName);
+
+        /// <summary>
+        /// Determines whether the specified property has changed.
+        /// </summary>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="originalValue">The original value.</param>
+        /// <returns>
+        ///   <c>true</c> if the specified property has changed; otherwise, <c>false</c>.
+        /// </returns>
+        bool HasPropertyChanged(string propertyName, out object originalValue);
 
         /// <summary>
         /// Determines whether the specified property has changed.

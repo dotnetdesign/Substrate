@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -75,6 +76,33 @@ namespace DotNetDesign.EntityFramework
         public void Remove(string key)
         {
             DictionaryCache.Remove(key);
+        }
+
+        /// <summary>
+        /// Removes if data contains.
+        /// </summary>
+        /// <param name="entityData">The entity data.</param>
+        public void RemoveIfDataContains(TEntityData entityData)
+        {
+            if (entityData != null)
+            {
+                RemoveIfDataContains(new[] {entityData});
+            }
+        }
+
+        /// <summary>
+        /// Removes if data contains.
+        /// </summary>
+        /// <param name="entityData">The entity data.</param>
+        public void RemoveIfDataContains(IEnumerable<TEntityData> entityData)
+        {
+            foreach (var cacheKeyValuePair in DictionaryCache)
+            {
+                if (cacheKeyValuePair.Value.Any(x => entityData.Contains(x)))
+                {
+                    DictionaryCache.Remove(cacheKeyValuePair.Key);
+                }
+            }
         }
     }
 }

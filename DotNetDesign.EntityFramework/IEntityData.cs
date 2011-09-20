@@ -31,5 +31,21 @@ namespace DotNetDesign.EntityFramework
         /// Gets the version id.
         /// </summary>
         string VersionId { get; }
+
+        /// <summary>
+        /// Gets or sets the created at.
+        /// </summary>
+        /// <value>
+        /// The created at.
+        /// </value>
+        DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last updated at.
+        /// </summary>
+        /// <value>
+        /// The last updated at.
+        /// </value>
+        DateTime LastUpdatedAt { get; set;  }
     }
 }

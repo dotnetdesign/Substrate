@@ -121,6 +121,10 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
             personRepositoryMock.Setup(x => x.Save(_person)).Returns(_person);
 
+            var concurrencyManagerMock = new Mock<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>>(MockBehavior.Strict);
+            _person.EntityConcurrencyManagerFactory = () => concurrencyManagerMock.Object;
+            concurrencyManagerMock.Setup(x => x.Verify(_person));
+
             IPerson returnedPerson;
             _person.Save(out returnedPerson);
             Assert.AreEqual(expectedVersion, returnedPerson.Version);
@@ -159,7 +163,7 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             const int version = 1;
-            personRepositoryMock.Setup(x => x.GetVersion(_person, version)).Returns(_person);
+            personRepositoryMock.Setup(x => x.GetVersion(_person, version, false)).Returns(_person);
 
             _person.GetVersion(version);
         }
@@ -172,7 +176,7 @@ namespace DotNetDesign.EntityFramework.Tests
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
             _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
-            personRepositoryMock.Setup(x => x.GetPreviousVersion(_person)).Returns(_person);
+            personRepositoryMock.Setup(x => x.GetPreviousVersion(_person, false)).Returns(_person);
 
             _person.GetPreviousVersion();
         }
