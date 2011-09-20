@@ -48,11 +48,17 @@
   <ItemGroup>
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseEntityData.cs" />
+    <Compile Include="ConcurrencyConflictException.cs" />
+    <Compile Include="ConcurrencyManager.cs" />
+    <Compile Include="ConcurrencyMode.cs" />
+    <Compile Include="ConcurrencyModeAttribute.cs" />
+    <Compile Include="ConflictingConcurrencyModesException.cs" />
     <Compile Include="DataAnnotationEntityValidator.cs" />
     <Compile Include="DictionaryEntityCache.cs" />
     <Compile Include="EntityIdentifier.cs" />
     <Compile Include="EntityRepository.cs" />
     <Compile Include="EventHandlerExtensions.cs" />
+    <Compile Include="IConcurrencyManager.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IEntityCache.cs" />
     <Compile Include="IEntityData.cs" />

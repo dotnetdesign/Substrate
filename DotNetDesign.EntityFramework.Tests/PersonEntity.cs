@@ -28,8 +28,12 @@ namespace DotNetDesign.EntityFramework.Tests
 
     public class Person : BaseEntity<IPerson, IPersonData, IPersonRepository>, IPerson
     {
-        public Person(Func<IPersonRepository> entityRepositoryFactory, Func<IPersonData> entityDataFactory, IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators)
-            : base(entityRepositoryFactory, entityDataFactory, entityValidators)
+        public Person(
+            Func<IPersonRepository> entityRepositoryFactory, 
+            Func<IPersonData> entityDataFactory, 
+            Func<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>> entityConcurrencyManager,
+            IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators)
+            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManager, entityValidators)
         {
         }
 

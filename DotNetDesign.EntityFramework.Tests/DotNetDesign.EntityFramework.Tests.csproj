@@ -60,6 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseEntityTests.cs" />
+    <Compile Include="ConcurrencyTests.cs" />
+    <Compile Include="OverwriteConcurrencyEntity.cs" />
+    <Compile Include="FailConcurrencyEntity.cs" />
     <Compile Include="PersonEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestModule.cs" />

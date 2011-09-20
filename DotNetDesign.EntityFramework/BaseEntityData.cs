@@ -55,6 +55,24 @@ namespace DotNetDesign.EntityFramework
         public int Version { get; set; }
 
         /// <summary>
+        /// Gets or sets the created at.
+        /// </summary>
+        /// <value>
+        /// The created at.
+        /// </value>
+        [DataMember]
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last updated at.
+        /// </summary>
+        /// <value>
+        /// The last updated at.
+        /// </value>
+        [DataMember]
+        public DateTime LastUpdatedAt { get; set; }
+
+        /// <summary>
         /// Gets or sets the id.
         /// </summary>
         /// <value>

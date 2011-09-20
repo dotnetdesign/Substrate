@@ -243,14 +243,15 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Gets all.
         /// </summary>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        public IEnumerable<TEntity> GetAll()
+        public IEnumerable<TEntity> GetAll(bool forceNew = false)
         {
             var cacheKey = string.Format("GetAll_{0}", typeof (TEntity));
 
             var entityData = EntityCache.Get(cacheKey);
 
-            if (entityData == null)
+            if (forceNew || entityData == null)
             {
                 entityData = EntityRepositoryServiceFactory().GetAll();
                 EntityCache.Add(cacheKey, entityData);
@@ -263,14 +264,15 @@ namespace DotNetDesign.EntityFramework
         /// Gets the by id.
         /// </summary>
         /// <param name="id">The id.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        public TEntity GetById(TId id)
+        public TEntity GetById(TId id, bool forceNew = false)
         {
             var cacheKey = string.Format("GetById_{0}_{1}", typeof (TEntity), id);
 
             var entityData = EntityCache.Get(cacheKey);
 
-            if (entityData == null)
+            if (forceNew || entityData == null)
             {
                 entityData = new[] {EntityRepositoryServiceFactory().GetById(id)};
                 EntityCache.Add(cacheKey, entityData);
@@ -283,14 +285,15 @@ namespace DotNetDesign.EntityFramework
         /// Gets the by ids.
         /// </summary>
         /// <param name="ids">The ids.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        public IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids)
+        public IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids, bool forceNew = false)
         {
             var cacheKey = string.Format("GetByIds_{0}_{1}", typeof (TEntity), string.Join("_", ids.OrderBy(x => x)));
 
             var entityData = EntityCache.Get(cacheKey);
 
-            if (entityData == null)
+            if (forceNew || entityData == null)
             {
                 entityData = EntityRepositoryServiceFactory().GetByIds(ids);
                 EntityCache.Add(cacheKey, entityData);
@@ -304,14 +307,15 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="version">The version.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        public TEntity GetVersion(TEntity entity, int version)
+        public TEntity GetVersion(TEntity entity, int version, bool forceNew = false)
         {
             var cacheKey = string.Format("GetVersion_{0}_{1}", entity, version);
 
             var entityData = EntityCache.Get(cacheKey);
 
-            if (entityData == null)
+            if (forceNew || entityData == null)
             {
                 entityData = new[]
                                  {
@@ -328,14 +332,15 @@ namespace DotNetDesign.EntityFramework
         /// Gets the previous version.
         /// </summary>
         /// <param name="entity">The entity.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        public TEntity GetPreviousVersion(TEntity entity)
+        public TEntity GetPreviousVersion(TEntity entity, bool forceNew = false)
         {
-            var cacheKey = string.Format("GetPreviousVersion_{0}_{1}", entity);
+            var cacheKey = string.Format("GetPreviousVersion_{0}_{1}", entity, entity.Version);
 
             var entityData = EntityCache.Get(cacheKey);
 
-            if (entityData == null)
+            if (forceNew || entityData == null)
             {
                 entityData = new[]
                                  {
@@ -357,6 +362,7 @@ namespace DotNetDesign.EntityFramework
         {
             var entityData = EntityRepositoryServiceFactory().Save(entity.EntityData as TEntityDataImplementation);
 
+            EntityCache.RemoveIfDataContains(entityData);
             var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityData.Id);
             EntityCache.Add(cacheKey, new[] {entityData});
 
@@ -373,6 +379,7 @@ namespace DotNetDesign.EntityFramework
             var entityData =
                 EntityRepositoryServiceFactory().SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
 
+            EntityCache.RemoveIfDataContains(entityData);
             foreach (var entityDataImplementation in entityData)
             {
                 var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityDataImplementation.Id);
@@ -392,8 +399,7 @@ namespace DotNetDesign.EntityFramework
 
             DetatchObservers(entity);
 
-            var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entity.Id);
-            EntityCache.Remove(cacheKey);
+            EntityCache.RemoveIfDataContains(entity.EntityData);
         }
 
         /// <summary>
@@ -405,11 +411,7 @@ namespace DotNetDesign.EntityFramework
             EntityRepositoryServiceFactory().DeleteAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
             DetatchObservers(entities);
 
-            foreach (var entity in entities)
-            {
-                var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entity.Id);
-                EntityCache.Remove(cacheKey);
-            }
+            EntityCache.RemoveIfDataContains(entities.Select(x => x.EntityData));
         }
 
         #endregion

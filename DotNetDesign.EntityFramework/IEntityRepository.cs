@@ -37,37 +37,42 @@ namespace DotNetDesign.EntityFramework
         /// <summary>
         /// Gets all entities.
         /// </summary>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        IEnumerable<TEntity> GetAll();
+        IEnumerable<TEntity> GetAll(bool forceNew = false);
 
         /// <summary>
         /// Gets the entity by id.
         /// </summary>
         /// <param name="id">The id.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        TEntity GetById(TId id);
+        TEntity GetById(TId id, bool forceNew = false);
 
         /// <summary>
         /// Gets the by ids.
         /// </summary>
         /// <param name="ids">The ids.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids);
+        IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids, bool forceNew = false);
 
         /// <summary>
         /// Gets the specified version of the entity.
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <param name="version">The version.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        TEntity GetVersion(TEntity entity, int version);
+        TEntity GetVersion(TEntity entity, int version, bool forceNew = false);
 
         /// <summary>
         /// Gets the previous version.
         /// </summary>
         /// <param name="entity">The entity.</param>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        TEntity GetPreviousVersion(TEntity entity);
+        TEntity GetPreviousVersion(TEntity entity, bool forceNew = false);
 
         /// <summary>
         /// Saves the specified entity.
