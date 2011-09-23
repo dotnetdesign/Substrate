@@ -575,6 +575,8 @@ namespace DotNetDesign.EntityFramework
             }
 
             newEntityData.Id = entityData.Id;
+            newEntityData.CreatedAt = entityData.CreatedAt;
+            newEntityData.LastUpdatedAt = entityData.LastUpdatedAt;
             newEntityData.Version = entityData.Version;
 
             return newEntityData;
