@@ -1,0 +1,213 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".generated.cs" #>
+<#@ assembly name="System.Xml"#>
+<#@ assembly name="System.Xml.Linq"#>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ assembly name="System.Core.dll" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Xml.Linq" #>
+<#@ import namespace="System.IO" #>
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using DotNetDesign.EntityFramework;
+
+<#
+	var namespaceName = System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("NamespaceHint");    
+	var absolutePath = Path.GetFullPath(string.Format("{0}\\EntityMetaData.xml", namespaceName)); 
+	var entitiesXDocument = XDocument.Load(absolutePath);
+   	var entities = from entity in entitiesXDocument.Descendants("Entity")
+		let properties = entity.Descendants("Property")
+		select new
+					{
+						Name = entity.Attribute("name").Value,
+						IdType = entity.Attribute("idType").Value,
+						Properties = properties.Select(p => new 
+							{ 
+								Name = p.Attribute("name").Value, 
+								Type = p.Attribute("type").Value, 
+								Required = p.Attribute("required"),
+								DisplayName = p.Attribute("displayName"),
+								Attributes = p.Descendants("Attribute").Select(a => a.Value.Trim())
+							})
+					};
+					
+#>
+namespace <#=namespaceName#>
+{
+	#region Entity Data Interfaces
+<# 
+
+	// creating interfaces for entity data
+	PushIndent("\t");
+	foreach(var entity in entities)
+	{
+		WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
+		WriteLine("{");
+		
+		foreach(var property in entity.Properties)
+		{
+			PushIndent("\t");
+			if(property.Required != null && bool.Parse(property.Required.Value))
+			{
+				WriteLine("[Required]");
+			}
+			if(property.DisplayName != null)
+			{
+				WriteLine("[DisplayName(\"{0}\")]", property.DisplayName.Value);
+			}
+			foreach(var attribute in property.Attributes.Where(a => !string.IsNullOrWhiteSpace(a)))
+			{
+				WriteLine("[{0}]", attribute);
+			}
+			
+			WriteLine("{0} {1} {{ get; set; }}", property.Type, property.Name);
+			PopIndent();
+		} // end foreach for properties
+
+		WriteLine("}");
+	}
+	PopIndent();
+#>
+	#endregion Entity Data Interfaces
+
+	#region Entity Interfaces
+<# 
+
+	// creating interfaces for entities
+	PushIndent("\t");
+	foreach(var entity in entities)
+	{
+		WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
+	}
+	PopIndent();
+#>
+	#endregion Entity Interfaces
+
+	#region Entity Repository Interfaces
+<# 
+
+	// creating interfaces for entity repositories
+	PushIndent("\t");
+	foreach(var entity in entities)
+	{
+		WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
+	}
+	PopIndent();
+#>
+	#endregion Entity Repository Interfaces
+
+	#region Entity Repository Service Interfaces
+<# 
+
+	// creating interfaces for entity repository services
+	PushIndent("\t");
+	foreach(var entity in entities)
+	{
+		WriteLine("[ServiceContract]");
+		WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+	}
+	PopIndent();
+#>
+	#endregion Entity Repository Service Interfaces
+
+	#region Entity Data Implementations
+<# 
+
+	// creating entity data implementations for entities
+	PushIndent("\t");
+	foreach(var entity in entities)
+	{
+		WriteLine("[DataContract]");
+		WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
+		WriteLine("{");
+		
+		PushIndent("\t");
+		WriteLine("#region I{0}Data Properties", entity.Name);
+		foreach(var property in entity.Properties)
+		{
+			WriteLine("[DataMember]");
+			WriteLine("public virtual {0} {1} {{ get; set; }}", property.Type, property.Name);
+		} // end foreach for properties
+		WriteLine("#endregion I{0}Data Properties", entity.Name);
+		PopIndent();
+
+		WriteLine("}");
+	}
+	PopIndent();
+#>
+	#endregion Entity Data Implementations
+
+	#region Entity Implementations
+<# 
+	
+	// creating entity implementations for entities
+	foreach(var entity in entities)
+	{
+#>
+	public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
+	{
+		public <#=entity.Name#>(
+			Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
+			Func<I<#=entity.Name#>Data> entityDataFactory,
+			Func<IConcurrencyManager<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
+			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> entityValidators)
+			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
+		{
+		}
+
+		#region I<#=entity.Name#>Data Properties
+<#
+	foreach(var property in entity.Properties)
+	{
+#>
+		public virtual <#=property.Type#> <#=property.Name#> 
+		{
+			get { return EntityData.<#=property.Name#>; }
+			set
+			{
+				if (EntityData.<#=property.Name#> == value) return;
+
+				var originalValue = EntityData.<#=property.Name#>;
+				OnPropertyChanging("<#=property.Name#>", originalValue, value);
+				EntityData.<#=property.Name#> = value;
+				OnPropertyChanged("<#=property.Name#>", originalValue, value);
+			}
+		}
+<#
+	} // end foreach for properties
+#>
+		#endregion I<#=entity.Name#>Data Properties
+	}
+<#  
+	}
+#>
+	#endregion Entity Implementations
+
+	#region Entity Repository Implementations
+<# 
+
+	// creating entity repository implementations for entities
+	foreach(var entity in entities)
+	{
+#>
+	public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
+	{
+		public <#=entity.Name#>Repository(
+			Func<I<#=entity.Name#>> entityFactory,
+			Func<I<#=entity.Name#>Data> entityDataFactory,
+			Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
+			IEnumerable<IEntityObserver<I<#=entity.Name#>, <#=entity.IdType#>>> entityObservers,
+			IEntityCache<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository> entityCache)
+			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCache)
+		{
+		}
+	}
+<#  
+	}
+#>
+	#endregion Entity Repository Implementations
+}
