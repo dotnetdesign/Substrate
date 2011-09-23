@@ -86,7 +86,7 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         public string VersionId
         {
-            get { return Id + "::" + Id; }
+            get { return Id + "::" + Version; }
         }
     }
 }
