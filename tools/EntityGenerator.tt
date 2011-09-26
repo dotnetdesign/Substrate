@@ -17,7 +17,7 @@ using DotNetDesign.EntityFramework;
 
 <#
 	var namespaceName = System.Runtime.Remoting.Messaging.CallContext.LogicalGetData("NamespaceHint");    
-	var absolutePath = Path.GetFullPath(string.Format("{0}\\EntityMetaData.xml", namespaceName)); 
+	var absolutePath = Host.ResolvePath("EntityMetaData.xml"); 
 	var entitiesXDocument = XDocument.Load(absolutePath);
    	var entities = from entity in entitiesXDocument.Descendants("Entity")
 		let properties = entity.Descendants("Property")
