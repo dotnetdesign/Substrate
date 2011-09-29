@@ -147,13 +147,13 @@ namespace DotNetDesign.EntityFramework
 
             conflictingPropertyNames = new List<string>();
 
-            foreach (var propertyInfo in typeof(TEntityData).GetProperties().Where(x => !_excludedPropertyNames.Contains(x.Name, StringComparer.InvariantCultureIgnoreCase)))
+            foreach (var propertyInfo in typeof(TEntityData).GetProperties().Where(IsPropertyIncluded))
             {
                 object originalValue;
-                bool currentPropertyChanged = currentEntity.HasPropertyChanged(propertyInfo.Name, out originalValue);
+                var currentPropertyChanged = currentEntity.HasPropertyChanged(propertyInfo.Name, out originalValue);
 
                 var retrievedValue = propertyInfo.GetValue(retrievedEntity, null);
-                bool retrievedValueChangedFromOriginal = originalValue != retrievedValue ||
+                var retrievedValueChangedFromOriginal = originalValue != retrievedValue ||
                                                          (originalValue != null && !originalValue.Equals(retrievedValue));
 
                 if (currentPropertyChanged)
@@ -172,6 +172,11 @@ namespace DotNetDesign.EntityFramework
             }
 
             return conflictingPropertyNames.Count == 0;
+        }
+
+        private bool IsPropertyIncluded(PropertyInfo x)
+        {
+            return !_excludedPropertyNames.Contains(x.Name, StringComparer.InvariantCultureIgnoreCase);
         }
     }
 }
