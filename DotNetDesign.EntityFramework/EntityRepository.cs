@@ -234,10 +234,7 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetNew()
         {
-            var entity = EntityFactory();
-            AttachObservers(entity);
-            entity.Initialize(EntityDataFactory());
-            return entity;
+            return InitializeEntities(EntityDataFactory());
         }
 
         /// <summary>
@@ -317,11 +314,16 @@ namespace DotNetDesign.EntityFramework
 
             if (forceNew || entityData == null)
             {
-                entityData = new[]
-                                 {
-                                     EntityRepositoryServiceFactory().GetVersion(
-                                         entity.EntityData as TEntityDataImplementation, version)
-                                 };
+                var returnedEntityData = EntityRepositoryServiceFactory().GetVersion(
+                                         entity.EntityData as TEntityDataImplementation, version);
+
+                if (returnedEntityData == null)
+                {
+                    return null;
+                }
+
+                entityData = new[] { returnedEntityData };
+
                 EntityCache.Add(cacheKey, entityData);
             }
 
@@ -342,11 +344,16 @@ namespace DotNetDesign.EntityFramework
 
             if (forceNew || entityData == null)
             {
-                entityData = new[]
-                                 {
-                                     EntityRepositoryServiceFactory().GetPreviousVersion(
-                                         entity.EntityData as TEntityDataImplementation)
-                                 };
+                var returnedEntityData = EntityRepositoryServiceFactory().GetPreviousVersion(
+                    entity.EntityData as TEntityDataImplementation);
+
+                if (returnedEntityData == null)
+                {
+                    return null;
+                }
+
+                entityData = new[] { returnedEntityData };
+
                 EntityCache.Add(cacheKey, entityData);
             }
 

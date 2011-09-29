@@ -52,6 +52,7 @@ namespace DotNetDesign.EntityFramework
         private bool _init;
         private bool _isDirty;
         private bool _propertyChangedSinceIsDirtySet;
+        private bool _propertyChangedSinceValidationResultsPopulated;
         private IEnumerable<IValidationResult> _validationResults;
 
         #endregion
@@ -131,7 +132,7 @@ namespace DotNetDesign.EntityFramework
 
                 EntityConcurrencyManagerFactory().Verify(this as TEntity);
 
-                Version = Version + 1;
+                Version++;
                 if (Version == 1)
                 {
                     CreatedAt = DateTime.Now;
@@ -433,8 +434,9 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<IValidationResult> Validate()
         {
-            if (_validationResults == null)
+            if (_validationResults == null || _propertyChangedSinceValidationResultsPopulated)
             {
+                _propertyChangedSinceValidationResultsPopulated = false;
                 _validationResults = EntityValidators.SelectMany(x => x.Validate(this as TEntity));
             }
 
@@ -590,6 +592,7 @@ namespace DotNetDesign.EntityFramework
         private void BaseEntityPropertyChanged(object sender, PropertyChangeEventArgs e)
         {
             _propertyChangedSinceIsDirtySet = true;
+            _propertyChangedSinceValidationResultsPopulated = true;
         }
 
         #endregion
