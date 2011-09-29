@@ -20,8 +20,6 @@ namespace DotNetDesign.EntityFramework
             NewValue = newValue;
         }
 
-        #region Implementation of IPropertyChangeEventArgs<TPropertyType>
-
         /// <summary>
         /// Gets the name of the property.
         /// </summary>
@@ -45,8 +43,6 @@ namespace DotNetDesign.EntityFramework
         /// The new value.
         /// </value>
         public object NewValue { get; private set; }
-
-        #endregion
 
         /// <summary>
         /// Converts <see cref="DotNetDesign.EntityFramework.PropertyChangeEventArgs"/> to <see cref="System.EventArgs"/>.

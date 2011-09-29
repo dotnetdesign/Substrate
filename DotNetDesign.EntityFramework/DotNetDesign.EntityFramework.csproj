@@ -67,13 +67,17 @@
     <Compile Include="IEntityRepositoryService.cs" />
     <Compile Include="IEntityValidator.cs" />
     <Compile Include="IIdentifiable.cs" />
+    <Compile Include="InvalidStateException.cs" />
     <Compile Include="IObservableEntity.cs" />
+    <Compile Include="IStateMachine.cs" />
     <Compile Include="IValidatable.cs" />
     <Compile Include="IValidationResult.cs" />
     <Compile Include="IVersionable.cs" />
     <Compile Include="IWeakEventHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangeEventArgs.cs" />
+    <Compile Include="StateChangeEventArgs.cs" />
+    <Compile Include="StateMachine.cs" />
     <Compile Include="ValidationResult.cs" />
     <Compile Include="ValidationResultStatusType.cs" />
     <Compile Include="WeakEventHandler.cs" />
