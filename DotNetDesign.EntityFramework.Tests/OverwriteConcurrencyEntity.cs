@@ -87,7 +87,7 @@ namespace DotNetDesign.EntityFramework.Tests
 
     public class OverwriteConcurrencyRepositoryService : IOverwriteConcurrencyRepositoryService
     {
-        public OverwriteConcurrencyData GetById(EntityIdentifier id)
+        public OverwriteConcurrencyData GetById(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -102,7 +102,7 @@ namespace DotNetDesign.EntityFramework.Tests
             throw new NotImplementedException();
         }
 
-        public IEnumerable<OverwriteConcurrencyData> GetByIds(IEnumerable<EntityIdentifier> ids)
+        public IEnumerable<OverwriteConcurrencyData> GetByIds(IEnumerable<Guid> ids)
         {
             throw new NotImplementedException();
         }

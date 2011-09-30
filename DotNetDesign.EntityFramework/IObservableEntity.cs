@@ -6,7 +6,7 @@ namespace DotNetDesign.EntityFramework
     /// <summary>
     /// Defines functionality for observable entity.
     /// </summary>
-    public interface IObservableEntity : IObservableEntity<EntityIdentifier>
+    public interface IObservableEntity : IObservableEntity<Guid>
     {}
 
     /// <summary>

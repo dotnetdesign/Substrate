@@ -14,7 +14,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
     public class EntityRepository<TEntity, TEntityData, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService>
-        : EntityRepository<TEntity, TEntityData, EntityIdentifier, TEntityDataImplementation, TEntityRepository,
+        : EntityRepository<TEntity, TEntityData, Guid, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData, IObservableEntity
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>

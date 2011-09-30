@@ -1,3 +1,5 @@
+using System;
+
 namespace DotNetDesign.EntityFramework
 {
     /// <summary>
@@ -6,7 +8,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
-    public interface IConcurrencyManager<in TEntity, TEntityData, TEntityRepository> : IConcurrencyManager<TEntity, EntityIdentifier, TEntityData, TEntityRepository>
+    public interface IConcurrencyManager<in TEntity, TEntityData, TEntityRepository> : IConcurrencyManager<TEntity, Guid, TEntityData, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>

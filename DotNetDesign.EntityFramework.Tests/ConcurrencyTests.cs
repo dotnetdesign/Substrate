@@ -40,7 +40,7 @@ namespace DotNetDesign.EntityFramework.Tests
             // we then need to get a merge conflict to cause an exception to be thrown and 
             // then we can validate that exception's concurrency mode attribute
 
-            var commonId = new EntityIdentifier(Guid.NewGuid());
+            var commonId = Guid.NewGuid();
 
             var person = _container.Resolve<IPerson>();
             var personData = _container.Resolve<IPersonData>();
@@ -75,7 +75,7 @@ namespace DotNetDesign.EntityFramework.Tests
         [Test]
         public void MergeConcurrencyMode_WithoutConflictingPropertyChanges_ShouldSucceed()
         {
-            var commonId = new EntityIdentifier(Guid.NewGuid());
+            var commonId = Guid.NewGuid();
 
             var person = _container.Resolve<IPerson>();
             var personData = _container.Resolve<IPersonData>();
@@ -115,7 +115,7 @@ namespace DotNetDesign.EntityFramework.Tests
         [Test]
         public void OverwriteConcurrencyMode_WithConflictingPropertyChanges_ShouldSucceed()
         {
-            var commonId = new EntityIdentifier(Guid.NewGuid());
+            var commonId = Guid.NewGuid();
 
             var overwriteConcurrency = _container.Resolve<IOverwriteConcurrency>();
             var overwriteConcurrencyData = _container.Resolve<IOverwriteConcurrencyData>();
@@ -157,7 +157,7 @@ namespace DotNetDesign.EntityFramework.Tests
         [Test]
         public void FailConcurrencyMode_WithoutConflictingPropertyChanges_ShouldThrowException()
         {
-            var commonId = new EntityIdentifier(Guid.NewGuid());
+            var commonId = Guid.NewGuid();
 
             var failConcurrency = _container.Resolve<IFailConcurrency>();
             var failConcurrencyData = _container.Resolve<IFailConcurrencyData>();
