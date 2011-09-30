@@ -86,7 +86,7 @@ namespace DotNetDesign.EntityFramework.Tests
 
     public class PersonRepositoryService : IPersonRepositoryService
     {
-        public PersonData GetById(EntityIdentifier id)
+        public PersonData GetById(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -101,7 +101,7 @@ namespace DotNetDesign.EntityFramework.Tests
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PersonData> GetByIds(IEnumerable<EntityIdentifier> ids)
+        public IEnumerable<PersonData> GetByIds(IEnumerable<Guid> ids)
         {
             throw new NotImplementedException();
         }

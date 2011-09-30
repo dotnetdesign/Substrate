@@ -11,7 +11,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
-    public class ConcurrencyManager<TEntity, TEntityData, TEntityRepository> : ConcurrencyManager<TEntity, EntityIdentifier, TEntityData, TEntityRepository>, IConcurrencyManager<TEntity, TEntityData, TEntityRepository> 
+    public class ConcurrencyManager<TEntity, TEntityData, TEntityRepository> : ConcurrencyManager<TEntity, Guid, TEntityData, TEntityRepository>, IConcurrencyManager<TEntity, TEntityData, TEntityRepository> 
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>

@@ -10,7 +10,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public interface IEntityCache<TEntity, TEntityData, TEntityRepository>
-        : IEntityCache<TEntity, EntityIdentifier, TEntityData, TEntityRepository>
+        : IEntityCache<TEntity, Guid, TEntityData, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>

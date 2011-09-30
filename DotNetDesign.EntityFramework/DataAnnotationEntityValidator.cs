@@ -14,7 +14,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public class DataAnnotationEntityValidator<TEntity, TEntityData, TEntityRepository> :
-        DataAnnotationEntityValidator<TEntity, TEntityData, EntityIdentifier, TEntityRepository>, IEntityValidator<TEntity, TEntityData, TEntityRepository>
+        DataAnnotationEntityValidator<TEntity, TEntityData, Guid, TEntityRepository>, IEntityValidator<TEntity, TEntityData, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>

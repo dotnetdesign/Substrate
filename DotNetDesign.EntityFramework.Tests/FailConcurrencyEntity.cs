@@ -87,7 +87,7 @@ namespace DotNetDesign.EntityFramework.Tests
 
     public class FailConcurrencyRepositoryService : IFailConcurrencyRepositoryService
     {
-        public FailConcurrencyData GetById(EntityIdentifier id)
+        public FailConcurrencyData GetById(Guid id)
         {
             throw new NotImplementedException();
         }
@@ -102,7 +102,7 @@ namespace DotNetDesign.EntityFramework.Tests
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FailConcurrencyData> GetByIds(IEnumerable<EntityIdentifier> ids)
+        public IEnumerable<FailConcurrencyData> GetByIds(IEnumerable<Guid> ids)
         {
             throw new NotImplementedException();
         }
