@@ -349,7 +349,18 @@ namespace DotNetDesign.EntityFramework
                 (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
             var currentValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
-            return !originalValue.Equals(currentValue);
+            bool hasPropertyChanged;
+
+            if (originalValue == null && currentValue == null)
+            {
+                hasPropertyChanged = false;
+            }
+            else
+            {
+                hasPropertyChanged = originalValue == null || !originalValue.Equals(currentValue);
+            }
+
+            return hasPropertyChanged;
         }
 
         /// <summary>
