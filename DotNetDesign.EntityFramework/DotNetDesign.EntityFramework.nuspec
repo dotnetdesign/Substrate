@@ -11,5 +11,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <tags>entity-framework dal</tags>
+	<files>
+	  <file src="..\tools\*.*" target="" />
+	</files>
   </metadata>
 </package>
