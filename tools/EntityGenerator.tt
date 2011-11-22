@@ -45,7 +45,11 @@ namespace <#=namespaceName#>
 	PushIndent("\t");
 	foreach(var entity in entities)
 	{
-		WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
+		var useDefaultIdType = entity.IdType == "Guid";
+		
+		if(useDefaultIdType)
+			? WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, I{0}Repository>", entity.Name, entity)
+			: WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
 		WriteLine("{");
 		
 		foreach(var property in entity.Properties)
@@ -81,7 +85,11 @@ namespace <#=namespaceName#>
 	PushIndent("\t");
 	foreach(var entity in entities)
 	{
-		WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
+		var useDefaultIdType = entity.IdType == "Guid";
+		
+		if(useDefaultIdType)
+			? WriteLine("public partial interface I{0} : IEntity<I{0}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name)
+			: WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
 	}
 	PopIndent();
 #>
@@ -94,7 +102,11 @@ namespace <#=namespaceName#>
 	PushIndent("\t");
 	foreach(var entity in entities)
 	{
-		WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
+		var useDefaultIdType = entity.IdType == "Guid";
+		
+		if(useDefaultIdType)
+			? WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, I{0}Data> {{}}", entity.Name)
+			: WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
 	}
 	PopIndent();
 #>
@@ -107,8 +119,12 @@ namespace <#=namespaceName#>
 	PushIndent("\t");
 	foreach(var entity in entities)
 	{
+		var useDefaultIdType = entity.IdType == "Guid";
+		
 		WriteLine("[ServiceContract]");
-		WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+		if(useDefaultIdType)
+			? WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name)
+			: WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
 	}
 	PopIndent();
 #>
@@ -120,9 +136,13 @@ namespace <#=namespaceName#>
 	// creating entity data implementations for entities
 	PushIndent("\t");
 	foreach(var entity in entities)
-	{
+	{	
+		var useDefaultIdType = entity.IdType == "Guid";
+		
 		WriteLine("[DataContract]");
-		WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
+		if(useDefaultIdType)
+			? WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, I{0}Repository>, I{0}Data", entity.Name)
+			: WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
 		WriteLine("{");
 		
 		PushIndent("\t");
@@ -147,6 +167,25 @@ namespace <#=namespaceName#>
 	// creating entity implementations for entities
 	foreach(var entity in entities)
 	{
+		var useDefaultIdType = entity.IdType == "Guid";
+		
+		if(useDefaultIdType){
+#>
+	public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
+	{
+		public <#=entity.Name#>(
+			Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
+			Func<I<#=entity.Name#>Data> entityDataFactory,
+			Func<IConcurrencyManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
+			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityValidators)
+			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
+		{
+		}
+
+		#region I<#=entity.Name#>Data Properties
+<#
+		}
+		else{
 #>
 	public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
 	{
@@ -161,6 +200,7 @@ namespace <#=namespaceName#>
 
 		#region I<#=entity.Name#>Data Properties
 <#
+		}
 	foreach(var property in entity.Properties)
 	{
 #>
@@ -193,6 +233,9 @@ namespace <#=namespaceName#>
 	// creating entity repository implementations for entities
 	foreach(var entity in entities)
 	{
+		var useDefaultIdType = entity.IdType == "Guid";
+		
+		if(useDefaultIdType){
 #>
 	public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
 	{
@@ -207,6 +250,23 @@ namespace <#=namespaceName#>
 		}
 	}
 <#  
+		}
+		else{
+#>
+	public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
+	{
+		public <#=entity.Name#>Repository(
+			Func<I<#=entity.Name#>> entityFactory,
+			Func<I<#=entity.Name#>Data> entityDataFactory,
+			Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
+			IEnumerable<IEntityObserver<I<#=entity.Name#>>> entityObservers,
+			IEntityCache<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository> entityCache)
+			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCache)
+		{
+		}
+	}
+<#  
+		}
 	}
 #>
 	#endregion Entity Repository Implementations
