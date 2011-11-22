@@ -5,6 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDesign.EntityFramewor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDesign.EntityFramework.Tests", "DotNetDesign.EntityFramework.Tests\DotNetDesign.EntityFramework.Tests.csproj", "{F7FC9874-CF7E-4659-8173-991E7CB56AFB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{8E2A7388-55D7-4558-943E-20239D0FEBE2}"
+	ProjectSection(SolutionItems) = preProject
+		tools\EntitiesFormTemplate.xsn = tools\EntitiesFormTemplate.xsn
+		tools\EntitiesSchema.xsd = tools\EntitiesSchema.xsd
+		tools\EntityGenerator.tt = tools\EntityGenerator.tt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
