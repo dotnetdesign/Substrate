@@ -132,10 +132,10 @@ namespace <#=namespaceName#>
 		
 		WriteLine("[ServiceContract]");
 		if(useDefaultIdType){
-			WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
+			WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
 		}
 		else{
-			WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+			WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
 		}
 	}
 	PopIndent();
