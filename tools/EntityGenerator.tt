@@ -47,9 +47,12 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		if(useDefaultIdType)
-			? WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, I{0}Repository>", entity.Name, entity)
-			: WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
+		if(useDefaultIdType){
+			WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, I{0}Repository>", entity.Name, entity);
+		}
+		else{
+			WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
+		}
 		WriteLine("{");
 		
 		foreach(var property in entity.Properties)
@@ -87,9 +90,12 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		if(useDefaultIdType)
-			? WriteLine("public partial interface I{0} : IEntity<I{0}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name)
-			: WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
+		if(useDefaultIdType){
+			WriteLine("public partial interface I{0} : IEntity<I{0}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name);
+		}
+		else{
+			WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
+		}
 	}
 	PopIndent();
 #>
@@ -104,9 +110,12 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		if(useDefaultIdType)
-			? WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, I{0}Data> {{}}", entity.Name)
-			: WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
+		if(useDefaultIdType){
+			WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, I{0}Data> {{}}", entity.Name);
+		}
+		else{
+			WriteLine("public interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
+		}
 	}
 	PopIndent();
 #>
@@ -122,9 +131,12 @@ namespace <#=namespaceName#>
 		var useDefaultIdType = entity.IdType == "Guid";
 		
 		WriteLine("[ServiceContract]");
-		if(useDefaultIdType)
-			? WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name)
-			: WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+		if(useDefaultIdType){
+			WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
+		}
+		else{
+			WriteLine("public interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+		}
 	}
 	PopIndent();
 #>
@@ -140,9 +152,12 @@ namespace <#=namespaceName#>
 		var useDefaultIdType = entity.IdType == "Guid";
 		
 		WriteLine("[DataContract]");
-		if(useDefaultIdType)
-			? WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, I{0}Repository>, I{0}Data", entity.Name)
-			: WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
+		if(useDefaultIdType){
+			WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, I{0}Repository>, I{0}Data", entity.Name);
+		}
+		else{
+			WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
+		}
 		WriteLine("{");
 		
 		PushIndent("\t");
