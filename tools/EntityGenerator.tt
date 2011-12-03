@@ -64,7 +64,7 @@ namespace <#=namespaceName#>
 			}
 			if(property.DisplayName != null)
 			{
-				WriteLine("[DisplayName(\"{0}\")]", property.DisplayName.Value);
+				WriteLine("[DisplayName(\"{0}\")]", (string.IsNullOrWhiteSpace(property.DisplayName.Value)) ? property.Name : property.DisplayName.Value );
 			}
 			foreach(var attribute in property.Attributes.Where(a => !string.IsNullOrWhiteSpace(a)))
 			{
