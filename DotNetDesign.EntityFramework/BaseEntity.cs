@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Diagnostics;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -42,6 +44,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public abstract class BaseEntity<TEntity, TId, TEntityData, TEntityRepository> :
+        BaseLogger,
         IEntity<TEntity, TId, TEntityData, TEntityRepository>, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -76,7 +79,7 @@ namespace DotNetDesign.EntityFramework
         /// The original entity data.
         /// </value>
         protected TEntityData OriginalEntityData { get; set; }
-
+        
         #endregion
 
         #region Constructors
@@ -94,12 +97,15 @@ namespace DotNetDesign.EntityFramework
             Func<IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>> entityConcurrencyManagerFactory,
             IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators)
         {
-            EntityDataFactory = entityDataFactory;
-            EntityRepositoryFactory = entityRepositoryFactory;
-            EntityConcurrencyManagerFactory = entityConcurrencyManagerFactory;
-            EntityValidators = entityValidators;
+            using (Logger.Scope())
+            {
+                EntityDataFactory = entityDataFactory;
+                EntityRepositoryFactory = entityRepositoryFactory;
+                EntityConcurrencyManagerFactory = entityConcurrencyManagerFactory;
+                EntityValidators = entityValidators;
 
-            PropertyChanged += BaseEntityPropertyChanged;
+                PropertyChanged += BaseEntityPropertyChanged;
+            }
         }
 
         #endregion
@@ -112,8 +118,11 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public bool Save()
         {
-            TEntity returnedEntity;
-            return Save(out returnedEntity);
+            using (Logger.Scope())
+            {
+                TEntity returnedEntity;
+                return Save(out returnedEntity);
+            }
         }
 
         /// <summary>
@@ -122,31 +131,44 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public bool Save(out TEntity returnedEntity)
         {
-            if (IsDirty)
+            using (Logger.Scope())
             {
-                if (!IsValid && Validate().Any(x => x.StatusType == ValidationResultStatusType.Error))
+                if (IsDirty)
                 {
-                    returnedEntity = this as TEntity;
-                    return false;
+                    Logger.InfoFormat("Entity [{0}] is dirty.", this);
+                    if (!IsValid && Validate().Any(x => x.StatusType == ValidationResultStatusType.Error))
+                    {
+                        Logger.InfoFormat("Entity [{0}] is not valid.", this);
+                        returnedEntity = this as TEntity;
+                        return false;
+                    }
+                    else if (Logger.IsInfoEnabled)
+                    {
+                        Logger.InfoFormat("Entity [{0}] is valid.", this);
+                    }
+
+                    EntityConcurrencyManagerFactory().Verify(this as TEntity);
+
+                    Version++;
+                    if (Version == 1)
+                    {
+                        CreatedAt = DateTime.Now;
+                    }
+                    LastUpdatedAt = DateTime.Now;
+
+                    OnSaving();
+                    returnedEntity = EntityRepositoryFactory().Save(this as TEntity);
+                    OnSaved();
+                    return true;
+                }
+                else if(Logger.IsInfoEnabled)
+                {
+                    Logger.InfoFormat("Entity [{0}] is not dirty.", this);
                 }
 
-                EntityConcurrencyManagerFactory().Verify(this as TEntity);
-
-                Version++;
-                if (Version == 1)
-                {
-                    CreatedAt = DateTime.Now;
-                }
-                LastUpdatedAt = DateTime.Now;
-
-                OnSaving();
-                returnedEntity = EntityRepositoryFactory().Save(this as TEntity);
-                OnSaved();
+                returnedEntity = this as TEntity;
                 return true;
             }
-
-            returnedEntity = this as TEntity;
-            return true;
         }
 
         /// <summary>
@@ -154,9 +176,12 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         public void Delete()
         {
-            OnDeleting();
-            EntityRepositoryFactory().Delete(this as TEntity);
-            OnDeleted();
+            using (Logger.Scope())
+            {
+                OnDeleting();
+                EntityRepositoryFactory().Delete(this as TEntity);
+                OnDeleted();
+            }
         }
 
         /// <summary>
@@ -167,15 +192,24 @@ namespace DotNetDesign.EntityFramework
         /// </value>
         public TId Id
         {
-            get { return (EntityData == null) ? default(TId) : EntityData.Id; }
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return (EntityData == null) ? default(TId) : EntityData.Id;
+                }
+            }
             set
             {
-                if (EntityData.Id.Equals(value)) return;
+                using (Logger.Scope())
+                {
+                    if (EntityData.Id.Equals(value)) return;
 
-                var oldValue = EntityData.Id;
-                OnPropertyChanging("Id", oldValue, value);
-                EntityData.Id = value;
-                OnPropertyChanged("Id", oldValue, value);
+                    var oldValue = EntityData.Id;
+                    OnPropertyChanging("Id", oldValue, value);
+                    EntityData.Id = value;
+                    OnPropertyChanged("Id", oldValue, value);
+                }
             }
         }
 
@@ -187,15 +221,24 @@ namespace DotNetDesign.EntityFramework
         /// </value>
         public int Version
         {
-            get { return (EntityData == null) ? default(int) : EntityData.Version; }
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return (EntityData == null) ? default(int) : EntityData.Version;
+                }
+            }
             set
             {
-                if (EntityData.Version.Equals(value)) return;
+                using (Logger.Scope())
+                {
+                    if (EntityData.Version.Equals(value)) return;
 
-                var oldValue = EntityData.Version;
-                OnPropertyChanging("Version", oldValue, value);
-                EntityData.Version = value;
-                OnPropertyChanged("Version", oldValue, value);
+                    var oldValue = EntityData.Version;
+                    OnPropertyChanging("Version", oldValue, value);
+                    EntityData.Version = value;
+                    OnPropertyChanged("Version", oldValue, value);
+                }
             }
         }
 
@@ -207,15 +250,24 @@ namespace DotNetDesign.EntityFramework
         /// </value>
         public DateTime CreatedAt
         {
-            get { return (EntityData == null) ? DateTime.MinValue : EntityData.CreatedAt; }
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return (EntityData == null) ? DateTime.MinValue : EntityData.CreatedAt;
+                }
+            }
             set
             {
-                if (EntityData.CreatedAt.Equals(value)) return;
+                using (Logger.Scope())
+                {
+                    if (EntityData.CreatedAt.Equals(value)) return;
 
-                var oldValue = EntityData.Version;
-                OnPropertyChanging("CreatedAt", oldValue, value);
-                EntityData.CreatedAt = value;
-                OnPropertyChanged("CreatedAt", oldValue, value);
+                    var oldValue = EntityData.Version;
+                    OnPropertyChanging("CreatedAt", oldValue, value);
+                    EntityData.CreatedAt = value;
+                    OnPropertyChanged("CreatedAt", oldValue, value);
+                }
             }
         }
 
@@ -227,22 +279,40 @@ namespace DotNetDesign.EntityFramework
         /// </value>
         public DateTime LastUpdatedAt
         {
-            get { return (EntityData == null) ? DateTime.MinValue : EntityData.LastUpdatedAt; }
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return (EntityData == null) ? DateTime.MinValue : EntityData.LastUpdatedAt;
+                }
+            }
             set
             {
-                if (EntityData.LastUpdatedAt.Equals(value)) return;
+                using (Logger.Scope())
+                {
+                    if (EntityData.LastUpdatedAt.Equals(value)) return;
 
-                var oldValue = EntityData.LastUpdatedAt;
-                OnPropertyChanging("LastUpdatedAt", oldValue, value);
-                EntityData.LastUpdatedAt = value;
-                OnPropertyChanged("LastUpdatedAt", oldValue, value);
+                    var oldValue = EntityData.LastUpdatedAt;
+                    OnPropertyChanging("LastUpdatedAt", oldValue, value);
+                    EntityData.LastUpdatedAt = value;
+                    OnPropertyChanged("LastUpdatedAt", oldValue, value);
+                }
             }
         }
 
         /// <summary>
         /// Gets the version id.
         /// </summary>
-        public string VersionId { get { return EntityData.VersionId; } }
+        public string VersionId
+        {
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return EntityData.VersionId;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the previous version.
@@ -250,7 +320,10 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetPreviousVersion()
         {
-            return EntityRepositoryFactory().GetPreviousVersion(this as TEntity);
+            using (Logger.Scope())
+            {
+                return EntityRepositoryFactory().GetPreviousVersion(this as TEntity);
+            }
         }
 
         /// <summary>
@@ -260,7 +333,10 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public TEntity GetVersion(int version)
         {
-            return EntityRepositoryFactory().GetVersion(this as TEntity, version);
+            using (Logger.Scope())
+            {
+                return EntityRepositoryFactory().GetVersion(this as TEntity, version);
+            }
         }
 
         /// <summary>
@@ -296,8 +372,11 @@ namespace DotNetDesign.EntityFramework
         /// </returns>
         public virtual bool HasPropertyChanged(string propertyName)
         {
-            object originalValue;
-            return HasPropertyChanged(propertyName, out originalValue);
+            using (Logger.Scope())
+            {
+                object originalValue;
+                return HasPropertyChanged(propertyName, out originalValue);
+            }
         }
 
         /// <summary>
@@ -310,10 +389,13 @@ namespace DotNetDesign.EntityFramework
         /// </returns>
         public virtual bool HasPropertyChanged(string propertyName, out object originalValue)
         {
-            originalValue = typeof (TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
-            var currentValue = typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
+            using (Logger.Scope())
+            {
+                originalValue = typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
+                var currentValue = typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
-            return !originalValue.Equals(currentValue);
+                return !originalValue.Equals(currentValue);
+            }
         }
 
         /// <summary>
@@ -326,8 +408,11 @@ namespace DotNetDesign.EntityFramework
         /// </returns>
         public virtual bool HasPropertyChanged<TProperty>(Expression<Func<TEntityData, TProperty>> property)
         {
-            TProperty originalValue;
-            return HasPropertyChanged(property, out originalValue);
+            using (Logger.Scope())
+            {
+                TProperty originalValue;
+                return HasPropertyChanged(property, out originalValue);
+            }
         }
 
         /// <summary>
@@ -343,24 +428,32 @@ namespace DotNetDesign.EntityFramework
             Expression<Func<TEntityData, TProperty>> property,
             out TProperty originalValue)
         {
-            var propertyName = ((MemberExpression)property.Body).Member.Name;
-
-            originalValue =
-                (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
-            var currentValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
-
-            bool hasPropertyChanged;
-
-            if (originalValue == null && currentValue == null)
+            using (Logger.Scope())
             {
-                hasPropertyChanged = false;
-            }
-            else
-            {
-                hasPropertyChanged = originalValue == null || !originalValue.Equals(currentValue);
-            }
+                var propertyName = ((MemberExpression)property.Body).Member.Name;
 
-            return hasPropertyChanged;
+                originalValue =
+                    (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
+                var currentValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
+
+                bool hasPropertyChanged;
+
+                if (originalValue == null && currentValue == null)
+                {
+                    hasPropertyChanged = false;
+                }
+                else
+                {
+                    hasPropertyChanged = originalValue == null || !originalValue.Equals(currentValue);
+                }
+
+                if (Logger.IsInfoEnabled)
+                {
+                    Logger.InfoFormat("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName, hasPropertyChanged, currentValue, originalValue);
+                }
+
+                return hasPropertyChanged;
+            }
         }
 
         /// <summary>
@@ -369,23 +462,28 @@ namespace DotNetDesign.EntityFramework
         /// <param name="entityData">The entity data.</param>
         public void Initialize(TEntityData entityData)
         {
-            if (_init)
+            using (Logger.Scope())
             {
-                throw new InvalidOperationException(
-                    "Initialize has already been called on this instance. This can only be called once per instance.");
+                if (_init)
+                {
+                    var invalidOperationException = new InvalidOperationException(
+                        "Initialize has already been called on this instance. This can only be called once per instance.");
+                    Logger.Error(invalidOperationException.Message);
+                    throw invalidOperationException;
+                }
+
+                OnInitializing();
+
+                OriginalEntityData = entityData;
+                EntityData = CloneEntityData(entityData);
+
+                _propertyChangedSinceIsDirtySet = false;
+                _isDirty = false;
+                _validationResults = null;
+                _init = true;
+
+                OnInitialized();
             }
-
-            OnInitializing();
-
-            OriginalEntityData = entityData;
-            EntityData = CloneEntityData(entityData);
-
-            _propertyChangedSinceIsDirtySet = false;
-            _isDirty = false;
-            _validationResults = null;
-            _init = true;
-
-            OnInitialized();
         }
 
         /// <summary>
@@ -398,16 +496,19 @@ namespace DotNetDesign.EntityFramework
         {
             get
             {
-                if (_propertyChangedSinceIsDirtySet)
+                using (Logger.Scope())
                 {
-                    _propertyChangedSinceIsDirtySet = false;
-                    _isDirty =
-                        typeof (TEntityData).GetProperties().Any(
-                            x =>
-                            x.GetValue(OriginalEntityData, null) != x.GetValue(EntityData, null));
-                }
+                    if (_propertyChangedSinceIsDirtySet)
+                    {
+                        _propertyChangedSinceIsDirtySet = false;
+                        _isDirty =
+                            typeof(TEntityData).GetProperties().Any(
+                                x =>
+                                x.GetValue(OriginalEntityData, null) != x.GetValue(EntityData, null));
+                    }
 
-                return _isDirty;
+                    return _isDirty;
+                }
             }
         }
 
@@ -416,8 +517,11 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         public virtual void RevertChanges()
         {
-            _init = false;
-            Initialize(OriginalEntityData);
+            using (Logger.Scope())
+            {
+                _init = false;
+                Initialize(OriginalEntityData);
+            }
         }
 
         /// <summary>
@@ -430,12 +534,15 @@ namespace DotNetDesign.EntityFramework
         {
             get
             {
-                if (_validationResults == null)
+                using (Logger.Scope())
                 {
-                    _validationResults = Validate();
-                }
+                    if (_validationResults == null)
+                    {
+                        _validationResults = Validate();
+                    }
 
-                return !_validationResults.Any();
+                    return !_validationResults.Any();
+                }
             }
         }
 
@@ -445,13 +552,16 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<IValidationResult> Validate()
         {
-            if (_validationResults == null || _propertyChangedSinceValidationResultsPopulated)
+            using (Logger.Scope())
             {
-                _propertyChangedSinceValidationResultsPopulated = false;
-                _validationResults = EntityValidators.SelectMany(x => x.Validate(this as TEntity));
-            }
+                if (_validationResults == null || _propertyChangedSinceValidationResultsPopulated)
+                {
+                    _propertyChangedSinceValidationResultsPopulated = false;
+                    _validationResults = EntityValidators.SelectMany(x => x.Validate(this as TEntity));
+                }
 
-            return _validationResults;
+                return _validationResults;
+            }
         }
 
         #endregion
@@ -471,7 +581,10 @@ namespace DotNetDesign.EntityFramework
         /// <param name="newValue">The new value.</param>
         protected virtual void OnPropertyChanging(string propertyName, object oldValue, object newValue)
         {
-            PropertyChanging.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
+            using (Logger.Scope())
+            {
+                PropertyChanging.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
+            }
         }
 
         /// <summary>
@@ -487,7 +600,10 @@ namespace DotNetDesign.EntityFramework
         /// <param name="newValue">The new value.</param>
         protected virtual void OnPropertyChanged(string propertyName, object oldValue, object newValue)
         {
-            PropertyChanged.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
+            using (Logger.Scope())
+            {
+                PropertyChanged.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
+            }
         }
 
         /// <summary>
@@ -500,7 +616,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected virtual void OnSaving()
         {
-            Saving.Invoke(this, EventArgs.Empty);
+            using (Logger.Scope())
+            {
+                Saving.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
@@ -513,7 +632,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected virtual void OnSaved()
         {
-            Saved.Invoke(this, EventArgs.Empty);
+            using (Logger.Scope())
+            {
+                Saved.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
@@ -526,7 +648,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected virtual void OnDeleting()
         {
-            Deleting.Invoke(this, EventArgs.Empty);
+            using (Logger.Scope())
+            {
+                Deleting.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
@@ -539,7 +664,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected virtual void OnDeleted()
         {
-            Deleted.Invoke(this, EventArgs.Empty);
+            using (Logger.Scope())
+            {
+                Deleted.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
@@ -552,7 +680,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected virtual void OnInitializing()
         {
-            Initializing.Invoke(this, EventArgs.Empty);
+            using (Logger.Scope())
+            {
+                Initializing.Invoke(this, EventArgs.Empty);
+            }
         }
 
         /// <summary>
@@ -565,7 +696,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected virtual void OnInitialized()
         {
-            Initialized.Invoke(this, EventArgs.Empty);
+            using (Logger.Scope())
+            {
+                Initialized.Invoke(this, EventArgs.Empty);
+            }
         }
 
         #endregion
@@ -579,20 +713,23 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         protected virtual TEntityData CloneEntityData(TEntityData entityData)
         {
-            var newEntityData = EntityDataFactory();
-
-            foreach (var property in typeof (TEntityData).GetProperties())
+            using (Logger.Scope())
             {
-                var value = property.GetValue(entityData, null);
-                property.SetValue(newEntityData, value, null);
+                var newEntityData = EntityDataFactory();
+
+                foreach (var property in typeof(TEntityData).GetProperties())
+                {
+                    var value = property.GetValue(entityData, null);
+                    property.SetValue(newEntityData, value, null);
+                }
+
+                newEntityData.Id = entityData.Id;
+                newEntityData.CreatedAt = entityData.CreatedAt;
+                newEntityData.LastUpdatedAt = entityData.LastUpdatedAt;
+                newEntityData.Version = entityData.Version;
+
+                return newEntityData;
             }
-
-            newEntityData.Id = entityData.Id;
-            newEntityData.CreatedAt = entityData.CreatedAt;
-            newEntityData.LastUpdatedAt = entityData.LastUpdatedAt;
-            newEntityData.Version = entityData.Version;
-
-            return newEntityData;
         }
 
         /// <summary>
@@ -602,8 +739,11 @@ namespace DotNetDesign.EntityFramework
         /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
         private void BaseEntityPropertyChanged(object sender, PropertyChangeEventArgs e)
         {
-            _propertyChangedSinceIsDirtySet = true;
-            _propertyChangedSinceValidationResultsPopulated = true;
+            using (Logger.Scope())
+            {
+                _propertyChangedSinceIsDirtySet = true;
+                _propertyChangedSinceValidationResultsPopulated = true;
+            }
         }
 
         #endregion
@@ -616,7 +756,10 @@ namespace DotNetDesign.EntityFramework
         /// </returns>
         public override string ToString()
         {
-            return string.Format("{0}::{1}::{2}", typeof (TEntity), Id, Version);
+            using (Logger.Scope())
+            {
+                return string.Format("{0}::{1}::{2}", typeof(TEntity), Id, Version);
+            }
         }
 
         /// <summary>
@@ -627,7 +770,10 @@ namespace DotNetDesign.EntityFramework
         /// </returns>
         public override int GetHashCode()
         {
-            return ToString().GetHashCode();
+            using (Logger.Scope())
+            {
+                return ToString().GetHashCode();
+            }
         }
     }
 }

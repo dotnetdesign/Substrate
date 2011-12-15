@@ -21,7 +21,10 @@ namespace DotNetDesign.EntityFramework
         /// <param name="id">The id.</param>
         public EntityIdentifier(Guid id)
         {
-            Id = id;
+            using (Logger.Scope())
+            {
+                Id = id;
+            }
         }
 
         /// <summary>
@@ -40,7 +43,9 @@ namespace DotNetDesign.EntityFramework
     /// <summary>
     /// An object that uniquely identifies an entity.
     /// </summary>
-    public class EntityIdentifier<TId> : IIdentifiable<TId>
+    public class EntityIdentifier<TId> : 
+        BaseLogger,
+        IIdentifiable<TId>
     {
         /// <summary>
         /// Gets or sets the id.

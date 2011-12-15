@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -8,6 +9,8 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     public class StateChangeEventArgs<TState> : EventArgs
     {
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="StateChangeEventArgs&lt;TState&gt;"/> class.
         /// </summary>
@@ -15,8 +18,11 @@ namespace DotNetDesign.EntityFramework
         /// <param name="newState">The new state.</param>
         public StateChangeEventArgs(TState originalState, TState newState)
         {
-            OriginalState = originalState;
-            NewState = newState;
+            using (Logger.Scope())
+            {
+                OriginalState = originalState;
+                NewState = newState;
+            }
         }
 
         /// <summary>

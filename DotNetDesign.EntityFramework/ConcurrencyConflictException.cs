@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -12,6 +13,8 @@ namespace DotNetDesign.EntityFramework
     {
         private const string ERROR_MESSAGE_FORMAT =
             "One or more concurrency conflicts were encountered and prevented this entity from saving. Entity data type {0}. Assigned concurrency mode {1}. Conflicting property name(s) [{2}].";
+
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Gets or sets the type of the entity data.
@@ -46,9 +49,12 @@ namespace DotNetDesign.EntityFramework
         public ConcurrencyConflictException(Type entityDataType, ConcurrencyMode concurrencyMode, IEnumerable<string> conflictingPropertyNames = null)
             : base(string.Format(ERROR_MESSAGE_FORMAT, entityDataType, concurrencyMode, (conflictingPropertyNames == null) ? "" : string.Join(", ", conflictingPropertyNames)))
         {
-            EntityDataType = entityDataType;
-            ConcurrencyMode = concurrencyMode;
-            ConflictingPropertyNames = conflictingPropertyNames;
+            using (Logger.Scope())
+            {
+                EntityDataType = entityDataType;
+                ConcurrencyMode = concurrencyMode;
+                ConflictingPropertyNames = conflictingPropertyNames;
+            }
         }
 
         protected ConcurrencyConflictException(

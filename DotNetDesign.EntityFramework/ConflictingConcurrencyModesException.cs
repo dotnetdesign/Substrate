@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -12,6 +13,8 @@ namespace DotNetDesign.EntityFramework
     {
         private const string ERROR_MESSAGE_FORMAT =
             "A entity data type cannot be assigned multiple and differing concurrency modes. Entity data type {0}. Assigned concurrency modes [{1}].";
+
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Gets or sets the type of the entity data.
@@ -37,8 +40,11 @@ namespace DotNetDesign.EntityFramework
         public ConflictingConcurrencyModesException(Type entityDataType, IEnumerable<ConcurrencyMode> conflictingConcurrencyModes)
             : base(string.Format(ERROR_MESSAGE_FORMAT, entityDataType, string.Join(", ", conflictingConcurrencyModes)))
         {
-            EntityDataType = entityDataType;
-            ConflictingConcurrencyModes = conflictingConcurrencyModes;
+            using (Logger.Scope())
+            {
+                EntityDataType = entityDataType;
+                ConflictingConcurrencyModes = conflictingConcurrencyModes;
+            }
         }
 
         /// <summary>

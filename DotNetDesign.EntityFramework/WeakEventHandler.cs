@@ -16,7 +16,9 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     /// <typeparam name="TTarget">The type of the target.</typeparam>
     /// <typeparam name="TEventArgs">The type of the event args.</typeparam>
-    public class WeakEventHandler<TTarget, TEventArgs> : IWeakEventHandler<TEventArgs>
+    public class WeakEventHandler<TTarget, TEventArgs> : 
+        BaseLogger,
+        IWeakEventHandler<TEventArgs>
         where TTarget : class
         where TEventArgs : EventArgs
     {
@@ -34,11 +36,14 @@ namespace DotNetDesign.EntityFramework
         /// <param name="unregister">The unregister.</param>
         public WeakEventHandler(EventHandler<TEventArgs> eventHandler, UnregisterCallback<TEventArgs> unregister)
         {
-            _targetRef = new WeakReference(eventHandler.Target);
-            _openHandler =
-                (OpenEventHandler) Delegate.CreateDelegate(typeof (OpenEventHandler), null, eventHandler.Method);
-            _handler = Invoke;
-            _unregister = unregister;
+            using (Logger.Scope())
+            {
+                _targetRef = new WeakReference(eventHandler.Target);
+                _openHandler =
+                    (OpenEventHandler)Delegate.CreateDelegate(typeof(OpenEventHandler), null, eventHandler.Method);
+                _handler = Invoke;
+                _unregister = unregister;
+            }
         }
 
         /// <summary>
@@ -48,14 +53,17 @@ namespace DotNetDesign.EntityFramework
         /// <param name="e">The <see cref="TEventArgs"/> instance containing the event data.</param>
         public void Invoke(object sender, TEventArgs e)
         {
-            var target = (TTarget) _targetRef.Target;
-
-            if (target != null)
-                _openHandler.Invoke(target, sender, e);
-            else if (_unregister != null)
+            using (Logger.Scope())
             {
-                _unregister(_handler);
-                _unregister = null;
+                var target = (TTarget)_targetRef.Target;
+
+                if (target != null)
+                    _openHandler.Invoke(target, sender, e);
+                else if (_unregister != null)
+                {
+                    _unregister(_handler);
+                    _unregister = null;
+                }
             }
         }
 
@@ -64,7 +72,13 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         public EventHandler<TEventArgs> Handler
         {
-            get { return _handler; }
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return _handler;
+                }
+            }
         }
 
         /// <summary>

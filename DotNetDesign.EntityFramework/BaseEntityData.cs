@@ -20,7 +20,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected BaseEntityData()
         {
-            Id = Guid.NewGuid();
+            using (Logger.Scope())
+            {
+                Id = Guid.NewGuid();
+            }
         }
     }
 
@@ -32,7 +35,9 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     [DataContract]
-    public abstract class BaseEntityData<TEntityData, TEntity, TId, TEntityRepository> : IEntityData<TEntityData, TEntity, TId, TEntityRepository>
+    public abstract class BaseEntityData<TEntityData, TEntity, TId, TEntityRepository> : 
+        BaseLogger,
+        IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
@@ -42,7 +47,10 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         protected BaseEntityData()
         {
-            Version = 0;
+            using (Logger.Scope())
+            {
+                Version = 0;
+            }
         }
 
         /// <summary>
@@ -86,7 +94,13 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         public string VersionId
         {
-            get { return Id + "::" + Version; }
+            get
+            {
+                using (Logger.Scope())
+                { 
+                    return Id + "::" + Version; 
+                }
+            }
         }
     }
 }

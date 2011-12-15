@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -14,6 +15,8 @@ namespace DotNetDesign.EntityFramework
         private const string ERROR_MESSAGE_FORMAT =
             "Change from state {0} to state {1} is not allowed. Allowed states, [{2}].";
 
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidStateException&lt;TState&gt;"/> class.
         /// </summary>
@@ -23,9 +26,12 @@ namespace DotNetDesign.EntityFramework
         public InvalidStateException(TState currentState, TState targetState, IEnumerable<TState> allowedStates)
             : base(string.Format(ERROR_MESSAGE_FORMAT, currentState, targetState, string.Join(", ", allowedStates)))
         {
-            CurrentState = currentState;
-            TargetState = targetState;
-            AllowedStates = allowedStates;
+            using (Logger.Scope())
+            {
+                CurrentState = currentState;
+                TargetState = targetState;
+                AllowedStates = allowedStates;
+            }
         }
 
         /// <summary>
