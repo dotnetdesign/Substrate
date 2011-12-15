@@ -1,4 +1,6 @@
 using System;
+using Common.Logging;
+using DotNetDesign.EntityFramework;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -7,6 +9,8 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     public static class EventHandlerExtensions
     {
+        private static readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Makes the weak.
         /// </summary>
@@ -17,24 +21,27 @@ namespace DotNetDesign.EntityFramework
         public static EventHandler<TEventArgs> MakeWeak<TEventArgs>(this EventHandler<TEventArgs> eventHandler, UnregisterCallback<TEventArgs> unregister)
           where TEventArgs : EventArgs
         {
-            if (eventHandler == null)
-                throw new ArgumentNullException("eventHandler");
+            using (Logger.Scope())
+            {
+                if (eventHandler == null)
+                    throw new ArgumentNullException("eventHandler");
 
-            if (eventHandler.Method.IsStatic || eventHandler.Target == null)
-                throw new ArgumentException("Only instance methods are supported.", "eventHandler");
+                if (eventHandler.Method.IsStatic || eventHandler.Target == null)
+                    throw new ArgumentException("Only instance methods are supported.", "eventHandler");
 
-            var wehType = typeof(WeakEventHandler<,>).MakeGenericType(eventHandler.Method.DeclaringType, typeof(TEventArgs));
+                var wehType = typeof(WeakEventHandler<,>).MakeGenericType(eventHandler.Method.DeclaringType, typeof(TEventArgs));
 
-            var wehConstructor = wehType.GetConstructor(
-                new[]
+                var wehConstructor = wehType.GetConstructor(
+                    new[]
                     {
                         typeof (EventHandler<TEventArgs>),
                         typeof (UnregisterCallback<TEventArgs>)
                     });
 
-            var weh = (IWeakEventHandler<TEventArgs>) wehConstructor.Invoke(new object[] {eventHandler, unregister});
+                var weh = (IWeakEventHandler<TEventArgs>)wehConstructor.Invoke(new object[] { eventHandler, unregister });
 
-            return weh.Handler;
+                return weh.Handler;
+            }
         }
     }
 }

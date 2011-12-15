@@ -1,4 +1,5 @@
 using System;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -7,6 +8,8 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     public class PropertyChangeEventArgs : EventArgs
     {
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyChangeEventArgs"/> class.
         /// </summary>
@@ -15,9 +18,12 @@ namespace DotNetDesign.EntityFramework
         /// <param name="newValue">The new value.</param>
         public PropertyChangeEventArgs(string propertyName, object originalValue, object newValue)
         {
-            PropertyName = propertyName;
-            OriginalValue = originalValue;
-            NewValue = newValue;
+            using (Logger.Scope())
+            {
+                PropertyName = propertyName;
+                OriginalValue = originalValue;
+                NewValue = newValue;
+            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -8,13 +9,18 @@ namespace DotNetDesign.EntityFramework
     [AttributeUsage(AttributeTargets.Interface)]
     public class ConcurrencyModeAttribute : Attribute
     {
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrencyModeAttribute"/> class.
         /// </summary>
         /// <param name="concurrencyMode">The concurrency mode.</param>
         public ConcurrencyModeAttribute(ConcurrencyMode concurrencyMode)
         {
-            ConcurrencyMode = concurrencyMode;
+            using (Logger.Scope())
+            {
+                ConcurrencyMode = concurrencyMode;
+            }
         }
 
         /// <summary>

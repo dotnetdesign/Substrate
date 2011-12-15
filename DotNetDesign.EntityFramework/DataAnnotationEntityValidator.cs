@@ -29,6 +29,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public class DataAnnotationEntityValidator<TEntity, TEntityData, TId, TEntityRepository> :
+        BaseLogger,
         IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
@@ -43,12 +44,15 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<IValidationResult> Validate(TEntity entity)
         {
-            var validationResults = new List<IValidationResult>();
+            using (Logger.Scope())
+            {
+                var validationResults = new List<IValidationResult>();
 
-            validationResults.AddRange(ValidateType<TEntityData>(entity));
-            validationResults.AddRange(ValidateType<TEntity>(entity));
+                validationResults.AddRange(ValidateType<TEntityData>(entity));
+                validationResults.AddRange(ValidateType<TEntity>(entity));
 
-            return validationResults;
+                return validationResults;
+            }
         }
 
         #endregion
@@ -61,15 +65,17 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         private IEnumerable<IValidationResult> ValidateType<TValidatableType>(TEntity entity)
         {
-            return from property in typeof (TValidatableType).GetProperties()
-                   from validationAttribute in
-                       property.GetCustomAttributes(typeof (ValidationAttribute), true).OfType<ValidationAttribute>()
-                   where !validationAttribute.IsValid(property.GetValue(entity, null))
-                   select
-                       ValidationResult.Error(
-                           validationAttribute.FormatErrorMessage(GetDisplayName(property)),
-                           new[] {property.Name});
-
+            using (Logger.Scope())
+            {
+                return from property in typeof(TValidatableType).GetProperties()
+                       from validationAttribute in
+                           property.GetCustomAttributes(typeof(ValidationAttribute), true).OfType<ValidationAttribute>()
+                       where !validationAttribute.IsValid(property.GetValue(entity, null))
+                       select
+                           ValidationResult.Error(
+                               validationAttribute.FormatErrorMessage(GetDisplayName(property)),
+                               new[] { property.Name });
+            }
         }
 
         /// <summary>
@@ -79,9 +85,12 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         protected virtual string GetDisplayName(PropertyInfo propertyInfo)
         {
-            return
-                ((DisplayNameAttribute)
-                 propertyInfo.GetCustomAttributes(typeof (DisplayNameAttribute), true).SingleOrDefault()).DisplayName;
+            using (Logger.Scope())
+            {
+                return
+                    ((DisplayNameAttribute)
+                     propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), true).SingleOrDefault()).DisplayName;
+            }
         }
     }
 }

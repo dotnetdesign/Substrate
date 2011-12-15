@@ -34,6 +34,9 @@
     <DocumentationFile>bin\Release\DotNetDesign.EntityFramework.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Common.Logging">
+      <HintPath>..\packages\Common.Logging.2.0.0\lib\2.0\Common.Logging.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -48,6 +51,7 @@
   <ItemGroup>
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseEntityData.cs" />
+    <Compile Include="BaseLogger.cs" />
     <Compile Include="ConcurrencyConflictException.cs" />
     <Compile Include="ConcurrencyManager.cs" />
     <Compile Include="ConcurrencyMode.cs" />
@@ -74,8 +78,10 @@
     <Compile Include="IValidationResult.cs" />
     <Compile Include="IVersionable.cs" />
     <Compile Include="IWeakEventHandler.cs" />
+    <Compile Include="LoggerExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangeEventArgs.cs" />
+    <Compile Include="ScopeLogger.cs" />
     <Compile Include="StateChangeEventArgs.cs" />
     <Compile Include="StateMachine.cs" />
     <Compile Include="ValidationResult.cs" />
@@ -84,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DotNetDesign.EntityFramework.nuspec" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

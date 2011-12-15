@@ -8,7 +8,9 @@ namespace DotNetDesign.EntityFramework
     /// Implementation of state machine.
     /// </summary>
     /// <typeparam name="TState">The type of the state.</typeparam>
-    public class StateMachine<TState> : IStateMachine<TState>
+    public class StateMachine<TState> : 
+        BaseLogger,
+        IStateMachine<TState>
     {
         private readonly IDictionary<TState, IEnumerable<TState>> _validStateChangeMap;
         private TState _currentState;
@@ -30,8 +32,11 @@ namespace DotNetDesign.EntityFramework
         /// <param name="initialState">The initial state.</param>
         public StateMachine(IDictionary<TState, IEnumerable<TState>> validStateChangeMap, TState initialState)
         {
-            _validStateChangeMap = validStateChangeMap;
-            _currentState = initialState;
+            using (Logger.Scope())
+            {
+                _validStateChangeMap = validStateChangeMap;
+                _currentState = initialState;
+            }
         }
 
         /// <summary>
@@ -41,7 +46,10 @@ namespace DotNetDesign.EntityFramework
         /// <param name="newState">The new state.</param>
         protected virtual void OnStateChanging(TState originalState, TState newState)
         {
-            StateChanging.Invoke(this, new StateChangeEventArgs<TState>(originalState, newState));
+            using (Logger.Scope())
+            {
+                StateChanging.Invoke(this, new StateChangeEventArgs<TState>(originalState, newState));
+            }
         }
 
         /// <summary>
@@ -56,7 +64,10 @@ namespace DotNetDesign.EntityFramework
         /// <param name="newState">The new state.</param>
         protected virtual void OnStateChanged(TState originalState, TState newState)
         {
-            StateChanged.Invoke(this, new StateChangeEventArgs<TState>(originalState, newState));
+            using (Logger.Scope())
+            {
+                StateChanged.Invoke(this, new StateChangeEventArgs<TState>(originalState, newState));
+            }
         }
 
         /// <summary>
@@ -72,7 +83,13 @@ namespace DotNetDesign.EntityFramework
         /// </value>
         public TState CurrentState
         {
-            get { return _currentState; }
+            get
+            {
+                using (Logger.Scope())
+                {
+                    return _currentState;
+                }
+            }
         }
 
         /// <summary>
@@ -81,15 +98,18 @@ namespace DotNetDesign.EntityFramework
         /// <param name="targetState">State of the target.</param>
         public void ChangeState(TState targetState)
         {
-            if (!GetValidNextStates().Contains(targetState))
+            using (Logger.Scope())
             {
-                throw new InvalidStateException<TState>(_currentState, targetState, GetValidNextStates());
-            }
+                if (!GetValidNextStates().Contains(targetState))
+                {
+                    throw new InvalidStateException<TState>(_currentState, targetState, GetValidNextStates());
+                }
 
-            var originalState = _currentState;
-            OnStateChanging(originalState, targetState);
-            _currentState = targetState;
-            OnStateChanged(originalState, targetState);
+                var originalState = _currentState;
+                OnStateChanging(originalState, targetState);
+                _currentState = targetState;
+                OnStateChanged(originalState, targetState);
+            }
         }
 
         /// <summary>
@@ -98,7 +118,10 @@ namespace DotNetDesign.EntityFramework
         /// <returns></returns>
         public IEnumerable<TState> GetValidNextStates()
         {
-            return _validStateChangeMap[CurrentState];
+            using (Logger.Scope())
+            {
+                return _validStateChangeMap[CurrentState];
+            }
         }
     }
 }

@@ -5,7 +5,9 @@ namespace DotNetDesign.EntityFramework
     ///<summary>
     /// Validation result
     ///</summary>
-    public class ValidationResult : IValidationResult
+    public class ValidationResult : 
+        BaseLogger,
+        IValidationResult
     {
         #region Properties
 
