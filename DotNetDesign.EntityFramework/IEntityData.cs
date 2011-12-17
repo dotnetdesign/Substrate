@@ -47,5 +47,11 @@ namespace DotNetDesign.EntityFramework
         /// The last updated at.
         /// </value>
         DateTime LastUpdatedAt { get; set;  }
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
+        TEntityData Clone();
     }
 }

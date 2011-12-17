@@ -44,7 +44,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public abstract class BaseEntity<TEntity, TId, TEntityData, TEntityRepository> :
-        BaseLogger,
+        BaseLogger<BaseEntity<TEntity, TId, TEntityData, TEntityRepository>>,
         IEntity<TEntity, TId, TEntityData, TEntityRepository>, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -113,6 +113,20 @@ namespace DotNetDesign.EntityFramework
         #region IEntity<TEntity,TId,TEntityData,TEntityRepository> Members
 
         /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
+        public TEntityData Clone()
+        {
+            using (Logger.Scope())
+            {
+                var newEntity = EntityRepositoryFactory().GetNew();
+                newEntity.Initialize(OriginalEntityData);
+                return newEntity;
+            }
+        }
+
+        /// <summary>
         /// Saves this instance. Returns if the save process was successful.
         /// </summary>
         /// <returns></returns>
@@ -135,16 +149,16 @@ namespace DotNetDesign.EntityFramework
             {
                 if (IsDirty)
                 {
-                    Logger.InfoFormat("Entity [{0}] is dirty.", this);
+                    Logger.DebugFormat("Entity [{0}] is dirty.", this);
                     if (!IsValid && Validate().Any(x => x.StatusType == ValidationResultStatusType.Error))
                     {
-                        Logger.InfoFormat("Entity [{0}] is not valid.", this);
+                        Logger.DebugFormat("Entity [{0}] is not valid.", this);
                         returnedEntity = this as TEntity;
                         return false;
                     }
                     else if (Logger.IsInfoEnabled)
                     {
-                        Logger.InfoFormat("Entity [{0}] is valid.", this);
+                        Logger.DebugFormat("Entity [{0}] is valid.", this);
                     }
 
                     EntityConcurrencyManagerFactory().Verify(this as TEntity);
@@ -163,7 +177,7 @@ namespace DotNetDesign.EntityFramework
                 }
                 else if(Logger.IsInfoEnabled)
                 {
-                    Logger.InfoFormat("Entity [{0}] is not dirty.", this);
+                    Logger.DebugFormat("Entity [{0}] is not dirty.", this);
                 }
 
                 returnedEntity = this as TEntity;
@@ -449,7 +463,7 @@ namespace DotNetDesign.EntityFramework
 
                 if (Logger.IsInfoEnabled)
                 {
-                    Logger.InfoFormat("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName, hasPropertyChanged, currentValue, originalValue);
+                    Logger.DebugFormat("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName, hasPropertyChanged, currentValue, originalValue);
                 }
 
                 return hasPropertyChanged;
@@ -475,7 +489,7 @@ namespace DotNetDesign.EntityFramework
                 OnInitializing();
 
                 OriginalEntityData = entityData;
-                EntityData = CloneEntityData(entityData);
+                EntityData = entityData.Clone();
 
                 _propertyChangedSinceIsDirtySet = false;
                 _isDirty = false;
@@ -705,32 +719,6 @@ namespace DotNetDesign.EntityFramework
         #endregion
 
         #region Helper Methods
-
-        /// <summary>
-        /// Clones the entity data.
-        /// </summary>
-        /// <param name="entityData">The entity data.</param>
-        /// <returns></returns>
-        protected virtual TEntityData CloneEntityData(TEntityData entityData)
-        {
-            using (Logger.Scope())
-            {
-                var newEntityData = EntityDataFactory();
-
-                foreach (var property in typeof(TEntityData).GetProperties())
-                {
-                    var value = property.GetValue(entityData, null);
-                    property.SetValue(newEntityData, value, null);
-                }
-
-                newEntityData.Id = entityData.Id;
-                newEntityData.CreatedAt = entityData.CreatedAt;
-                newEntityData.LastUpdatedAt = entityData.LastUpdatedAt;
-                newEntityData.Version = entityData.Version;
-
-                return newEntityData;
-            }
-        }
 
         /// <summary>
         /// Bases the entity property changed.

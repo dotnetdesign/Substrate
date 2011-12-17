@@ -9,7 +9,7 @@ namespace DotNetDesign.EntityFramework
     [AttributeUsage(AttributeTargets.Interface)]
     public class ConcurrencyModeAttribute : Attribute
     {
-        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(typeof(ConcurrencyModeAttribute));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrencyModeAttribute"/> class.

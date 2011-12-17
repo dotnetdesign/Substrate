@@ -9,7 +9,7 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     /// <typeparam name="TState">The type of the state.</typeparam>
     public class StateMachine<TState> : 
-        BaseLogger,
+        BaseLogger<StateMachine<TState>>,
         IStateMachine<TState>
     {
         private readonly IDictionary<TState, IEnumerable<TState>> _validStateChangeMap;

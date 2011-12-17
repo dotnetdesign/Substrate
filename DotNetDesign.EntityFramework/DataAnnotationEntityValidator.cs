@@ -29,7 +29,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public class DataAnnotationEntityValidator<TEntity, TEntityData, TId, TEntityRepository> :
-        BaseLogger,
+        BaseLogger<DataAnnotationEntityValidator<TEntity, TEntityData, TId, TEntityRepository>>,
         IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>

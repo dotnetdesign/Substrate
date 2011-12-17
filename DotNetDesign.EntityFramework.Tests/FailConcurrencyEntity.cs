@@ -67,7 +67,8 @@ namespace DotNetDesign.EntityFramework.Tests
         }
     }
 
-    public class FailConcurrencyData : BaseEntityData<IFailConcurrencyData,IFailConcurrency,IFailConcurrencyRepository>, IFailConcurrencyData
+    [Serializable]
+    public class FailConcurrencyData : BaseEntityData<IFailConcurrencyData, IFailConcurrency, IFailConcurrencyRepository>, IFailConcurrencyData
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

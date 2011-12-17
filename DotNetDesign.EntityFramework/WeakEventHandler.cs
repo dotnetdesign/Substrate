@@ -16,8 +16,8 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     /// <typeparam name="TTarget">The type of the target.</typeparam>
     /// <typeparam name="TEventArgs">The type of the event args.</typeparam>
-    public class WeakEventHandler<TTarget, TEventArgs> : 
-        BaseLogger,
+    public class WeakEventHandler<TTarget, TEventArgs> :
+        BaseLogger<WeakEventHandler<TTarget, TEventArgs>>,
         IWeakEventHandler<TEventArgs>
         where TTarget : class
         where TEventArgs : EventArgs

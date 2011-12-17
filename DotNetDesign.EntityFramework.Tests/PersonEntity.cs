@@ -66,7 +66,8 @@ namespace DotNetDesign.EntityFramework.Tests
         }
     }
 
-    public class PersonData : BaseEntityData<IPersonData,IPerson,IPersonRepository>, IPersonData
+    [Serializable]
+    public class PersonData : BaseEntityData<IPersonData, IPerson, IPersonRepository>, IPersonData
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

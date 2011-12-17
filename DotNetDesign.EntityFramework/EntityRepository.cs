@@ -53,8 +53,8 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
     public class EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService>
-        : 
-        BaseLogger,
+        :
+        BaseLogger<EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository, TEntityRepositoryService>>,
         IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
@@ -133,7 +133,7 @@ namespace DotNetDesign.EntityFramework
             {
                 foreach (var entityObserver in EntityObservers)
                 {
-                    Logger.InfoFormat("Attaching entity observer [{0}] to entity [{1}].", entityObserver, entity);
+                    Logger.DebugFormat("Attaching entity observer [{0}] to entity [{1}].", entityObserver, entity);
                     entityObserver.Attach(entity);
                 }
             }
@@ -164,7 +164,7 @@ namespace DotNetDesign.EntityFramework
             {
                 foreach (var entityObserver in EntityObservers)
                 {
-                    Logger.InfoFormat("Detaching entity observer [{0}] to entity [{1}].", entityObserver, entity);
+                    Logger.DebugFormat("Detaching entity observer [{0}] to entity [{1}].", entityObserver, entity);
                     entityObserver.Detach(entity);
                 }
             }
@@ -234,16 +234,16 @@ namespace DotNetDesign.EntityFramework
                 {
                     var entity = EntityFactory();
 
-                    Logger.Info("Attaching Entity Observers");
+                    Logger.Debug("Attaching Entity Observers");
                     AttachObservers(entity);
 
-                    Logger.Info("Pre-initializing Entity");
+                    Logger.Debug("Pre-initializing Entity");
                     PreInitializeEntity(entity);
 
-                    Logger.Info("Initializing Entity");
+                    Logger.Debug("Initializing Entity");
                     entity.Initialize(entityDataInstance);
 
-                    Logger.Info("Post-initializing Entity");
+                    Logger.Debug("Post-initializing Entity");
                     PostInitializeEntity(entity);
 
                     yield return entity;
@@ -278,7 +278,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Getting all [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew);
+                Logger.DebugFormat("Getting all [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew);
                 var cacheKey = string.Format("GetAll_{0}", typeof(TEntity));
 
                 var entityData = EntityCache.Get(cacheKey);
@@ -286,10 +286,10 @@ namespace DotNetDesign.EntityFramework
                 if (forceNew || entityData == null)
                 {
                     entityData = EntityRepositoryServiceFactory().GetAll();
-                    EntityCache.Add(cacheKey, entityData);
+                    EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
-                return InitializeEntities(entityData);
+                return InitializeEntities(entityData.Select(x => x.Clone()));
             }
         }
 
@@ -303,7 +303,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Getting [{0}] by ID [{1}]. ForceNew [{2}].", typeof(TEntity), id, forceNew);
+                Logger.DebugFormat("Getting [{0}] by ID [{1}]. ForceNew [{2}].", typeof(TEntity), id, forceNew);
                 var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), id);
 
                 var entityData = EntityCache.Get(cacheKey);
@@ -311,10 +311,10 @@ namespace DotNetDesign.EntityFramework
                 if (forceNew || entityData == null)
                 {
                     entityData = new[] { EntityRepositoryServiceFactory().GetById(id) };
-                    EntityCache.Add(cacheKey, entityData);
+                    EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
-                return InitializeEntities(entityData).FirstOrDefault();
+                return InitializeEntities(entityData.Select(x => x.Clone())).FirstOrDefault();
             }
         }
 
@@ -328,7 +328,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Getting [{0}] by ID(s) [{1}]. ForceNew [{2}].", typeof(TEntity), string.Join(",", ids), forceNew);
+                Logger.DebugFormat("Getting [{0}] by ID(s) [{1}]. ForceNew [{2}].", typeof(TEntity), string.Join(",", ids), forceNew);
                 var cacheKey = string.Format("GetByIds_{0}_{1}", typeof(TEntity), string.Join("_", ids.OrderBy(x => x)));
 
                 var entityData = EntityCache.Get(cacheKey);
@@ -336,10 +336,10 @@ namespace DotNetDesign.EntityFramework
                 if (forceNew || entityData == null)
                 {
                     entityData = EntityRepositoryServiceFactory().GetByIds(ids);
-                    EntityCache.Add(cacheKey, entityData);
+                    EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
-                return InitializeEntities(entityData);
+                return InitializeEntities(entityData.Select(x => x.Clone()));
             }
         }
 
@@ -354,7 +354,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Getting [{0}] by version [{1}]. ForceNew [{2}].", typeof(TEntity), version, forceNew);
+                Logger.DebugFormat("Getting [{0}] by version [{1}]. ForceNew [{2}].", typeof(TEntity), version, forceNew);
                 var cacheKey = string.Format("GetVersion_{0}_{1}", entity, version);
 
                 var entityData = EntityCache.Get(cacheKey);
@@ -371,10 +371,10 @@ namespace DotNetDesign.EntityFramework
 
                     entityData = new[] { returnedEntityData };
 
-                    EntityCache.Add(cacheKey, entityData);
+                    EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
-                return InitializeEntities(entityData).FirstOrDefault();
+                return InitializeEntities(entityData.Select(x => x.Clone())).FirstOrDefault();
             }
         }
 
@@ -388,7 +388,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Getting previous version of [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew);
+                Logger.DebugFormat("Getting previous version of [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew);
                 var cacheKey = string.Format("GetPreviousVersion_{0}_{1}", entity, entity.Version);
 
                 var entityData = EntityCache.Get(cacheKey);
@@ -405,10 +405,10 @@ namespace DotNetDesign.EntityFramework
 
                     entityData = new[] { returnedEntityData };
 
-                    EntityCache.Add(cacheKey, entityData);
+                    EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
-                return InitializeEntities(entityData).FirstOrDefault();
+                return InitializeEntities(entityData.Select(x => x.Clone())).FirstOrDefault();
             }
         }
 
@@ -421,14 +421,14 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Saving [{0}].", entity);
+                Logger.DebugFormat("Saving [{0}].", entity);
                 var entityData = EntityRepositoryServiceFactory().Save(entity.EntityData as TEntityDataImplementation);
 
                 EntityCache.RemoveIfDataContains(entityData);
                 var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityData.Id);
-                EntityCache.Add(cacheKey, new[] { entityData });
+                EntityCache.Add(cacheKey, new[] { entityData.Clone() });
 
-                return InitializeEntities(entityData);
+                return InitializeEntities(entityData.Clone());
             }
         }
 
@@ -441,18 +441,18 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Saving all [{0}].", string.Join(",", entities));
+                Logger.DebugFormat("Saving all [{0}].", string.Join(",", entities));
                 var entityData =
                     EntityRepositoryServiceFactory().SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
 
                 EntityCache.RemoveIfDataContains(entityData);
-                foreach (var entityDataImplementation in entityData)
+                foreach (var entityDataImplementation in entityData.Select(x => x.Clone()))
                 {
                     var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityDataImplementation.Id);
                     EntityCache.Add(cacheKey, new[] { entityDataImplementation });
                 }
 
-                return InitializeEntities(entityData);
+                return InitializeEntities(entityData.Select(x => x.Clone()));
             }
         }
 
@@ -464,7 +464,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Deleting [{0}].", entity);
+                Logger.DebugFormat("Deleting [{0}].", entity);
                 EntityRepositoryServiceFactory().Delete(entity.EntityData as TEntityDataImplementation);
 
                 DetatchObservers(entity);
@@ -481,7 +481,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                Logger.InfoFormat("Deleting all [{0}].", string.Join(",", entities));
+                Logger.DebugFormat("Deleting all [{0}].", string.Join(",", entities));
 
                 EntityRepositoryServiceFactory().DeleteAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>());
                 DetatchObservers(entities);
