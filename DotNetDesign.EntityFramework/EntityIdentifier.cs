@@ -43,8 +43,8 @@ namespace DotNetDesign.EntityFramework
     /// <summary>
     /// An object that uniquely identifies an entity.
     /// </summary>
-    public class EntityIdentifier<TId> : 
-        BaseLogger,
+    public class EntityIdentifier<TId> :
+        BaseLogger<EntityIdentifier<TId>>,
         IIdentifiable<TId>
     {
         /// <summary>

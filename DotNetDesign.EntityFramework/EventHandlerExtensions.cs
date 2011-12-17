@@ -9,7 +9,7 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     public static class EventHandlerExtensions
     {
-        private static readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Logger = Common.Logging.LogManager.GetLogger(typeof(EventHandlerExtensions));
 
         /// <summary>
         /// Makes the weak.

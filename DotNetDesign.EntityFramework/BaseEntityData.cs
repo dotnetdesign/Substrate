@@ -9,6 +9,7 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
+    [Serializable]
     [DataContract]
     public abstract class BaseEntityData<TEntityData, TEntity, TEntityRepository> : BaseEntityData<TEntityData, TEntity, Guid, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
@@ -35,8 +36,9 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     [DataContract]
-    public abstract class BaseEntityData<TEntityData, TEntity, TId, TEntityRepository> : 
-        BaseLogger,
+    [Serializable]
+    public abstract class BaseEntityData<TEntityData, TEntity, TId, TEntityRepository> :
+        BaseLogger<BaseEntityData<TEntityData, TEntity, TId, TEntityRepository>>,
         IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -100,6 +102,18 @@ namespace DotNetDesign.EntityFramework
                 { 
                     return Id + "::" + Version; 
                 }
+            }
+        }
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <returns></returns>
+        public TEntityData Clone()
+        {
+            using (Logger.Scope())
+            {
+                return ObjectCopier.Clone(this) as TEntityData;
             }
         }
     }

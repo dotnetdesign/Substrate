@@ -33,8 +33,8 @@ namespace DotNetDesign.EntityFramework
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
-    public class ConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository> : 
-        BaseLogger,
+    public class ConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository> :
+        BaseLogger<ConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>>,
         IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository> 
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -99,7 +99,7 @@ namespace DotNetDesign.EntityFramework
                 // now, we either need that distinct concurrency mode or the default concurrency mode in order to proceed.
                 var concurrencyMode = distinctConcurrencyModes.FirstOrDefault();
 
-                Logger.InfoFormat("Concurrency Mode [{0}].", concurrencyMode);
+                Logger.DebugFormat("Concurrency Mode [{0}].", concurrencyMode);
 
                 if (concurrencyMode == ConcurrencyMode.Overwrite)
                 {
@@ -110,11 +110,11 @@ namespace DotNetDesign.EntityFramework
 
                 if (!HasEntityChanged(entity, out retrievedEntity))
                 {
-                    Logger.InfoFormat("Entity [{0}] hasn't changed.", entity);
+                    Logger.DebugFormat("Entity [{0}] hasn't changed.", entity);
                     return;
                 }
 
-                Logger.InfoFormat("Entity [{0}] has changed.", entity);
+                Logger.DebugFormat("Entity [{0}] has changed.", entity);
 
                 // entity has changed.
                 if (concurrencyMode == ConcurrencyMode.Fail)
@@ -127,12 +127,12 @@ namespace DotNetDesign.EntityFramework
                     IList<string> conflictingPropertyNames;
                     if (!TryMergeChanges(entity, retrievedEntity, out conflictingPropertyNames))
                     {
-                        Logger.InfoFormat("Merge failed for entity [{0}]. Conflicting property names [{1}].", entity, string.Join(",", conflictingPropertyNames));
+                        Logger.DebugFormat("Merge failed for entity [{0}]. Conflicting property names [{1}].", entity, string.Join(",", conflictingPropertyNames));
 
                         throw new ConcurrencyConflictException(typeof(TEntityData), concurrencyMode, conflictingPropertyNames);
                     }
 
-                    Logger.InfoFormat("Merge succeeded for entity [{0}].", entity);
+                    Logger.DebugFormat("Merge succeeded for entity [{0}].", entity);
 
                     // merge was successful so we should update the current version to that of the retrieved entity.
                     // it will then be incremented by 1 by the base entity before persisting.
@@ -149,7 +149,7 @@ namespace DotNetDesign.EntityFramework
 
                 if (retrievedEntity == null)
                 {
-                    Logger.InfoFormat("No entity of type [{0}] returned for id [{1}]", typeof(TEntity), entity.Id);
+                    Logger.DebugFormat("No entity of type [{0}] returned for id [{1}]", typeof(TEntity), entity.Id);
                     return false;
                 }
 
@@ -157,7 +157,7 @@ namespace DotNetDesign.EntityFramework
                 var lastUpdatedAtChanged = entity.LastUpdatedAt != retrievedEntity.LastUpdatedAt;
                 var entityChanged = versionChanged || lastUpdatedAtChanged;
 
-                Logger.InfoFormat("Version Changed [{0}]. Last Updated At Changed [{1}]. Entity Changed [{2}].",
+                Logger.DebugFormat("Version Changed [{0}]. Last Updated At Changed [{1}]. Entity Changed [{2}].",
                     versionChanged, lastUpdatedAtChanged, entityChanged);
 
                 return entityChanged;
@@ -189,11 +189,16 @@ namespace DotNetDesign.EntityFramework
                     var retrievedValueChangedFromOriginal = originalValue != retrievedValue ||
                                                              (originalValue != null && !originalValue.Equals(retrievedValue));
 
+                    if (propertyInfo.PropertyType == typeof(string))
+                    {
+                        retrievedValueChangedFromOriginal = string.Compare((string)retrievedValue, (string)originalValue, StringComparison.InvariantCulture) != 0;
+                    }
+
                     if (currentPropertyChanged)
                     {
                         if (retrievedValueChangedFromOriginal)
                         {
-                            Logger.InfoFormat("Property [{0}] has changed in both current value [{1}] and retrieved value [{2}] is different from the original value of the current entity [{3}].",
+                            Logger.DebugFormat("Property [{0}] has changed in both current value [{1}] and retrieved value [{2}] is different from the original value of the current entity [{3}].",
                                 propertyInfo.Name, currentValue, retrievedValue, originalValue);
 
                             // property has changed so we cannot merge
@@ -202,7 +207,7 @@ namespace DotNetDesign.EntityFramework
                     }
                     else if (retrievedValueChangedFromOriginal)
                     {
-                        Logger.InfoFormat("Property [{0}] hasn't changed in the current entity but the recieved entity value [{1}] changed from the current entity original value [{2}].",
+                        Logger.DebugFormat("Property [{0}] hasn't changed in the current entity but the recieved entity value [{1}] changed from the current entity original value [{2}].",
                             propertyInfo.Name, retrievedValue, originalValue);
 
                         // this means the current property hasn't changed since before so go ahead and merge new value

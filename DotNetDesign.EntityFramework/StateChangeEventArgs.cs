@@ -9,7 +9,7 @@ namespace DotNetDesign.EntityFramework
     /// </summary>
     public class StateChangeEventArgs<TState> : EventArgs
     {
-        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(typeof(StateChangeEventArgs<TState>));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StateChangeEventArgs&lt;TState&gt;"/> class.

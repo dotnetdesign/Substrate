@@ -14,7 +14,7 @@ namespace DotNetDesign.EntityFramework
         private const string ERROR_MESSAGE_FORMAT =
             "One or more concurrency conflicts were encountered and prevented this entity from saving. Entity data type {0}. Assigned concurrency mode {1}. Conflicting property name(s) [{2}].";
 
-        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(typeof(ConcurrencyConflictException));
 
         /// <summary>
         /// Gets or sets the type of the entity data.

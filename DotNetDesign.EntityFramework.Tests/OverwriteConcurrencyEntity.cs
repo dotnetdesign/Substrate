@@ -67,7 +67,8 @@ namespace DotNetDesign.EntityFramework.Tests
         }
     }
 
-    public class OverwriteConcurrencyData : BaseEntityData<IOverwriteConcurrencyData,IOverwriteConcurrency,IOverwriteConcurrencyRepository>, IOverwriteConcurrencyData
+    [Serializable]
+    public class OverwriteConcurrencyData : BaseEntityData<IOverwriteConcurrencyData, IOverwriteConcurrency, IOverwriteConcurrencyRepository>, IOverwriteConcurrencyData
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
