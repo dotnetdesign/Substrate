@@ -285,7 +285,7 @@ namespace DotNetDesign.EntityFramework
 
                 if (forceNew || entityData == null)
                 {
-                    entityData = EntityRepositoryServiceFactory().GetAll();
+                    entityData = EntityRepositoryServiceFactory().GetAll().RemoveNulls();
                     EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
@@ -335,11 +335,11 @@ namespace DotNetDesign.EntityFramework
 
                 if (forceNew || entityData == null)
                 {
-                    entityData = EntityRepositoryServiceFactory().GetByIds(ids);
+                    entityData = EntityRepositoryServiceFactory().GetByIds(ids).RemoveNulls();
                     EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
-                return InitializeEntities(entityData.Select(x => x.Clone()));
+                return InitializeEntities(entityData.RemoveNulls().Select(x => x.Clone()));
             }
         }
 
@@ -369,7 +369,7 @@ namespace DotNetDesign.EntityFramework
                         return null;
                     }
 
-                    entityData = new[] { returnedEntityData };
+                    entityData = (new[] { returnedEntityData }).RemoveNulls();
 
                     EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
@@ -403,7 +403,7 @@ namespace DotNetDesign.EntityFramework
                         return null;
                     }
 
-                    entityData = new[] { returnedEntityData };
+                    entityData = (new[] { returnedEntityData }).RemoveNulls();
 
                     EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
