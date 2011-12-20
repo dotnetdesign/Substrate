@@ -52,6 +52,7 @@
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseEntityData.cs" />
     <Compile Include="BaseLogger.cs" />
+    <Compile Include="CommonExtensions.cs" />
     <Compile Include="ConcurrencyConflictException.cs" />
     <Compile Include="ConcurrencyManager.cs" />
     <Compile Include="ConcurrencyMode.cs" />
