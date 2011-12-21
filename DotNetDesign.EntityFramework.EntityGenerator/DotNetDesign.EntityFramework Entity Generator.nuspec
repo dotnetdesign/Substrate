@@ -3,8 +3,8 @@
   <metadata>
     <id>DotNetDesign.EntityFramework.EntityGenerator</id>
     <version>$version$</version>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <authors>DotNetDesign</authors>
+    <owners>DotNetDesign</owners>
     <projectUrl>https://github.com/adamcarr/DotNetDesign.EntityFramework</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Tools to help generate entities and their supporting classes.</description>
