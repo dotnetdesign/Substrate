@@ -91,6 +91,7 @@
     <Compile Include="WeakEventHandler.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DotNetDesign.EntityFramework Entity Generator.nuspec" />
     <None Include="DotNetDesign.EntityFramework.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>

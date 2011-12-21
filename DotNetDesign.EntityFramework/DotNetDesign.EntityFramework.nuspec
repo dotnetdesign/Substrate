@@ -10,7 +10,4 @@
     <description>$description$</description>
     <tags>entity-framework dal</tags>
   </metadata>
-  <files>
-    <file src="..\tools\*.*" target="content" />
-  </files>
 </package>
