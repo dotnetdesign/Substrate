@@ -310,7 +310,7 @@ namespace DotNetDesign.EntityFramework
 
                 if (forceNew || entityData == null)
                 {
-                    entityData = new[] { EntityRepositoryServiceFactory().GetById(id) };
+                    entityData = (new[] { EntityRepositoryServiceFactory().GetById(id) }).RemoveNulls();
                     EntityCache.Add(cacheKey, entityData.Select(x => x.Clone()));
                 }
 
