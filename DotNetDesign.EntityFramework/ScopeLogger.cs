@@ -22,7 +22,7 @@ namespace DotNetDesign.EntityFramework
         public ScopeLogger(ILog logger)
         {
             _logger = logger;
-            _methodName = new StackFrame(1).GetMethod().Name;
+            _methodName = new StackFrame(2).GetMethod().Name;
             _logger.Trace("Enter " + _methodName);
         }
 
