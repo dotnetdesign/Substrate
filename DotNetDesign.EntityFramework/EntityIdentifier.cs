@@ -5,6 +5,7 @@ namespace DotNetDesign.EntityFramework
     /// <summary>
     /// An object that uniquely identifies an entity.
     /// </summary>
+    [Serializable]
     public class EntityIdentifier : EntityIdentifier<Guid>, IIdentifiable
     {
         /// <summary>
@@ -43,6 +44,7 @@ namespace DotNetDesign.EntityFramework
     /// <summary>
     /// An object that uniquely identifies an entity.
     /// </summary>
+    [Serializable]
     public class EntityIdentifier<TId> :
         BaseLogger<EntityIdentifier<TId>>,
         IIdentifiable<TId>
