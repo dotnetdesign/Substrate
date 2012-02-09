@@ -59,8 +59,9 @@ namespace DotNetFramework.EntityFramework.ConsoleTester
 			Func<IPersonRepository> entityRepositoryFactory,
 			Func<IPersonData> entityDataFactory,
 			Func<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>> entityConcurrencyManagerFactory,
-			IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators)
-			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
+            IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators,
+            Func<IPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>> permissionAuthorizationManagerFactory)
+            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
 		{
 		}
 

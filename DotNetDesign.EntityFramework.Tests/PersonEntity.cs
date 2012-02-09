@@ -32,8 +32,9 @@ namespace DotNetDesign.EntityFramework.Tests
             Func<IPersonRepository> entityRepositoryFactory, 
             Func<IPersonData> entityDataFactory, 
             Func<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>> entityConcurrencyManager,
-            IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators)
-            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManager, entityValidators)
+            IEnumerable<IEntityValidator<IPerson, IPersonData, IPersonRepository>> entityValidators,
+            Func<IPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>> permissionAuthorizationManagerFactory)
+            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManager, entityValidators, permissionAuthorizationManagerFactory)
         {
         }
 

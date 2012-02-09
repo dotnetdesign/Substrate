@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Diagnostics;
-using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -20,18 +18,20 @@ namespace DotNetDesign.EntityFramework
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TEntityData, TEntityRepository&gt;"/> class.
+        /// Initializes a new instance of the <see cref="BaseEntity{TEntity,TEntityPermission,TEntityData,TEntityRepository}"/> class.
         /// </summary>
         /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
         /// <param name="entityConcurrencyManagerFactory">The entity concurrency manager factory.</param>
         /// <param name="entityValidators">The entity validators.</param>
+        /// <param name="permissionAuthorizationManagerFactory">The permission authorization manager factory.</param>
         protected BaseEntity(
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntityData> entityDataFactory,
             Func<IConcurrencyManager<TEntity, TEntityData, TEntityRepository>> entityConcurrencyManagerFactory,
-            IEnumerable<IEntityValidator<TEntity, TEntityData, TEntityRepository>> entityValidators)
-            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
+            IEnumerable<IEntityValidator<TEntity, TEntityData, TEntityRepository>> entityValidators,
+            Func<IPermissionAuthorizationManager<TEntity, TEntityData, TEntityRepository>> permissionAuthorizationManagerFactory)
+            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
         {
         }
     }
@@ -79,23 +79,33 @@ namespace DotNetDesign.EntityFramework
         /// The original entity data.
         /// </value>
         protected TEntityData OriginalEntityData { get; set; }
+
+        /// <summary>
+        /// Gets or sets the permission authorization manager factory.
+        /// </summary>
+        /// <value>
+        /// The permission authorization manager factory.
+        /// </value>
+        protected Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> PermissionAuthorizationManagerFactory { get; set; }
         
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TId, TEntityData, TEntityRepository&gt;"/> class.
+        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TEntityPermission, TId, TEntityData, TEntityRepository&gt;"/> class.
         /// </summary>
         /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
-        /// <param name="entityConcurrencyManagerFactory">The concurrency manager factory.</param>
+        /// <param name="entityConcurrencyManagerFactory">The entity concurrency manager factory.</param>
         /// <param name="entityValidators">The entity validators.</param>
+        /// <param name="permissionAuthorizationManagerFactory">The permission authorization manager factory.</param>
         protected BaseEntity(
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntityData> entityDataFactory,
             Func<IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>> entityConcurrencyManagerFactory,
-            IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators)
+            IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators,
+            Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> permissionAuthorizationManagerFactory)
         {
             using (Logger.Scope())
             {
@@ -103,6 +113,7 @@ namespace DotNetDesign.EntityFramework
                 EntityRepositoryFactory = entityRepositoryFactory;
                 EntityConcurrencyManagerFactory = entityConcurrencyManagerFactory;
                 EntityValidators = entityValidators;
+                PermissionAuthorizationManagerFactory = permissionAuthorizationManagerFactory;
 
                 PropertyChanged += BaseEntityPropertyChanged;
             }
@@ -156,7 +167,8 @@ namespace DotNetDesign.EntityFramework
                         returnedEntity = this as TEntity;
                         return false;
                     }
-                    else if (Logger.IsInfoEnabled)
+                    
+                    if (Logger.IsInfoEnabled)
                     {
                         Logger.DebugFormat("Entity [{0}] is valid.", this);
                     }
@@ -167,6 +179,26 @@ namespace DotNetDesign.EntityFramework
                     if (Version == 1)
                     {
                         CreatedAt = DateTime.Now;
+
+                        // Inserting, verify permissions
+                        if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.Insert))
+                        {
+                            var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                                "User not authorized to insert entity of type {0}.", typeof(TEntity)));
+                            Logger.Error(unauthorizedException.Message);
+                            throw unauthorizedException;
+                        }
+                    }
+                    else
+                    {
+                        // Updating, verify permissions
+                        if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.Update))
+                        {
+                            var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                                "User not authorized to update entity of type {0}.", typeof(TEntity)));
+                            Logger.Error(unauthorizedException.Message);
+                            throw unauthorizedException;
+                        }
                     }
                     LastUpdatedAt = DateTime.Now;
 
@@ -175,7 +207,8 @@ namespace DotNetDesign.EntityFramework
                     OnSaved();
                     return true;
                 }
-                else if(Logger.IsInfoEnabled)
+                
+                if(Logger.IsInfoEnabled)
                 {
                     Logger.DebugFormat("Entity [{0}] is not dirty.", this);
                 }
@@ -192,6 +225,15 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                // Deleting, verify permissions
+                if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.Delete))
+                {
+                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                        "User not authorized to update entity of type {0}.", typeof (TEntity)));
+                    Logger.Error(unauthorizedException.Message);
+                    throw unauthorizedException;
+                }
+
                 OnDeleting();
                 EntityRepositoryFactory().Delete(this as TEntity);
                 OnDeleted();
@@ -484,6 +526,15 @@ namespace DotNetDesign.EntityFramework
                         "Initialize has already been called on this instance. This can only be called once per instance.");
                     Logger.Error(invalidOperationException.Message);
                     throw invalidOperationException;
+                }
+
+                // Initializing, verify view permissions
+                if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.View))
+                {
+                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                        "User not authorized to view entity of type {0}.", typeof(TEntity)));
+                    Logger.Error(unauthorizedException.Message);
+                    throw unauthorizedException;
                 }
 
                 OnInitializing();

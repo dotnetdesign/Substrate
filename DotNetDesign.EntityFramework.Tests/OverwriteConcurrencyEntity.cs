@@ -33,8 +33,9 @@ namespace DotNetDesign.EntityFramework.Tests
             Func<IOverwriteConcurrencyRepository> entityRepositoryFactory, 
             Func<IOverwriteConcurrencyData> entityDataFactory,
             Func<IConcurrencyManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>> entityConcurrencyManager,
-            IEnumerable<IEntityValidator<IOverwriteConcurrency,IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>> entityValidators)
-            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManager, entityValidators)
+            IEnumerable<IEntityValidator<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>> entityValidators,
+            Func<IPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>> permissionAuthorizationManagerFactory)
+            : base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManager, entityValidators, permissionAuthorizationManagerFactory)
         {
         }
 

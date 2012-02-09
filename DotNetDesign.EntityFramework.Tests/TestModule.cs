@@ -15,6 +15,8 @@ namespace DotNetDesign.EntityFramework.Tests
                 <IEntityValidator<IPerson, IPersonData, IPersonRepository>>();
             builder.RegisterType<ConcurrencyManager<IPerson, IPersonData, IPersonRepository>>().As<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>>();
 
+            builder.RegisterType<AnonymousPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>>().As<IPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>>();
+
             builder.RegisterType<FailConcurrency>().As<IFailConcurrency>();
             builder.RegisterType<FailConcurrencyData>().As<IFailConcurrencyData>();
             builder.RegisterType<FailConcurrencyRepository>().As<IFailConcurrencyRepository>();
@@ -24,6 +26,9 @@ namespace DotNetDesign.EntityFramework.Tests
             builder.RegisterType<ConcurrencyManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>()
                 .As<IConcurrencyManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>();
 
+            builder.RegisterType<AnonymousPermissionAuthorizationManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>()
+                .As<IPermissionAuthorizationManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>();
+
             builder.RegisterType<OverwriteConcurrency>().As<IOverwriteConcurrency>();
             builder.RegisterType<OverwriteConcurrencyData>().As<IOverwriteConcurrencyData>();
             builder.RegisterType<OverwriteConcurrencyRepository>().As<IOverwriteConcurrencyRepository>();
@@ -32,6 +37,9 @@ namespace DotNetDesign.EntityFramework.Tests
                 <IEntityValidator<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
             builder.RegisterType<ConcurrencyManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>()
                 .As<IConcurrencyManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
+
+            builder.RegisterType<AnonymousPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>()
+                .As<IPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
 
         }
     }

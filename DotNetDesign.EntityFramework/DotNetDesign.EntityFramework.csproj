@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AnonymousPermissionAuthorizationManager.cs" />
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseEntityData.cs" />
     <Compile Include="BaseLogger.cs" />
@@ -61,6 +62,7 @@
     <Compile Include="DataAnnotationEntityValidator.cs" />
     <Compile Include="DictionaryEntityCache.cs" />
     <Compile Include="EntityIdentifier.cs" />
+    <Compile Include="EntityPermissions.cs" />
     <Compile Include="EntityRepository.cs" />
     <Compile Include="EventHandlerExtensions.cs" />
     <Compile Include="IConcurrencyManager.cs" />
@@ -74,6 +76,7 @@
     <Compile Include="IIdentifiable.cs" />
     <Compile Include="InvalidStateException.cs" />
     <Compile Include="IObservableEntity.cs" />
+    <Compile Include="IPermissionAuthorizationManager.cs" />
     <Compile Include="IStateMachine.cs" />
     <Compile Include="IValidatable.cs" />
     <Compile Include="IValidationResult.cs" />
