@@ -193,8 +193,9 @@ namespace <#=namespaceName#>
 			Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
 			Func<I<#=entity.Name#>Data> entityDataFactory,
 			Func<IConcurrencyManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
-			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityValidators)
-			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
+			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityValidators,
+            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory)
+			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
 		{
 		}
 
@@ -209,8 +210,9 @@ namespace <#=namespaceName#>
 			Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
 			Func<I<#=entity.Name#>Data> entityDataFactory,
 			Func<IConcurrencyManager<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
-			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> entityValidators)
-			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators)
+			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> entityValidators,
+            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory)
+			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
 		{
 		}
 

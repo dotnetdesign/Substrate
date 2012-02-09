@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Diagnostics;
+using Common.Logging;
 
 namespace DotNetDesign.EntityFramework
 {
@@ -233,7 +235,7 @@ namespace DotNetDesign.EntityFramework
                     Logger.Error(unauthorizedException.Message);
                     throw unauthorizedException;
                 }
-
+				
                 OnDeleting();
                 EntityRepositoryFactory().Delete(this as TEntity);
                 OnDeleted();
