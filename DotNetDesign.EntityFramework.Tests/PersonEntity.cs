@@ -80,55 +80,51 @@ namespace DotNetDesign.EntityFramework.Tests
             Func<IPerson> entityFactory, 
             Func<IPersonData> entityDataFactory, 
             Func<IPersonRepositoryService> entityRepositoryServiceFactory, 
-            IEnumerable<IEntityObserver<IPerson>> entityObservers)
-            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, new DictionaryEntityCache<IPerson, IPersonData, IPersonRepository>())
+            IEnumerable<IEntityObserver<IPerson>> entityObservers,
+            Func<IScopeManager> scopeManagerFactory)
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, () => new DictionaryEntityCache<IPerson, IPersonData, IPersonRepository>(), scopeManagerFactory)
         {
         }
     }
 
     public class PersonRepositoryService : IPersonRepositoryService
     {
-        public PersonData GetById(Guid id)
+        public PersonData GetById(Guid id, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public PersonData GetVersion(PersonData entityData, int version)
+        public PersonData GetVersion(Guid id, int version, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public PersonData GetPreviousVersion(PersonData entityData)
+        public IEnumerable<PersonData> GetByIds(IEnumerable<Guid> ids, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PersonData> GetByIds(IEnumerable<Guid> ids)
+        public IEnumerable<PersonData> GetAll(Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PersonData> GetAll()
+        public PersonData Save(PersonData entityData, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public PersonData Save(PersonData entityData)
+        public IEnumerable<PersonData> SaveAll(IEnumerable<PersonData> entityData, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<PersonData> SaveAll(IEnumerable<PersonData> entityData)
+        public void Delete(Guid id, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(PersonData entityData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteAll(IEnumerable<PersonData> entityData)
+        public void DeleteAll(IEnumerable<Guid> ids, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }

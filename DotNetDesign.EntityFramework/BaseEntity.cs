@@ -58,11 +58,15 @@ namespace DotNetDesign.EntityFramework
         private bool _isDirty;
         private bool _propertyChangedSinceIsDirtySet;
         private bool _propertyChangedSinceValidationResultsPopulated;
-        private IEnumerable<IValidationResult> _validationResults;
+        private IEnumerable<ValidationResult> _validationResults;
 
         #endregion
 
         #region Protected Members
+
+        protected bool BypassInsertPermissionCheck;
+        protected bool BypassUpdatePermissionCheck;
+        protected bool BypassDeletePermissionCheck;
 
         /// <summary>
         /// The entity data factory.
@@ -183,23 +187,17 @@ namespace DotNetDesign.EntityFramework
                         CreatedAt = DateTime.Now;
 
                         // Inserting, verify permissions
-                        if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.Insert))
+                        if (!BypassInsertPermissionCheck)
                         {
-                            var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                                "User not authorized to insert entity of type {0}.", typeof(TEntity)));
-                            Logger.Error(unauthorizedException.Message);
-                            throw unauthorizedException;
+                            PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Insert);
                         }
                     }
                     else
                     {
                         // Updating, verify permissions
-                        if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.Update))
+                        if (!BypassUpdatePermissionCheck)
                         {
-                            var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                                "User not authorized to update entity of type {0}.", typeof(TEntity)));
-                            Logger.Error(unauthorizedException.Message);
-                            throw unauthorizedException;
+                            PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Update);
                         }
                     }
                     LastUpdatedAt = DateTime.Now;
@@ -228,14 +226,11 @@ namespace DotNetDesign.EntityFramework
             using (Logger.Scope())
             {
                 // Deleting, verify permissions
-                if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.Delete))
+                if (!BypassDeletePermissionCheck)
                 {
-                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                        "User not authorized to update entity of type {0}.", typeof (TEntity)));
-                    Logger.Error(unauthorizedException.Message);
-                    throw unauthorizedException;
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Delete);
                 }
-				
+
                 OnDeleting();
                 EntityRepositoryFactory().Delete(this as TEntity);
                 OnDeleted();
@@ -380,7 +375,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                return EntityRepositoryFactory().GetPreviousVersion(this as TEntity);
+                return EntityRepositoryFactory().GetVersion(Id, Version - 1);
             }
         }
 
@@ -393,7 +388,7 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
-                return EntityRepositoryFactory().GetVersion(this as TEntity, version);
+                return EntityRepositoryFactory().GetVersion(Id, version);
             }
         }
 
@@ -530,15 +525,6 @@ namespace DotNetDesign.EntityFramework
                     throw invalidOperationException;
                 }
 
-                // Initializing, verify view permissions
-                if (!PermissionAuthorizationManagerFactory().IsAuthorized(EntityPermissions.View))
-                {
-                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                        "User not authorized to view entity of type {0}.", typeof(TEntity)));
-                    Logger.Error(unauthorizedException.Message);
-                    throw unauthorizedException;
-                }
-
                 OnInitializing();
 
                 OriginalEntityData = entityData;
@@ -617,7 +603,7 @@ namespace DotNetDesign.EntityFramework
         /// Validates this instance.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<IValidationResult> Validate()
+        public IEnumerable<ValidationResult> Validate()
         {
             using (Logger.Scope())
             {

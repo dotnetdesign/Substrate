@@ -81,55 +81,51 @@ namespace DotNetDesign.EntityFramework.Tests
             Func<IOverwriteConcurrency> entityFactory, 
             Func<IOverwriteConcurrencyData> entityDataFactory, 
             Func<IOverwriteConcurrencyRepositoryService> entityRepositoryServiceFactory, 
-            IEnumerable<IEntityObserver<IOverwriteConcurrency>> entityObservers)
-            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, new DictionaryEntityCache<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>())
+            IEnumerable<IEntityObserver<IOverwriteConcurrency>> entityObservers,
+            Func<IScopeManager> scopeManagerFactory)
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, () => new DictionaryEntityCache<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>(), scopeManagerFactory)
         {
         }
     }
 
     public class OverwriteConcurrencyRepositoryService : IOverwriteConcurrencyRepositoryService
     {
-        public OverwriteConcurrencyData GetById(Guid id)
+        public OverwriteConcurrencyData GetById(Guid id, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public OverwriteConcurrencyData GetVersion(OverwriteConcurrencyData entityData, int version)
+        public OverwriteConcurrencyData GetVersion(Guid id, int version, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public OverwriteConcurrencyData GetPreviousVersion(OverwriteConcurrencyData entityData)
+        public IEnumerable<OverwriteConcurrencyData> GetByIds(IEnumerable<Guid> ids, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<OverwriteConcurrencyData> GetByIds(IEnumerable<Guid> ids)
+        public IEnumerable<OverwriteConcurrencyData> GetAll(Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<OverwriteConcurrencyData> GetAll()
+        public OverwriteConcurrencyData Save(OverwriteConcurrencyData entityData, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public OverwriteConcurrencyData Save(OverwriteConcurrencyData entityData)
+        public IEnumerable<OverwriteConcurrencyData> SaveAll(IEnumerable<OverwriteConcurrencyData> entityData, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<OverwriteConcurrencyData> SaveAll(IEnumerable<OverwriteConcurrencyData> entityData)
+        public void Delete(Guid id, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(OverwriteConcurrencyData entityData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteAll(IEnumerable<OverwriteConcurrencyData> entityData)
+        public void DeleteAll(IEnumerable<Guid> ids, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }

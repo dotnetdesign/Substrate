@@ -130,7 +130,6 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		WriteLine("[ServiceContract]");
 		if(useDefaultIdType){
 			WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
 		}
@@ -262,8 +261,9 @@ namespace <#=namespaceName#>
 			Func<I<#=entity.Name#>Data> entityDataFactory,
 			Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
 			IEnumerable<IEntityObserver<I<#=entity.Name#>>> entityObservers,
-			IEntityCache<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository> entityCache)
-			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCache)
+			Func<IEntityCache<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
+			Func<IScopeManager> scopeManagerFactory)
+			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
 		{
 		}
 	}
@@ -278,8 +278,9 @@ namespace <#=namespaceName#>
 			Func<I<#=entity.Name#>Data> entityDataFactory,
 			Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
 			IEnumerable<IEntityObserver<I<#=entity.Name#>, <#=entity.IdType#>>> entityObservers,
-			IEntityCache<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository> entityCache)
-			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCache)
+			Func<IEntityCache<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
+			Func<IScopeManager> scopeManagerFactory)
+			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
 		{
 		}
 	}

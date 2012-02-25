@@ -163,22 +163,9 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             const int version = 1;
-            personRepositoryMock.Setup(x => x.GetVersion(_person, version, false)).Returns(_person);
+            personRepositoryMock.Setup(x => x.GetVersion(_person.Id, version, false)).Returns(_person);
 
             _person.GetVersion(version);
-        }
-
-        [Test]
-        public void CallToGetPreviousVersionShouldPassInstanceToEntityRepository()
-        {
-            _person.Initialize(_personData);
-
-            var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
-            _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
-
-            personRepositoryMock.Setup(x => x.GetPreviousVersion(_person, false)).Returns(_person);
-
-            _person.GetPreviousVersion();
         }
 
         [Test]

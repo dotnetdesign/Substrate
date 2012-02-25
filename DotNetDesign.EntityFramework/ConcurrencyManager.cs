@@ -62,7 +62,12 @@ namespace DotNetDesign.EntityFramework
             using (Logger.Scope())
             {
                 EntityRepository = entityRepository;
-                _excludedPropertyNames = excludedPropertyNames ?? DefaultExcludedPropertyNames;
+                var excludedPropertyNamesList = new List<string>(DefaultExcludedPropertyNames);
+                if(excludedPropertyNames!=null)
+                {
+                    excludedPropertyNamesList.AddRange(excludedPropertyNames);
+                }
+                _excludedPropertyNames = excludedPropertyNamesList;
             }
         }
 

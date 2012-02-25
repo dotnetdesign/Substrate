@@ -20,6 +20,6 @@ namespace DotNetDesign.EntityFramework
         /// Validates this instance.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<IValidationResult> Validate();
+        IEnumerable<ValidationResult> Validate();
     }
 }

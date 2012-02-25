@@ -34,6 +34,6 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <returns></returns>
-        IEnumerable<IValidationResult> Validate(TEntity entity);
+        IEnumerable<ValidationResult> Validate(TEntity entity);
     }
 }

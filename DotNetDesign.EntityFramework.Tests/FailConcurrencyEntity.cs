@@ -81,55 +81,51 @@ namespace DotNetDesign.EntityFramework.Tests
             Func<IFailConcurrency> entityFactory, 
             Func<IFailConcurrencyData> entityDataFactory, 
             Func<IFailConcurrencyRepositoryService> entityRepositoryServiceFactory, 
-            IEnumerable<IEntityObserver<IFailConcurrency>> entityObservers)
-            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, new DictionaryEntityCache<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>())
+            IEnumerable<IEntityObserver<IFailConcurrency>> entityObservers,
+            Func<IScopeManager> scopeManagerFactory)
+            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, () => new DictionaryEntityCache<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>(), scopeManagerFactory)
         {
         }
     }
 
     public class FailConcurrencyRepositoryService : IFailConcurrencyRepositoryService
     {
-        public FailConcurrencyData GetById(Guid id)
+        public FailConcurrencyData GetById(Guid id, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public FailConcurrencyData GetVersion(FailConcurrencyData entityData, int version)
+        public FailConcurrencyData GetVersion(Guid id, int version, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public FailConcurrencyData GetPreviousVersion(FailConcurrencyData entityData)
+        public IEnumerable<FailConcurrencyData> GetByIds(IEnumerable<Guid> ids, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FailConcurrencyData> GetByIds(IEnumerable<Guid> ids)
+        public IEnumerable<FailConcurrencyData> GetAll(Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FailConcurrencyData> GetAll()
+        public FailConcurrencyData Save(FailConcurrencyData entityData, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public FailConcurrencyData Save(FailConcurrencyData entityData)
+        public IEnumerable<FailConcurrencyData> SaveAll(IEnumerable<FailConcurrencyData> entityData, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<FailConcurrencyData> SaveAll(IEnumerable<FailConcurrencyData> entityData)
+        public void Delete(Guid id, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }
 
-        public void Delete(FailConcurrencyData entityData)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteAll(IEnumerable<FailConcurrencyData> entityData)
+        public void DeleteAll(IEnumerable<Guid> ids, Dictionary<string, string> scopeContext)
         {
             throw new NotImplementedException();
         }

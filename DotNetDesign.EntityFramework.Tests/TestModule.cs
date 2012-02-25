@@ -38,6 +38,7 @@ namespace DotNetDesign.EntityFramework.Tests
             builder.RegisterType<AnonymousPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>()
                 .As<IPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
 
+            builder.RegisterType<DictionaryScopeManager>().As<IScopeManager>();
         }
     }
 }

@@ -42,11 +42,11 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         /// <param name="entity">The entity.</param>
         /// <returns></returns>
-        public IEnumerable<IValidationResult> Validate(TEntity entity)
+        public IEnumerable<ValidationResult> Validate(TEntity entity)
         {
             using (Logger.Scope())
             {
-                var validationResults = new List<IValidationResult>();
+                var validationResults = new List<ValidationResult>();
 
                 validationResults.AddRange(ValidateType<TEntityData>(entity));
                 validationResults.AddRange(ValidateType<TEntity>(entity));
@@ -63,7 +63,7 @@ namespace DotNetDesign.EntityFramework
         /// <typeparam name="TValidatableType">The type of the validatable type.</typeparam>
         /// <param name="entity">The entity.</param>
         /// <returns></returns>
-        private IEnumerable<IValidationResult> ValidateType<TValidatableType>(TEntity entity)
+        private IEnumerable<ValidationResult> ValidateType<TValidatableType>(TEntity entity)
         {
             using (Logger.Scope())
             {

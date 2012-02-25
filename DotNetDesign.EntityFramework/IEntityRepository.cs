@@ -58,21 +58,13 @@ namespace DotNetDesign.EntityFramework
         IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids, bool forceNew = false);
 
         /// <summary>
-        /// Gets the specified version of the entity.
+        /// Gets the version.
         /// </summary>
-        /// <param name="entity">The entity.</param>
+        /// <param name="id">The id.</param>
         /// <param name="version">The version.</param>
         /// <param name="forceNew">if set to <c>true</c> [force new].</param>
         /// <returns></returns>
-        TEntity GetVersion(TEntity entity, int version, bool forceNew = false);
-
-        /// <summary>
-        /// Gets the previous version.
-        /// </summary>
-        /// <param name="entity">The entity.</param>
-        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
-        /// <returns></returns>
-        TEntity GetPreviousVersion(TEntity entity, bool forceNew = false);
+        TEntity GetVersion(TId id, int version, bool forceNew = false);
 
         /// <summary>
         /// Saves the specified entity.
