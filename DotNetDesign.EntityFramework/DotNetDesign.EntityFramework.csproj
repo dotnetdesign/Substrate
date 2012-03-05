@@ -84,7 +84,6 @@
     <Compile Include="IValidatable.cs" />
     <Compile Include="IVersionable.cs" />
     <Compile Include="IWeakEventHandler.cs" />
-    <Compile Include="IWebHttpEntityRepositoryService.cs" />
     <Compile Include="LoggerExtensions.cs" />
     <Compile Include="ObjectCopier.cs" />
     <Compile Include="PermissionAuthrozationManagerExtensions.cs" />
@@ -96,9 +95,6 @@
     <Compile Include="ValidationResult.cs" />
     <Compile Include="ValidationResultStatusType.cs" />
     <Compile Include="WeakEventHandler.cs" />
-    <Compile Include="WebHttpEntityContainer.cs" />
-    <Compile Include="WebHttpEntityContainerExtensions.cs" />
-    <Compile Include="WebHttpEntityRepositoryService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DotNetDesign.EntityFramework.nuspec" />

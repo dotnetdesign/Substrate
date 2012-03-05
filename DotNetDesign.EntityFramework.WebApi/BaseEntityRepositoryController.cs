@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Common.Logging;
@@ -131,7 +132,7 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// </summary>
         /// <param name="entityData">The entity data.</param>
         /// <returns></returns>
-        public HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>> Post(TEntityDataImplementation entityData)
+        public HttpResponseMessage<TEntityDataImplementation> Post(TEntityDataImplementation entityData)
         {
             using (Logger.Scope())
             {
@@ -140,10 +141,7 @@ namespace DotNetDesign.EntityFramework.WebApi
                 if (entityData == null)
                 {
                     Logger.Info("No data posted.");
-                    return
-                        new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                            WebHttpEntityContainer<TEntityDataImplementation>.NullFailureContainer("No data posted."),
-                            HttpStatusCode.BadRequest);
+                    return new HttpResponseMessage<TEntityDataImplementation>(HttpStatusCode.BadRequest);
                 }
 
                 try
@@ -153,7 +151,9 @@ namespace DotNetDesign.EntityFramework.WebApi
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                    var unauthorizedResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+                    unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
+                    throw new HttpResponseException(unauthorizedResponse);
                 }
 
                 var existingEntity = EntityRepositoryFactory().GetNew();
@@ -164,15 +164,14 @@ namespace DotNetDesign.EntityFramework.WebApi
                 if (!existingEntity.Save(out savedEntity))
                 {
                     Logger.Info("Validation failed.");
-                    return new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                        (existingEntity as TEntityDataImplementation).AsFailureContainer(
-                            validationResults: existingEntity.Validate()),
+                    return new HttpResponseMessage<TEntityDataImplementation>(
+                        (existingEntity as TEntityDataImplementation),
                         HttpStatusCode.BadRequest);
                 }
 
                 Logger.Info("Save succeeded.");
-                var response = new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                    (savedEntity.EntityData as TEntityDataImplementation).AsSuccessContainer(),
+                var response = new HttpResponseMessage<TEntityDataImplementation>(
+                    (savedEntity.EntityData as TEntityDataImplementation),
                     HttpStatusCode.Created);
                 response.Headers.Location = new Uri(Request.RequestUri, _rootUri + "/" + savedEntity.Id);
 
@@ -185,7 +184,7 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// </summary>
         /// <param name="entityData">The entity data.</param>
         /// <returns></returns>
-        public HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>> Put(TId id, TEntityDataImplementation entityData)
+        public HttpResponseMessage<TEntityDataImplementation> Put(TId id, TEntityDataImplementation entityData)
         {
             using (Logger.Scope())
             {
@@ -195,9 +194,7 @@ namespace DotNetDesign.EntityFramework.WebApi
                 {
                     Logger.Info("No data posted.");
                     return
-                        new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                            WebHttpEntityContainer<TEntityDataImplementation>.NullFailureContainer("No data posted."),
-                            HttpStatusCode.BadRequest);
+                        new HttpResponseMessage<TEntityDataImplementation>(HttpStatusCode.BadRequest);
                 }
 
                 try
@@ -207,7 +204,9 @@ namespace DotNetDesign.EntityFramework.WebApi
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                    var unauthorizedResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+                    unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
+                    throw new HttpResponseException(unauthorizedResponse);
                 }
 
                 var existingEntity = EntityRepositoryFactory().GetById(id);
@@ -216,9 +215,7 @@ namespace DotNetDesign.EntityFramework.WebApi
                 {
                     Logger.Info("Existing entity not found.");
                     return
-                        new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                            entityData.AsFailureContainer("Existing entity not found."),
-                            HttpStatusCode.NotFound);
+                        new HttpResponseMessage<TEntityDataImplementation>(HttpStatusCode.NotFound);
                 }
 
                 ApplyChanges(entityData, existingEntity);
@@ -227,15 +224,13 @@ namespace DotNetDesign.EntityFramework.WebApi
                 if (!existingEntity.Save(out savedEntity))
                 {
                     Logger.Info("Validation failed.");
-                    return new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                        (existingEntity as TEntityDataImplementation).AsFailureContainer(
-                            validationResults: existingEntity.Validate()),
+                    return new HttpResponseMessage<TEntityDataImplementation>(
+                        (existingEntity as TEntityDataImplementation),
                         HttpStatusCode.BadRequest);
                 }
 
                 Logger.Info("Save succeeded.");
-                var response = new HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>>(
-                    (savedEntity.EntityData as TEntityDataImplementation).AsSuccessContainer());
+                var response = new HttpResponseMessage<TEntityDataImplementation>((savedEntity.EntityData as TEntityDataImplementation));
                 response.Headers.Location = new Uri(Request.RequestUri, _rootUri + "/" + savedEntity.Id);
 
                 return response;
@@ -266,7 +261,9 @@ namespace DotNetDesign.EntityFramework.WebApi
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                    var unauthorizedResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+                    unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
+                    throw new HttpResponseException(unauthorizedResponse);
                 }
 
                 var existingEntity = EntityRepositoryFactory().GetById(id);
