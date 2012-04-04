@@ -46,3 +46,6 @@ _ReSharper*/
 ~$*
 
 version.txt
+
+# nuget packages
+*.nupkg
