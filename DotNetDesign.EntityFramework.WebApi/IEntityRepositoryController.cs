@@ -47,7 +47,7 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// </summary>
         /// <param name="entityData">The entity data.</param>
         /// <returns></returns>
-        HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>> Post(TEntityDataImplementation entityData);
+        HttpResponseMessage<TEntityDataImplementation> Post(TEntityDataImplementation entityData);
 
         /// <summary>
         /// Saves the specified entity data.
@@ -55,7 +55,7 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// <param name="id">The id.</param>
         /// <param name="entityData">The entity data.</param>
         /// <returns></returns>
-        HttpResponseMessage<WebHttpEntityContainer<TEntityDataImplementation>> Put(TId id, TEntityDataImplementation entityData);
+        HttpResponseMessage<TEntityDataImplementation> Put(TId id, TEntityDataImplementation entityData);
 
         /// <summary>
         /// Deletes the specified id.
