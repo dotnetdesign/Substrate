@@ -64,6 +64,7 @@ namespace DotNetDesign.EntityFramework
 
         #region Protected Members
 
+        protected bool BypassReadPermissionCheck;
         protected bool BypassInsertPermissionCheck;
         protected bool BypassUpdatePermissionCheck;
         protected bool BypassDeletePermissionCheck;
@@ -526,6 +527,12 @@ namespace DotNetDesign.EntityFramework
                 }
 
                 OnInitializing();
+                
+                // Initializing, verify read permissions
+                if (!BypassReadPermissionCheck)
+                {
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                }
 
                 OriginalEntityData = entityData;
                 EntityData = entityData.Clone();

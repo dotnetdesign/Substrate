@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>adamcarr</authors>
+    <owners>adamcarr</owners>
+    <projectUrl>https://github.com/adamcarr/DotNetDesign.EntityFramework</projectUrl>
+    <description>Library built on top of DotNetDesign.EntityFramework that exposes a web-api using the new MVC 4 ApiController</description>
+    <copyright>Copyright 2012</copyright>
+    <tags>entity-framework dal web-api</tags>
+    <dependencies>
+      <dependency id="DotNetDesign.EntityFramework" version="0.4.4" />
+    </dependencies>
+  </metadata>
+</package>

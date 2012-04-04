@@ -81,6 +81,16 @@ namespace DotNetDesign.EntityFramework.WebApi
             {
                 Logger.DebugFormat("Getting all entities of type {0}", typeof(TEntity));
 
+                try
+                {
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                }
+
                 var entities = EntityRepositoryFactory().GetAll().Select(x => x.EntityData).Cast<TEntityDataImplementation>();
 
                 return entities.AsQueryable();
@@ -97,6 +107,16 @@ namespace DotNetDesign.EntityFramework.WebApi
             using (Logger.Scope())
             {
                 Logger.DebugFormat("Getting entity of type {0} by id {1}", typeof(TEntity), id);
+
+                try
+                {
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                }
 
                 var entity = EntityRepositoryFactory().GetById(id);
 
@@ -117,6 +137,16 @@ namespace DotNetDesign.EntityFramework.WebApi
             using (Logger.Scope())
             {
                 Logger.DebugFormat("Getting entity of type {0} by id {1} and version {2}", typeof(TEntity), id, version);
+
+                try
+                {
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                }
 
                 var entity = EntityRepositoryFactory().GetVersion(id, version);
 
