@@ -9,8 +9,5 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Framework that facilitates a rich entity model with repositories and services that can be distributed across service layers.</description>
     <tags>entity-framework dal</tags>
-    <dependencies>
-      <dependency id="DotNetDesign.EntityFramework" version="$version$" />
-    </dependencies>
   </metadata>
 </package>
