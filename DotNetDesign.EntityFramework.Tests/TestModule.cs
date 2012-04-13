@@ -1,3 +1,4 @@
+using System;
 using Autofac;
 
 namespace DotNetDesign.EntityFramework.Tests
@@ -14,7 +15,7 @@ namespace DotNetDesign.EntityFramework.Tests
             builder.RegisterType<DataAnnotationEntityValidator<IPerson, IPersonData, IPersonRepository>>().As
                 <IEntityValidator<IPerson, IPersonData, IPersonRepository>>();
             builder.RegisterType<ConcurrencyManager<IPerson, IPersonData, IPersonRepository>>().As<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>>();
-            builder.RegisterType<AnonymousPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>>().As<IPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>>();
+            builder.RegisterType<AnonymousPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository, Guid>>().As<IPermissionAuthorizationManager<IPerson, IPersonData, IPersonRepository>>();
 			
             builder.RegisterType<FailConcurrency>().As<IFailConcurrency>();
             builder.RegisterType<FailConcurrencyData>().As<IFailConcurrencyData>();
@@ -24,7 +25,7 @@ namespace DotNetDesign.EntityFramework.Tests
                 <IEntityValidator<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>();
             builder.RegisterType<ConcurrencyManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>()
                 .As<IConcurrencyManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>();
-            builder.RegisterType<AnonymousPermissionAuthorizationManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>()
+            builder.RegisterType<AnonymousPermissionAuthorizationManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository, Guid>>()
                 .As<IPermissionAuthorizationManager<IFailConcurrency, IFailConcurrencyData, IFailConcurrencyRepository>>();
 
             builder.RegisterType<OverwriteConcurrency>().As<IOverwriteConcurrency>();
@@ -35,7 +36,7 @@ namespace DotNetDesign.EntityFramework.Tests
                 <IEntityValidator<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
             builder.RegisterType<ConcurrencyManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>()
                 .As<IConcurrencyManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
-            builder.RegisterType<AnonymousPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>()
+            builder.RegisterType<AnonymousPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository, Guid>>()
                 .As<IPermissionAuthorizationManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
 
             builder.RegisterType<DictionaryScopeManager>().As<IScopeManager>();

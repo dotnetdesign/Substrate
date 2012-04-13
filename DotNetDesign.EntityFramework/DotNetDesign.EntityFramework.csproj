@@ -67,6 +67,7 @@
     <Compile Include="EntityPermissions.cs" />
     <Compile Include="EntityRepository.cs" />
     <Compile Include="EventHandlerExtensions.cs" />
+    <Compile Include="IApiKeyPermissionAuthorizationManager.cs" />
     <Compile Include="IConcurrencyManager.cs" />
     <Compile Include="IEntity.cs" />
     <Compile Include="IEntityCache.cs" />

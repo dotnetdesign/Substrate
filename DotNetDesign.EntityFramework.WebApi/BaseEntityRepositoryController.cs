@@ -6,31 +6,30 @@ using System.Net.Http;
 using System.Reflection;
 using System.Web;
 using System.Web.Http;
-using System.Web.Http.Routing;
 using Common.Logging;
 
 namespace DotNetDesign.EntityFramework.WebApi
 {
-    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation> :
-        BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, Guid, TEntityDataImplementation>, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation>
+    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation, TApiKey> :
+        BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, Guid, TEntityDataImplementation, TApiKey>, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation, TApiKey>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
         where TEntityDataImplementation : class, TEntityData
     {
         public BaseEntityRepositoryController(
-            Func<IPermissionAuthorizationManager<TEntity, TEntityData, TEntityRepository>> permissionAuthorizationManagerFactory, 
+            Func<IApiKeyPermissionAuthorizationManager<TEntity, TEntityData, TEntityRepository, TApiKey>> apiKeyPermissionAuthorizationManagerFactory, 
             Func<TEntityRepository> entityRepositoryFactory, 
             Func<TEntity> entityFactory,
             string rootUri,
             IEnumerable<string> excludedPropertyNames = null)
-            : base(permissionAuthorizationManagerFactory, entityRepositoryFactory, entityFactory, rootUri, excludedPropertyNames)
+            : base(apiKeyPermissionAuthorizationManagerFactory, entityRepositoryFactory, entityFactory, rootUri, excludedPropertyNames)
         {
         }
     }
 
-    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation> : 
-        ApiController, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation>
+    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation, TApiKey> :
+        ApiController, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation, TApiKey>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
@@ -44,13 +43,13 @@ namespace DotNetDesign.EntityFramework.WebApi
         public static readonly IEnumerable<string> DefaultExcludedPropertyNames = new[] { "Id", "CreatedAt", "UpdatedAt", "Version", "VersionId" };
         private readonly IEnumerable<string> _excludedPropertyNames;
 
-        protected readonly Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> PermissionAuthorizationManagerFactory;
+        protected readonly Func<IApiKeyPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository, TApiKey>> ApiKeyPermissionAuthorizationManagerFactory;
         protected readonly Func<TEntityRepository> EntityRepositoryFactory;
         protected readonly Func<TEntity> EntityFactory;
         private readonly string _rootUri;
 
         public BaseEntityRepositoryController(
-            Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> permissionAuthorizationManagerFactory,
+            Func<IApiKeyPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository, TApiKey>> apiKeyPermissionAuthorizationManagerFactory,
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntity> entityFactory,
             string rootUri,
@@ -58,7 +57,7 @@ namespace DotNetDesign.EntityFramework.WebApi
         {
             using (Logger.Scope())
             {
-                PermissionAuthorizationManagerFactory = permissionAuthorizationManagerFactory;
+                ApiKeyPermissionAuthorizationManagerFactory = apiKeyPermissionAuthorizationManagerFactory;
                 EntityRepositoryFactory = entityRepositoryFactory;
                 EntityFactory = entityFactory;
                 _rootUri = rootUri;
@@ -75,8 +74,9 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// <summary>
         /// Gets all entity data.
         /// </summary>
+        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public IQueryable<TEntityDataImplementation> Get()
+        public IQueryable<TEntityDataImplementation> Get(TApiKey apiKey)
         {
             using(Logger.Scope())
             {
@@ -84,7 +84,7 @@ namespace DotNetDesign.EntityFramework.WebApi
 
                 try
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                    ApiKeyAuthorization(apiKey, EntityPermissions.Read);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -102,8 +102,9 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// Gets the entity data by id.
         /// </summary>
         /// <param name="id">The id.</param>
+        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public TEntityDataImplementation Get(TId id)
+        public TEntityDataImplementation Get(TId id, TApiKey apiKey)
         {
             using (Logger.Scope())
             {
@@ -111,7 +112,7 @@ namespace DotNetDesign.EntityFramework.WebApi
 
                 try
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                    ApiKeyAuthorization(apiKey, EntityPermissions.Read);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -132,8 +133,9 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// </summary>
         /// <param name="id">The id.</param>
         /// <param name="version">The version.</param>
+        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public TEntityDataImplementation Get(TId id, int version)
+        public TEntityDataImplementation Get(TId id, int version, TApiKey apiKey)
         {
             using (Logger.Scope())
             {
@@ -141,7 +143,7 @@ namespace DotNetDesign.EntityFramework.WebApi
 
                 try
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                    ApiKeyAuthorization(apiKey, EntityPermissions.Read);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -161,8 +163,9 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// Creates the specified entity data.
         /// </summary>
         /// <param name="entityData">The entity data.</param>
+        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public HttpResponseMessage<TEntityDataImplementation> Post(TEntityDataImplementation entityData)
+        public HttpResponseMessage<TEntityDataImplementation> Post(TEntityDataImplementation entityData, TApiKey apiKey)
         {
             using (Logger.Scope())
             {
@@ -176,12 +179,12 @@ namespace DotNetDesign.EntityFramework.WebApi
 
                 try
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Insert);
+                    ApiKeyAuthorization(apiKey, EntityPermissions.Insert);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    var unauthorizedResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+                    var unauthorizedResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
                     unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
                     throw new HttpResponseException(unauthorizedResponse);
                 }
@@ -212,9 +215,11 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// <summary>
         /// Saves the specified entity data.
         /// </summary>
+        /// <param name="id">The entity ID.</param>
         /// <param name="entityData">The entity data.</param>
+        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public HttpResponseMessage<TEntityDataImplementation> Put(TId id, TEntityDataImplementation entityData)
+        public HttpResponseMessage<TEntityDataImplementation> Put(TId id, TEntityDataImplementation entityData, TApiKey apiKey)
         {
             using (Logger.Scope())
             {
@@ -229,12 +234,12 @@ namespace DotNetDesign.EntityFramework.WebApi
 
                 try
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Update);
+                    ApiKeyAuthorization(apiKey, EntityPermissions.Update);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    var unauthorizedResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+                    var unauthorizedResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
                     unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
                     throw new HttpResponseException(unauthorizedResponse);
                 }
@@ -271,7 +276,8 @@ namespace DotNetDesign.EntityFramework.WebApi
         /// Deletes the specified id.
         /// </summary>
         /// <param name="id">The id.</param>
-        public HttpResponseMessage Delete(TId id)
+        /// <param name="apiKey">The API key.</param>
+        public HttpResponseMessage Delete(TId id, TApiKey apiKey)
         {
             using (Logger.Scope())
             {
@@ -286,12 +292,12 @@ namespace DotNetDesign.EntityFramework.WebApi
 
                 try
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Delete);
+                    ApiKeyAuthorization(apiKey, EntityPermissions.Delete);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    var unauthorizedResponse = new HttpResponseMessage(System.Net.HttpStatusCode.Unauthorized);
+                    var unauthorizedResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
                     unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
                     throw new HttpResponseException(unauthorizedResponse);
                 }
@@ -330,6 +336,16 @@ namespace DotNetDesign.EntityFramework.WebApi
             using (Logger.Scope())
             {
                 return !_excludedPropertyNames.Contains(x.Name, StringComparer.InvariantCultureIgnoreCase);
+            }
+        }
+
+        private void ApiKeyAuthorization(TApiKey apiKey, EntityPermissions requiredPermissions)
+        {
+            using(Logger.Scope())
+            {
+                var authManager = ApiKeyPermissionAuthorizationManagerFactory();
+                authManager.ApiKey = apiKey;
+                authManager.Authorize(requiredPermissions);
             }
         }
     }
