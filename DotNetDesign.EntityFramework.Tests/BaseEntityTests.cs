@@ -45,15 +45,24 @@ namespace DotNetDesign.EntityFramework.Tests
         [Test]
         public void PersonPropertyValuesShouldMatchDataPropertyValuesAfterInitialization()
         {
-            Assert.AreNotEqual(_personData.FirstName, _person.FirstName);
-            Assert.AreNotEqual(_personData.LastName, _person.LastName);
-            Assert.IsFalse(_person.IsDirty);
-
             _person.Initialize(_personData);
 
             Assert.AreEqual(_personData.FirstName, _person.FirstName);
             Assert.AreEqual(_personData.LastName, _person.LastName);
             Assert.IsFalse(_person.IsDirty);
+        }
+
+        [Test]
+        public void Person_NotInitialized_ShouldThrowExceptionWhenPropertyGetSet()
+        {
+            Assert.Throws<InvalidOperationException>(() =>
+                                                         {
+                                                             var firstName = _person.FirstName;
+                                                         });
+            Assert.Throws<InvalidOperationException>(() =>
+                                                         {
+                                                             _person.FirstName = "First Name";
+                                                         });
         }
 
         [Test]
@@ -81,6 +90,8 @@ namespace DotNetDesign.EntityFramework.Tests
         [Test]
         public void ValidPersonShouldCallSaveOnRepository()
         {
+            _person.Initialize(_personData);
+
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
             _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 

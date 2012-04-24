@@ -40,7 +40,10 @@ namespace DotNetDesign.EntityFramework.Tests
 
         public string FirstName
         {
-            get { return (EntityData == null) ? default(string) : EntityData.FirstName; }
+            get
+            {
+                return (EntityData == null) ? default(string) : EntityData.FirstName;
+            }
             set
             {
                 if (EntityData.FirstName.Equals(value)) return;
@@ -54,7 +57,10 @@ namespace DotNetDesign.EntityFramework.Tests
 
         public string LastName
         {
-            get { return (EntityData == null) ? default(string) : EntityData.LastName; }
+            get
+            {
+                return (EntityData == null) ? default(string) : EntityData.LastName;
+            }
             set
             {
                 if (EntityData.LastName.Equals(value)) return;

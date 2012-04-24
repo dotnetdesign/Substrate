@@ -59,6 +59,7 @@ namespace DotNetDesign.EntityFramework
         private bool _propertyChangedSinceIsDirtySet;
         private bool _propertyChangedSinceValidationResultsPopulated;
         private IEnumerable<ValidationResult> _validationResults;
+        private TEntityData _entityData;
 
         #endregion
 
@@ -250,7 +251,7 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
-                    return (EntityData == null) ? default(TId) : EntityData.Id;
+                    return (!_init) ? default(TId) : EntityData.Id;
                 }
             }
             set
@@ -279,7 +280,7 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
-                    return (EntityData == null) ? default(int) : EntityData.Version;
+                    return (!_init) ? default(int) : EntityData.Version;
                 }
             }
             set
@@ -308,7 +309,7 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
-                    return (EntityData == null) ? DateTime.MinValue : EntityData.CreatedAt;
+                    return (!_init) ? DateTime.MinValue : EntityData.CreatedAt;
                 }
             }
             set
@@ -337,7 +338,7 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
-                    return (EntityData == null) ? DateTime.MinValue : EntityData.LastUpdatedAt;
+                    return (!_init) ? DateTime.MinValue : EntityData.LastUpdatedAt;
                 }
             }
             set
@@ -363,7 +364,7 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
-                    return EntityData.VersionId;
+                    return (!_init) ? "NOT INITIALIZED" : EntityData.VersionId;
                 }
             }
         }
@@ -376,6 +377,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 return EntityRepositoryFactory().GetVersion(Id, Version - 1);
             }
         }
@@ -389,6 +392,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 return EntityRepositoryFactory().GetVersion(Id, version);
             }
         }
@@ -415,7 +420,24 @@ namespace DotNetDesign.EntityFramework
         /// <value>
         /// The entity data.
         /// </value>
-        public TEntityData EntityData { get; protected set; }
+        public TEntityData EntityData
+        {
+            get
+            {
+                using (Logger.Scope())
+                {
+                    ThrowIfNotInitialized();
+                    return _entityData;
+                }
+            }
+            private set
+            {
+                using (Logger.Scope())
+                {
+                    _entityData = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Determines whether the specified property has changed.
@@ -428,6 +450,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 object originalValue;
                 return HasPropertyChanged(propertyName, out originalValue);
             }
@@ -445,6 +469,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 originalValue = typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
                 var currentValue = typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
@@ -464,6 +490,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 TProperty originalValue;
                 return HasPropertyChanged(property, out originalValue);
             }
@@ -484,6 +512,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 var propertyName = ((MemberExpression)property.Body).Member.Name;
 
                 originalValue =
@@ -558,6 +588,8 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
+                    ThrowIfNotInitialized();
+
                     if (_propertyChangedSinceIsDirtySet)
                     {
                         _propertyChangedSinceIsDirtySet = false;
@@ -579,6 +611,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 _init = false;
                 Initialize(OriginalEntityData);
             }
@@ -596,6 +630,8 @@ namespace DotNetDesign.EntityFramework
             {
                 using (Logger.Scope())
                 {
+                    ThrowIfNotInitialized();
+
                     if (_validationResults == null)
                     {
                         _validationResults = Validate();
@@ -614,6 +650,8 @@ namespace DotNetDesign.EntityFramework
         {
             using (Logger.Scope())
             {
+                ThrowIfNotInitialized();
+
                 if (_validationResults == null || _propertyChangedSinceValidationResultsPopulated)
                 {
                     _propertyChangedSinceValidationResultsPopulated = false;
@@ -777,6 +815,24 @@ namespace DotNetDesign.EntityFramework
             {
                 _propertyChangedSinceIsDirtySet = true;
                 _propertyChangedSinceValidationResultsPopulated = true;
+            }
+        }
+
+        /// <summary>
+        /// Checks if the entity has been initialized. If not, will throw an InvalidOperationException.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">InvalidOperationException if entity hasn't been initialized.</exception>
+        protected void ThrowIfNotInitialized()
+        {
+            using(Logger.Scope())
+            {
+                if(!_init)
+                {
+                    var exception =
+                        new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
+                    Logger.Error(exception.Message);
+                    throw exception;
+                }
             }
         }
 
