@@ -73,23 +73,8 @@ namespace DotNetDesign.EntityFramework
                        where !validationAttribute.IsValid(property.GetValue(entity, null))
                        select
                            ValidationResult.Error(
-                               validationAttribute.FormatErrorMessage(GetDisplayName(property)),
+                               validationAttribute.FormatErrorMessage(entity.GetPropertyDisplayName(property.Name)),
                                new[] { property.Name });
-            }
-        }
-
-        /// <summary>
-        /// Gets the display name.
-        /// </summary>
-        /// <param name="propertyInfo">The property info.</param>
-        /// <returns></returns>
-        protected virtual string GetDisplayName(PropertyInfo propertyInfo)
-        {
-            using (Logger.Scope())
-            {
-                return
-                    ((DisplayNameAttribute)
-                     propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), true).SingleOrDefault()).DisplayName;
             }
         }
     }

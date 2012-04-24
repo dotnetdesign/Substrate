@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Diagnostics;
@@ -659,6 +660,41 @@ namespace DotNetDesign.EntityFramework
                 }
 
                 return _validationResults;
+            }
+        }
+
+        /// <summary>
+        /// Get's the properties display name from DataAnnotation attribute if it exists.
+        /// </summary>
+        /// <typeparam name="TProperty">Property type</typeparam>
+        /// <param name="property">Expression for property</param>
+        /// <returns></returns>
+        public string GetPropertyDisplayName<TProperty>(Expression<Func<TEntityData, TProperty>> property)
+        {
+            using (Logger.Scope())
+            {
+                var propertyName = ((MemberExpression)property.Body).Member.Name;
+
+                return GetPropertyDisplayName(propertyName);
+            }
+        }
+
+        /// <summary>
+        /// Get's the properties display name from DataAnnotation attribute if it exists.
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <returns></returns>
+        public string GetPropertyDisplayName(string propertyName)
+        {
+            using (Logger.Scope())
+            {
+                var propertyInfo = typeof(TEntityData).GetProperty(propertyName);
+
+                var displayNameAttribute =
+                    ((DisplayNameAttribute)
+                     propertyInfo.GetCustomAttributes(typeof(DisplayNameAttribute), true).SingleOrDefault());
+
+                return (displayNameAttribute == null) ? string.Empty : displayNameAttribute.DisplayName;
             }
         }
 

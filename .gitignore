@@ -49,3 +49,7 @@ version.txt
 
 # nuget packages
 *.nupkg
+
+# nuget packages
+packages/
+src/packages

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Autofac;
+using FluentAssertions;
 using NUnit.Framework;
 using NUnit.Mocks;
 using Moq;
@@ -63,6 +64,20 @@ namespace DotNetDesign.EntityFramework.Tests
                                                          {
                                                              _person.FirstName = "First Name";
                                                          });
+        }
+
+        [Test]
+        public void GetPropertyDisplayName_Should_Return_Value_In_Attribute()
+        {
+            _person.GetPropertyDisplayName(e => e.FirstName).Should().Be("First Name");
+            _person.GetPropertyDisplayName("FirstName").Should().Be("First Name");
+        }
+
+        [Test]
+        public void GetPropertyDisplayName_Should_Return_StringEmpty_If_Attribute_Is_Missing()
+        {
+            _person.GetPropertyDisplayName(e => e.LastName).Should().Be(string.Empty);
+            _person.GetPropertyDisplayName("LastName").Should().Be(string.Empty);
         }
 
         [Test]

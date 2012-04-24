@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetDesign.EntityFramewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{8E2A7388-55D7-4558-943E-20239D0FEBE2}"
 	ProjectSection(SolutionItems) = preProject
+		DotNetDesign.EntityFramework.EntityGenerator\DotNetDesign.EntityFramework Entity Generator.nuspec = DotNetDesign.EntityFramework.EntityGenerator\DotNetDesign.EntityFramework Entity Generator.nuspec
+		DotNetDesign.EntityFramework.WebApi\DotNetDesign.EntityFramework.WebApi.nuspec = DotNetDesign.EntityFramework.WebApi\DotNetDesign.EntityFramework.WebApi.nuspec
 		tools\EntitiesFormTemplate.xsn = tools\EntitiesFormTemplate.xsn
 		tools\EntitiesSchema.xsd = tools\EntitiesSchema.xsd
 		tools\EntityGenerator.tt = tools\EntityGenerator.tt

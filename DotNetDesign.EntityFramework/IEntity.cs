@@ -136,6 +136,21 @@ namespace DotNetDesign.EntityFramework
         /// </summary>
         void Delete();
 
+        /// <summary>
+        /// Get's the properties display name from DataAnnotation attribute if it exists.
+        /// </summary>
+        /// <typeparam name="TProperty">Property type</typeparam>
+        /// <param name="property">Expression for property</param>
+        /// <returns></returns>
+        string GetPropertyDisplayName<TProperty>(Expression<Func<TEntityData, TProperty>> property);
+
+        /// <summary>
+        /// Get's the properties display name from DataAnnotation attribute if it exists.
+        /// </summary>
+        /// <param name="propertyName">Name of the property</param>
+        /// <returns></returns>
+        string GetPropertyDisplayName(string propertyName);
+
         #endregion
     }
 }
