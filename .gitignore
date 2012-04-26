@@ -53,3 +53,6 @@ version.txt
 # nuget packages
 packages/
 src/packages
+
+# unit test output
+UnitTest-*
