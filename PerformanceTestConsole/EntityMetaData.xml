@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Entities>
+  <Entity name="Person" idType="Guid">
+    <Property name="Name" type="string" required="true" displayName="Name" />
+    <Property name="Email" type="string" required="true" displayName="Email Address" />
+  </Entity>
+</Entities>

@@ -56,3 +56,6 @@ src/packages
 
 # unit test output
 UnitTest-*
+
+# ncrunch files
+*.ncrunch*

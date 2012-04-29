@@ -11,7 +11,7 @@
     <copyright>Copyright 2012</copyright>
     <tags>entity-framework dal web-api</tags>
     <dependencies>
-      <dependency id="DotNetDesign.EntityFramework" version="0.4.11" />
+      <dependency id="DotNetDesign.EntityFramework" version="0.4.12" />
       <dependency id="aspnet.suppressformsredirect" version="0.0.1.4" />
     </dependencies>
   </metadata>

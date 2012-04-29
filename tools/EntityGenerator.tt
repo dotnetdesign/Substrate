@@ -223,15 +223,24 @@ namespace <#=namespaceName#>
 #>
 		public virtual <#=property.Type#> <#=property.Name#> 
 		{
-			get { return EntityData.<#=property.Name#>; }
+			get 
+			{
+				using(Logger.Scope())
+				{ 
+					return EntityData.<#=property.Name#>; 
+				}
+			}
 			set
 			{
-				if (EntityData.<#=property.Name#> == value) return;
+				using(Logger.Scope())
+				{ 
+					if (EntityData.<#=property.Name#> == value) return;
 
-				var originalValue = EntityData.<#=property.Name#>;
-				OnPropertyChanging("<#=property.Name#>", originalValue, value);
-				EntityData.<#=property.Name#> = value;
-				OnPropertyChanged("<#=property.Name#>", originalValue, value);
+					var originalValue = EntityData.<#=property.Name#>;
+					OnPropertyChanging("<#=property.Name#>", originalValue, value);
+					EntityData.<#=property.Name#> = value;
+					OnPropertyChanged("<#=property.Name#>", originalValue, value);
+				}
 			}
 		}
 <#
