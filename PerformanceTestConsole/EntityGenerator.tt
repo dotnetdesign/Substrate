@@ -29,9 +29,13 @@ using DotNetDesign.EntityFramework;
 							{ 
 								Name = p.Attribute("name").Value, 
 								Type = p.Attribute("type").Value, 
-								Required = p.Attribute("required"),
+								Required =  bool.Parse(p.Attribute("required").Value),
 								DisplayName = p.Attribute("displayName"),
-								Attributes = p.Descendants("Attribute").Select(a => a.Value.Trim())
+								Attributes = p.Descendants("Attribute").Select(a => new 
+									{
+										IncludeOnEntityData =  bool.Parse(a.Attribute("includeOnEntityData").Value),
+										Value = a.Value.Trim()
+									})
 							})
 					};
 					
@@ -58,7 +62,7 @@ namespace <#=namespaceName#>
 		foreach(var property in entity.Properties)
 		{
 			PushIndent("\t");
-			if(property.Required != null && bool.Parse(property.Required.Value))
+			if(property.Required)
 			{
 				WriteLine("[Required]");
 			}
@@ -66,9 +70,12 @@ namespace <#=namespaceName#>
 			{
 				WriteLine("[DisplayName(\"{0}\")]", (string.IsNullOrWhiteSpace(property.DisplayName.Value)) ? property.Name : property.DisplayName.Value );
 			}
-			foreach(var attribute in property.Attributes.Where(a => !string.IsNullOrWhiteSpace(a)))
+			foreach(var attribute in property.Attributes)
 			{
-				WriteLine("[{0}]", attribute);
+				if(!string.IsNullOrWhiteSpace(attribute.Value))
+				{
+					WriteLine("[{0}]", attribute.Value);
+				}
 			}
 			
 			WriteLine("{0} {1} {{ get; set; }}", property.Type, property.Name);
@@ -164,7 +171,14 @@ namespace <#=namespaceName#>
 		WriteLine("#region I{0}Data Properties", entity.Name);
 		foreach(var property in entity.Properties)
 		{
-			WriteLine("[DataMember]");
+			WriteLine("[DataMember]");			
+			foreach(var attribute in property.Attributes)
+			{
+				if(!string.IsNullOrWhiteSpace(attribute.Value) && attribute.IncludeOnEntityData)
+				{
+					WriteLine("[{0}]", attribute.Value);
+				}
+			}
 			WriteLine("public virtual {0} {1} {{ get; set; }}", property.Type, property.Name);
 		} // end foreach for properties
 		WriteLine("#endregion I{0}Data Properties", entity.Name);
@@ -223,15 +237,24 @@ namespace <#=namespaceName#>
 #>
 		public virtual <#=property.Type#> <#=property.Name#> 
 		{
-			get { return EntityData.<#=property.Name#>; }
+			get 
+			{
+				using(Logger.Scope())
+				{ 
+					return EntityData.<#=property.Name#>; 
+				}
+			}
 			set
 			{
-				if (EntityData.<#=property.Name#> == value) return;
+				using(Logger.Scope())
+				{ 
+					if (EntityData.<#=property.Name#> == value) return;
 
-				var originalValue = EntityData.<#=property.Name#>;
-				OnPropertyChanging("<#=property.Name#>", originalValue, value);
-				EntityData.<#=property.Name#> = value;
-				OnPropertyChanged("<#=property.Name#>", originalValue, value);
+					var originalValue = EntityData.<#=property.Name#>;
+					OnPropertyChanging("<#=property.Name#>", originalValue, value);
+					EntityData.<#=property.Name#> = value;
+					OnPropertyChanged("<#=property.Name#>", originalValue, value);
+				}
 			}
 		}
 <#

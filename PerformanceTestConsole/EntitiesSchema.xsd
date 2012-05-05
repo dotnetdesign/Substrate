@@ -9,7 +9,15 @@
               <xs:element maxOccurs="unbounded" name="Property">
                 <xs:complexType>
                   <xs:sequence minOccurs="0" maxOccurs="unbounded">
-                    <xs:element name="Attribute" type="xs:string" />
+                    <xs:element name="Attribute">
+                      <xs:complexType>
+                        <xs:simpleContent>
+                          <xs:extension base="xs:string">
+                            <xs:attribute name="includeOnEntityData" type="xs:boolean" default="false" use="optional" />
+                          </xs:extension>
+                        </xs:simpleContent>
+                      </xs:complexType>
+                    </xs:element>
                   </xs:sequence>
                   <xs:attribute name="name" type="xs:string" use="required" />
                   <xs:attribute name="displayName" type="xs:string" use="optional" />

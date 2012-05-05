@@ -1,7 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <Entities>
   <Entity name="Person" idType="Guid">
-    <Property name="Name" type="string" required="true" displayName="Name" />
-    <Property name="Email" type="string" required="true" displayName="Email Address" />
+    <Property name="Name" type="string" required="true" displayName="Name">
+      <Attribute includeOnEntityData="true">System.Web.Script.Serialization.ScriptIgnore</Attribute>
+    </Property>
+    <Property name="Email" type="string" required="true" displayName="Email Address">
+      <Attribute includeOnEntityData="false">System.Web.Script.Serialization.ScriptIgnore</Attribute>
+    </Property>
   </Entity>
 </Entities>

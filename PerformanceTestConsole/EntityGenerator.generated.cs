@@ -13,9 +13,11 @@ namespace PerformanceTestConsole
 	{
 		[Required]
 		[DisplayName("Name")]
+		[System.Web.Script.Serialization.ScriptIgnore]
 		string Name { get; set; }
 		[Required]
 		[DisplayName("Email Address")]
+		[System.Web.Script.Serialization.ScriptIgnore]
 		string Email { get; set; }
 	}
 	#endregion Entity Data Interfaces
@@ -39,6 +41,7 @@ namespace PerformanceTestConsole
 	{
 		#region IPersonData Properties
 		[DataMember]
+		[System.Web.Script.Serialization.ScriptIgnore]
 		public virtual string Name { get; set; }
 		[DataMember]
 		public virtual string Email { get; set; }
@@ -62,28 +65,46 @@ namespace PerformanceTestConsole
 		#region IPersonData Properties
 		public virtual string Name 
 		{
-			get { return EntityData.Name; }
+			get 
+			{
+				using(Logger.Scope())
+				{ 
+					return EntityData.Name; 
+				}
+			}
 			set
 			{
-				if (EntityData.Name == value) return;
+				using(Logger.Scope())
+				{ 
+					if (EntityData.Name == value) return;
 
-				var originalValue = EntityData.Name;
-				OnPropertyChanging("Name", originalValue, value);
-				EntityData.Name = value;
-				OnPropertyChanged("Name", originalValue, value);
+					var originalValue = EntityData.Name;
+					OnPropertyChanging("Name", originalValue, value);
+					EntityData.Name = value;
+					OnPropertyChanged("Name", originalValue, value);
+				}
 			}
 		}
 		public virtual string Email 
 		{
-			get { return EntityData.Email; }
+			get 
+			{
+				using(Logger.Scope())
+				{ 
+					return EntityData.Email; 
+				}
+			}
 			set
 			{
-				if (EntityData.Email == value) return;
+				using(Logger.Scope())
+				{ 
+					if (EntityData.Email == value) return;
 
-				var originalValue = EntityData.Email;
-				OnPropertyChanging("Email", originalValue, value);
-				EntityData.Email = value;
-				OnPropertyChanged("Email", originalValue, value);
+					var originalValue = EntityData.Email;
+					OnPropertyChanging("Email", originalValue, value);
+					EntityData.Email = value;
+					OnPropertyChanged("Email", originalValue, value);
+				}
 			}
 		}
 		#endregion IPersonData Properties
