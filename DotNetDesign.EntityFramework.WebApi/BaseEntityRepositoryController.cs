@@ -22,7 +22,7 @@ namespace DotNetDesign.EntityFramework.WebApi
             Func<TEntityRepository> entityRepositoryFactory, 
             Func<TEntity> entityFactory,
             string rootUri,
-            IEnumerable<string> excludedPropertyNames = null)
+            params string[] excludedPropertyNames)
             : base(apiKeyPermissionAuthorizationManagerFactory, entityRepositoryFactory, entityFactory, rootUri, excludedPropertyNames)
         {
         }
@@ -53,7 +53,7 @@ namespace DotNetDesign.EntityFramework.WebApi
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntity> entityFactory,
             string rootUri,
-            IEnumerable<string> excludedPropertyNames = null)
+            params string[] excludedPropertyNames)
         {
             using (Logger.Scope())
             {

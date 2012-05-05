@@ -97,6 +97,7 @@
     <Compile Include="ScopeLogger.cs" />
     <Compile Include="StateChangeEventArgs.cs" />
     <Compile Include="StateMachine.cs" />
+    <Compile Include="MemberName.cs" />
     <Compile Include="ValidationResult.cs" />
     <Compile Include="ValidationResultStatusType.cs" />
     <Compile Include="WeakEventHandler.cs" />
