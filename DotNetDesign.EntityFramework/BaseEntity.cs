@@ -475,8 +475,30 @@ namespace DotNetDesign.EntityFramework
                 originalValue = typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
                 var currentValue = typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
-                return !originalValue.Equals(currentValue);
+                return HasPropertyChanged(propertyName, originalValue, currentValue);
             }
+        }
+
+        private bool HasPropertyChanged(string propertyName, object originalValue, object currentValue)
+        {
+            bool hasPropertyChanged;
+
+            if (originalValue == null && currentValue == null)
+            {
+                hasPropertyChanged = false;
+            }
+            else
+            {
+                hasPropertyChanged = originalValue == null || !originalValue.Equals(currentValue);
+            }
+
+            if (Logger.IsInfoEnabled)
+            {
+                Logger.DebugFormat("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName,
+                                   hasPropertyChanged, currentValue, originalValue);
+            }
+
+            return hasPropertyChanged;
         }
 
         /// <summary>
@@ -521,23 +543,7 @@ namespace DotNetDesign.EntityFramework
                     (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
                 var currentValue = (TProperty)typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
 
-                bool hasPropertyChanged;
-
-                if (originalValue == null && currentValue == null)
-                {
-                    hasPropertyChanged = false;
-                }
-                else
-                {
-                    hasPropertyChanged = originalValue == null || !originalValue.Equals(currentValue);
-                }
-
-                if (Logger.IsInfoEnabled)
-                {
-                    Logger.DebugFormat("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName, hasPropertyChanged, currentValue, originalValue);
-                }
-
-                return hasPropertyChanged;
+                return HasPropertyChanged(propertyName, originalValue, currentValue);
             }
         }
 

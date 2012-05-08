@@ -13,11 +13,9 @@ namespace PerformanceTestConsole
 	{
 		[Required]
 		[DisplayName("Name")]
-		[System.Web.Script.Serialization.ScriptIgnore]
 		string Name { get; set; }
 		[Required]
 		[DisplayName("Email Address")]
-		[System.Web.Script.Serialization.ScriptIgnore]
 		string Email { get; set; }
 	}
 	#endregion Entity Data Interfaces
@@ -41,7 +39,6 @@ namespace PerformanceTestConsole
 	{
 		#region IPersonData Properties
 		[DataMember]
-		[System.Web.Script.Serialization.ScriptIgnore]
 		public virtual string Name { get; set; }
 		[DataMember]
 		public virtual string Email { get; set; }
