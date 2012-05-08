@@ -94,10 +94,18 @@ namespace DotNetDesign.EntityFramework.Tests
             updatedPerson.Initialize(updatedPersonData);
 
             person.FirstName = "Jon";
+            
+            var newPerson = _container.Resolve<IPerson>();
+            var newEntityData = person.EntityData;
 
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
             personRepositoryMock.Setup(x => x.GetById(commonId, true)).Returns(updatedPerson);
-            personRepositoryMock.Setup(x => x.Save(person)).Returns(person);
+            personRepositoryMock.Setup(x => x.Save(person))
+                .Returns(() =>
+                             {
+                                 newPerson.Initialize(newEntityData);
+                                 return newPerson;
+                             });
 
             var concurrencyManager = _container.Resolve<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>>();
             concurrencyManager.EntityRepository = personRepositoryMock.Object;
@@ -137,9 +145,17 @@ namespace DotNetDesign.EntityFramework.Tests
             overwriteConcurrency.LastName = "Dooo!";
             var newVersion = overwriteConcurrency.Version + 1;
 
+            var newOverwriteConcurrency = _container.Resolve<IOverwriteConcurrency>();
+            var newEntityData = overwriteConcurrency.EntityData;
+
             var overwriteConcurrencyRepositoryMock = new Mock<IOverwriteConcurrencyRepository>(MockBehavior.Strict);
             overwriteConcurrencyRepositoryMock.Setup(x => x.GetById(commonId, true)).Returns(updatedOverwriteConcurrency);
-            overwriteConcurrencyRepositoryMock.Setup(x => x.Save(overwriteConcurrency)).Returns(overwriteConcurrency);
+            overwriteConcurrencyRepositoryMock.Setup(x => x.Save(overwriteConcurrency))
+                .Returns(() =>
+                             {
+                                 newOverwriteConcurrency.Initialize(newEntityData);
+                                 return newOverwriteConcurrency;
+                             });
 
             var concurrencyManager = _container.Resolve<IConcurrencyManager<IOverwriteConcurrency, IOverwriteConcurrencyData, IOverwriteConcurrencyRepository>>();
             concurrencyManager.EntityRepository = overwriteConcurrencyRepositoryMock.Object;

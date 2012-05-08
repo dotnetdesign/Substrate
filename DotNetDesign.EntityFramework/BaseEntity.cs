@@ -207,7 +207,13 @@ namespace DotNetDesign.EntityFramework
 
                     OnSaving();
                     returnedEntity = EntityRepositoryFactory().Save(this as TEntity);
+
+                    // reset entity state now that it has been saved.
+                    _init = false;
+                    Initialize(returnedEntity.EntityData);
+
                     OnSaved();
+                    
                     return true;
                 }
                 

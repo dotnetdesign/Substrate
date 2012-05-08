@@ -191,8 +191,7 @@ namespace DotNetDesign.EntityFramework
                     currentValue = propertyInfo.GetValue(currentEntity, null);
 
                     var retrievedValue = propertyInfo.GetValue(retrievedEntity, null);
-                    var retrievedValueChangedFromOriginal = originalValue != retrievedValue ||
-                                                             (originalValue != null && !originalValue.Equals(retrievedValue));
+                    var retrievedValueChangedFromOriginal = (originalValue != null && !originalValue.Equals(retrievedValue));
 
                     if (propertyInfo.PropertyType == typeof(string))
                     {

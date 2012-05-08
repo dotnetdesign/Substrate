@@ -143,9 +143,16 @@ namespace DotNetDesign.EntityFramework.Tests
             _person.FirstName = _person.FirstName + " more info";
             var expectedVersion = _person.Version + 1;
 
+            var newPerson = _container.Resolve<IPerson>();
+            var newEntityData = _person.EntityData;
+
             var personRepositoryMock = new Mock<IPersonRepository>(MockBehavior.Strict);
             _person.EntityRepositoryFactory = () => personRepositoryMock.Object;
-            personRepositoryMock.Setup(x => x.Save(_person)).Returns(_person);
+            personRepositoryMock.Setup(x => x.Save(_person)).Returns(() =>
+                                                                         {
+                                                                             newPerson.Initialize(newEntityData);
+                                                                             return newPerson;
+                                                                         });
 
             var concurrencyManagerMock = new Mock<IConcurrencyManager<IPerson, IPersonData, IPersonRepository>>(MockBehavior.Strict);
             _person.EntityConcurrencyManagerFactory = () => concurrencyManagerMock.Object;
