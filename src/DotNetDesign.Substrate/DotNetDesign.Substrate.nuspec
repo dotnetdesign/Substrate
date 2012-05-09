@@ -2,12 +2,12 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>DotNetDesign.Substrate</id>
-    <version>$version$</version>
+    <version>0.5.0</version>
     <authors>DotNetDesign</authors>
     <owners>DotNetDesign</owners>
-    <projectUrl>https://github.com/adamcarr/DotNetDesign.Substrate</projectUrl>
+    <projectUrl>https://github.com/dotnetdesign/Substrate</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Framework that facilitates a rich entity model with repositories and services that can be distributed across service layers.</description>
-    <tags>entity-framework dal</tags>
+    <tags>dal</tags>
   </metadata>
 </package>
