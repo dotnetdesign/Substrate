@@ -2,18 +2,19 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>DotNetDesign.Substrate.EntityGenerator</id>
-    <version>$version$</version>
+    <version>0.5.0.0</version>
     <authors>DotNetDesign</authors>
     <owners>DotNetDesign</owners>
-    <projectUrl>https://github.com/adamcarr/DotNetDesign.Substrate</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://raw.github.com/dotnetdesign/Substrate/master/License.txt</licenseUrl>
+    <projectUrl>https://github.com/dotnetdesign/Substrate</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Tools to help generate entities and their supporting classes.</description>
-    <tags>entity-framework dal</tags>
+    <tags>dal</tags>
     <dependencies>
-      <dependency id="DotNetDesign.Substrate" version="$version$" />
+      <dependency id="DotNetDesign.Substrate" version="0.5.0.0" />
     </dependencies>
   </metadata>
   <files>
-    <file src="..\tools\*.*" target="content" />
+    <file src="..\..\tools\*.*" target="content" />
   </files>
 </package>

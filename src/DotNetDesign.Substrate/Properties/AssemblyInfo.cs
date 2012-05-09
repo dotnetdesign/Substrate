@@ -14,13 +14,14 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("DotNetDesign.Substrate")]
-[assembly: AssemblyDescription("Library that provides smart entity structure for versioning and persisting.")]
+[assembly: AssemblyDescription("Framework that facilitates a rich entity model with repositories and services that can be distributed across service layers.")]
 [assembly: AssemblyCompany("DotNetDesign")]
 [assembly: AssemblyProduct("DotNetDesign.Substrate")]
-[assembly: AssemblyCopyright("Copyright (c) DotNetDesign 2011")]
+[assembly: AssemblyCopyright("Copyright (c) DotNetDesign 2012")]
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]
 [assembly: Guid("8ba2a63c-ec50-4d4f-8290-3166d5931e8b")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("0.5.0.0")]
+[assembly: AssemblyVersion("0.5.0.0")]
 
 

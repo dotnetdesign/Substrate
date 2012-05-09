@@ -1,13 +1,16 @@
 <?xml version="1.0"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package >
   <metadata>
-    <id>DotNetDesign.Substrate</id>
-    <version>0.5.0</version>
-    <authors>DotNetDesign</authors>
-    <owners>DotNetDesign</owners>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://raw.github.com/dotnetdesign/Substrate/master/License.txt</licenseUrl>
     <projectUrl>https://github.com/dotnetdesign/Substrate</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Framework that facilitates a rich entity model with repositories and services that can be distributed across service layers.</description>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright 2012</copyright>
     <tags>dal</tags>
   </metadata>
 </package>
