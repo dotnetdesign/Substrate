@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Entities>
-  <Entity name="Person" idType="Guid">
-    <Property name="Name" type="string" required="true" displayName="Name">
-    </Property>
-    <Property name="Email" type="string" required="true" displayName="Email Address">
-    </Property>
-  </Entity>
-</Entities>
