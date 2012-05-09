@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {

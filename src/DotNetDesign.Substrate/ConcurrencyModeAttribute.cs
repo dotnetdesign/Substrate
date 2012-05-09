@@ -1,5 +1,6 @@
 using System;
 using Common.Logging;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {
@@ -9,7 +10,7 @@ namespace DotNetDesign.Substrate
     [AttributeUsage(AttributeTargets.Interface)]
     public class ConcurrencyModeAttribute : Attribute
     {
-        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(typeof(ConcurrencyModeAttribute));
+        protected readonly ILog Logger = LogManager.GetLogger(typeof(ConcurrencyModeAttribute));
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrencyModeAttribute"/> class.

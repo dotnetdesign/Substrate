@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Web;
 using System.Web.Http;
 using Common.Logging;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate.WebApi
 {

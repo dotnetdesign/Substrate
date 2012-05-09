@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Diagnostics;
 using Common.Logging;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {

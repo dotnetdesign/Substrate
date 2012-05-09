@@ -1,4 +1,5 @@
 using System;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {

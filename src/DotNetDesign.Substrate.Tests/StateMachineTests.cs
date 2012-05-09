@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DotNetDesign.Common;
 using NUnit.Framework;
 
 namespace DotNetDesign.Substrate.Tests

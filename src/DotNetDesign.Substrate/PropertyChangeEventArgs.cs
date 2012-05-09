@@ -1,5 +1,6 @@
 using System;
 using Common.Logging;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {
@@ -8,7 +9,7 @@ namespace DotNetDesign.Substrate
     /// </summary>
     public class PropertyChangeEventArgs : EventArgs
     {
-        protected readonly ILog Logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        protected readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyChangeEventArgs"/> class.

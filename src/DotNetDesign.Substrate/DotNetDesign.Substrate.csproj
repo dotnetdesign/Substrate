@@ -41,6 +41,9 @@
     <Reference Include="Common.Logging">
       <HintPath>..\packages\Common.Logging.2.0.0\lib\2.0\Common.Logging.dll</HintPath>
     </Reference>
+    <Reference Include="DotNetDesign.Common">
+      <HintPath>..\packages\DotNetDesign.Common.0.5.1.0\lib\net40\DotNetDesign.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -57,8 +60,6 @@
     <Compile Include="AnonymousPermissionAuthorizationManager.cs" />
     <Compile Include="BaseEntity.cs" />
     <Compile Include="BaseEntityData.cs" />
-    <Compile Include="BaseLogger.cs" />
-    <Compile Include="CommonExtensions.cs" />
     <Compile Include="ConcurrencyConflictException.cs" />
     <Compile Include="ConcurrencyManager.cs" />
     <Compile Include="ConcurrencyMode.cs" />
@@ -70,7 +71,6 @@
     <Compile Include="EntityIdentifier.cs" />
     <Compile Include="EntityPermissions.cs" />
     <Compile Include="EntityRepository.cs" />
-    <Compile Include="EventHandlerExtensions.cs" />
     <Compile Include="IApiKeyPermissionAuthorizationManager.cs" />
     <Compile Include="IConcurrencyManager.cs" />
     <Compile Include="IEntity.cs" />
@@ -81,26 +81,16 @@
     <Compile Include="IEntityRepositoryService.cs" />
     <Compile Include="IEntityValidator.cs" />
     <Compile Include="IIdentifiable.cs" />
-    <Compile Include="InvalidStateException.cs" />
     <Compile Include="IObservableEntity.cs" />
     <Compile Include="IPermissionAuthorizationManager.cs" />
     <Compile Include="IScopeManager.cs" />
-    <Compile Include="IStateMachine.cs" />
     <Compile Include="IValidatable.cs" />
     <Compile Include="IVersionable.cs" />
-    <Compile Include="IWeakEventHandler.cs" />
-    <Compile Include="LoggerExtensions.cs" />
-    <Compile Include="ObjectCopier.cs" />
     <Compile Include="PermissionAuthrozationManagerExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyChangeEventArgs.cs" />
-    <Compile Include="ScopeLogger.cs" />
-    <Compile Include="StateChangeEventArgs.cs" />
-    <Compile Include="StateMachine.cs" />
-    <Compile Include="MemberName.cs" />
     <Compile Include="ValidationResult.cs" />
     <Compile Include="ValidationResultStatusType.cs" />
-    <Compile Include="WeakEventHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DotNetDesign.Substrate.nuspec" />
