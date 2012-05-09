@@ -101,6 +101,6 @@
   </Target>
   -->
   <Target Name="AfterBuild">
-    <Exec Command="$(SolutionDir)tools\nunit\tools\nunit-console.exe $(OutputPath)$(AssemblyName).dll /xml:$(SolutionDir)\UnitTest-$(AssemblyName).xml"/>
+    <Exec Command="$(SolutionDir)..\tools\nunit\tools\nunit-console.exe $(OutputPath)$(AssemblyName).dll /xml:$(SolutionDir)\UnitTest-$(AssemblyName).xml"/>
   </Target>
 </Project>
