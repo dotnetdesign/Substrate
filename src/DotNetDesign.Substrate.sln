@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{8E2A7388-55D7-4558-943E-20239D0FEBE2}"
 	ProjectSection(SolutionItems) = preProject
 		DotNetDesign.Substrate.Generator\DotNetDesign.Substrate Generator.nuspec = DotNetDesign.Substrate.Generator\DotNetDesign.Substrate Generator.nuspec
-		DotNetDesign.Substrate.WebApi\DotNetDesign.Substrate.WebApi.nuspec = DotNetDesign.Substrate.WebApi\DotNetDesign.Substrate.WebApi.nuspec
 		..\tools\EntitiesFormTemplate.xsn = ..\tools\EntitiesFormTemplate.xsn
 		..\tools\EntitiesSchema.xsd = ..\tools\EntitiesSchema.xsd
 		..\tools\EntityGenerator.tt = ..\tools\EntityGenerator.tt
