@@ -11,26 +11,27 @@ using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate.WebApi
 {
-    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation, TApiKey> :
-        BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, Guid, TEntityDataImplementation, TApiKey>, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation, TApiKey>
+    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation> :
+        BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, Guid, TEntityDataImplementation>, 
+        IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TEntityDataImplementation>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TEntityData>
         where TEntityDataImplementation : class, TEntityData
     {
         public BaseEntityRepositoryController(
-            Func<IApiKeyPermissionAuthorizationManager<TEntity, TEntityData, TEntityRepository, TApiKey>> apiKeyPermissionAuthorizationManagerFactory, 
+            Func<IPermissionAuthorizationManager<TEntity, TEntityData, TEntityRepository>> permissionAuthorizationManagerFactory, 
             Func<TEntityRepository> entityRepositoryFactory, 
             Func<TEntity> entityFactory,
             string rootUri,
             params string[] excludedPropertyNames)
-            : base(apiKeyPermissionAuthorizationManagerFactory, entityRepositoryFactory, entityFactory, rootUri, excludedPropertyNames)
+            : base(permissionAuthorizationManagerFactory, entityRepositoryFactory, entityFactory, rootUri, excludedPropertyNames)
         {
         }
     }
 
-    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation, TApiKey> :
-        ApiController, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation, TApiKey>
+    public class BaseEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation> :
+        ApiController, IEntityRepositoryController<TEntityData, TEntity, TEntityRepository, TId, TEntityDataImplementation>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
@@ -44,13 +45,13 @@ namespace DotNetDesign.Substrate.WebApi
         public static readonly IEnumerable<string> DefaultExcludedPropertyNames = new[] { "Id", "CreatedAt", "UpdatedAt", "Version", "VersionId" };
         private readonly IEnumerable<string> _excludedPropertyNames;
 
-        protected readonly Func<IApiKeyPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository, TApiKey>> ApiKeyPermissionAuthorizationManagerFactory;
+        protected readonly Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> PermissionAuthorizationManagerFactory;
         protected readonly Func<TEntityRepository> EntityRepositoryFactory;
         protected readonly Func<TEntity> EntityFactory;
         private readonly string _rootUri;
 
         public BaseEntityRepositoryController(
-            Func<IApiKeyPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository, TApiKey>> apiKeyPermissionAuthorizationManagerFactory,
+            Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> permissionAuthorizationManagerFactory,
             Func<TEntityRepository> entityRepositoryFactory,
             Func<TEntity> entityFactory,
             string rootUri,
@@ -58,7 +59,7 @@ namespace DotNetDesign.Substrate.WebApi
         {
             using (Logger.Scope())
             {
-                ApiKeyPermissionAuthorizationManagerFactory = apiKeyPermissionAuthorizationManagerFactory;
+                PermissionAuthorizationManagerFactory = permissionAuthorizationManagerFactory;
                 EntityRepositoryFactory = entityRepositoryFactory;
                 EntityFactory = entityFactory;
                 _rootUri = rootUri;
@@ -75,9 +76,8 @@ namespace DotNetDesign.Substrate.WebApi
         /// <summary>
         /// Gets all entity data.
         /// </summary>
-        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public IQueryable<TEntityDataImplementation> Get(TApiKey apiKey)
+        public IQueryable<TEntityDataImplementation> Get()
         {
             using(Logger.Scope())
             {
@@ -85,12 +85,12 @@ namespace DotNetDesign.Substrate.WebApi
 
                 try
                 {
-                    ApiKeyAuthorization(apiKey, EntityPermissions.Read);
+                    Authorize(EntityPermissions.Read);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                    throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Unauthorized));
                 }
 
                 var entities = EntityRepositoryFactory().GetAll().Select(x => x.EntityData).Cast<TEntityDataImplementation>();
@@ -103,9 +103,8 @@ namespace DotNetDesign.Substrate.WebApi
         /// Gets the entity data by id.
         /// </summary>
         /// <param name="id">The id.</param>
-        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public TEntityDataImplementation Get(TId id, TApiKey apiKey)
+        public TEntityDataImplementation Get(TId id)
         {
             using (Logger.Scope())
             {
@@ -113,12 +112,12 @@ namespace DotNetDesign.Substrate.WebApi
 
                 try
                 {
-                    ApiKeyAuthorization(apiKey, EntityPermissions.Read);
+                    Authorize(EntityPermissions.Read);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                    throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Unauthorized));
                 }
 
                 var entity = EntityRepositoryFactory().GetById(id);
@@ -134,9 +133,8 @@ namespace DotNetDesign.Substrate.WebApi
         /// </summary>
         /// <param name="id">The id.</param>
         /// <param name="version">The version.</param>
-        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public TEntityDataImplementation Get(TId id, int version, TApiKey apiKey)
+        public TEntityDataImplementation Get(TId id, int version)
         {
             using (Logger.Scope())
             {
@@ -144,12 +142,12 @@ namespace DotNetDesign.Substrate.WebApi
 
                 try
                 {
-                    ApiKeyAuthorization(apiKey, EntityPermissions.Read);
+                    Authorize(EntityPermissions.Read);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
-                    throw new HttpResponseException(ex.Message, HttpStatusCode.Unauthorized);
+                    throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Unauthorized));
                 }
 
                 var entity = EntityRepositoryFactory().GetVersion(id, version);
@@ -164,9 +162,8 @@ namespace DotNetDesign.Substrate.WebApi
         /// Creates the specified entity data.
         /// </summary>
         /// <param name="entityData">The entity data.</param>
-        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public HttpResponseMessage<TEntityDataImplementation> Post(TEntityDataImplementation entityData, TApiKey apiKey)
+        public HttpResponseMessage Post(TEntityDataImplementation entityData)
         {
             using (Logger.Scope())
             {
@@ -175,12 +172,12 @@ namespace DotNetDesign.Substrate.WebApi
                 if (entityData == null)
                 {
                     Logger.Info("No data posted.");
-                    return new HttpResponseMessage<TEntityDataImplementation>(HttpStatusCode.BadRequest);
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
 
                 try
                 {
-                    ApiKeyAuthorization(apiKey, EntityPermissions.Insert);
+                    Authorize(EntityPermissions.Insert);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -198,15 +195,11 @@ namespace DotNetDesign.Substrate.WebApi
                 if (!existingEntity.Save(out savedEntity))
                 {
                     Logger.Info("Validation failed.");
-                    return new HttpResponseMessage<TEntityDataImplementation>(
-                        (existingEntity as TEntityDataImplementation),
-                        HttpStatusCode.BadRequest);
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, existingEntity);
                 }
 
                 Logger.Info("Save succeeded.");
-                var response = new HttpResponseMessage<TEntityDataImplementation>(
-                    (savedEntity.EntityData as TEntityDataImplementation),
-                    HttpStatusCode.Created);
+                var response = Request.CreateResponse(HttpStatusCode.Created, savedEntity.EntityData);
                 response.Headers.Location = new Uri(Request.RequestUri, _rootUri + "/" + savedEntity.Id);
 
                 return response;
@@ -218,9 +211,8 @@ namespace DotNetDesign.Substrate.WebApi
         /// </summary>
         /// <param name="id">The entity ID.</param>
         /// <param name="entityData">The entity data.</param>
-        /// <param name="apiKey">The API key.</param>
         /// <returns></returns>
-        public HttpResponseMessage<TEntityDataImplementation> Put(TId id, TEntityDataImplementation entityData, TApiKey apiKey)
+        public HttpResponseMessage Put(TId id, TEntityDataImplementation entityData)
         {
             using (Logger.Scope())
             {
@@ -229,13 +221,12 @@ namespace DotNetDesign.Substrate.WebApi
                 if (entityData == null)
                 {
                     Logger.Info("No data posted.");
-                    return
-                        new HttpResponseMessage<TEntityDataImplementation>(HttpStatusCode.BadRequest);
+                    return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
 
                 try
                 {
-                    ApiKeyAuthorization(apiKey, EntityPermissions.Update);
+                    Authorize(EntityPermissions.Update);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -250,8 +241,7 @@ namespace DotNetDesign.Substrate.WebApi
                 if (existingEntity == null)
                 {
                     Logger.Info("Existing entity not found.");
-                    return
-                        new HttpResponseMessage<TEntityDataImplementation>(HttpStatusCode.NotFound);
+                    return Request.CreateResponse(HttpStatusCode.NotFound);
                 }
 
                 ApplyChanges(entityData, existingEntity);
@@ -260,13 +250,11 @@ namespace DotNetDesign.Substrate.WebApi
                 if (!existingEntity.Save(out savedEntity))
                 {
                     Logger.Info("Validation failed.");
-                    return new HttpResponseMessage<TEntityDataImplementation>(
-                        (existingEntity as TEntityDataImplementation),
-                        HttpStatusCode.BadRequest);
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, existingEntity);
                 }
 
                 Logger.Info("Save succeeded.");
-                var response = new HttpResponseMessage<TEntityDataImplementation>((savedEntity.EntityData as TEntityDataImplementation));
+                var response = Request.CreateResponse(HttpStatusCode.OK, savedEntity.EntityData);
                 response.Headers.Location = new Uri(Request.RequestUri, _rootUri + "/" + savedEntity.Id);
 
                 return response;
@@ -277,8 +265,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// Deletes the specified id.
         /// </summary>
         /// <param name="id">The id.</param>
-        /// <param name="apiKey">The API key.</param>
-        public HttpResponseMessage Delete(TId id, TApiKey apiKey)
+        public HttpResponseMessage Delete(TId id)
         {
             using (Logger.Scope())
             {
@@ -293,7 +280,7 @@ namespace DotNetDesign.Substrate.WebApi
 
                 try
                 {
-                    ApiKeyAuthorization(apiKey, EntityPermissions.Delete);
+                    Authorize(EntityPermissions.Delete);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -326,9 +313,12 @@ namespace DotNetDesign.Substrate.WebApi
         /// <param name="existingEntityData">The existing entity data.</param>
         protected void ApplyChanges(TEntityData newEntityData, TEntityData existingEntityData)
         {
-            foreach (var propertyInfo in typeof(TEntityData).GetProperties().Where(IsPropertyIncluded))
+            using (Logger.Scope())
             {
-                propertyInfo.SetValue(existingEntityData, propertyInfo.GetValue(newEntityData, null), null);
+                foreach (var propertyInfo in typeof (TEntityData).GetProperties().Where(IsPropertyIncluded))
+                {
+                    propertyInfo.SetValue(existingEntityData, propertyInfo.GetValue(newEntityData, null), null);
+                }
             }
         }
 
@@ -340,12 +330,11 @@ namespace DotNetDesign.Substrate.WebApi
             }
         }
 
-        private void ApiKeyAuthorization(TApiKey apiKey, EntityPermissions requiredPermissions)
+        private void Authorize(EntityPermissions requiredPermissions)
         {
             using(Logger.Scope())
             {
-                var authManager = ApiKeyPermissionAuthorizationManagerFactory();
-                authManager.ApiKey = apiKey;
+                var authManager = PermissionAuthorizationManagerFactory();
                 authManager.Authorize(requiredPermissions);
             }
         }

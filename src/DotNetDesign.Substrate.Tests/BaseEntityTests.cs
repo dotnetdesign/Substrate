@@ -3,9 +3,7 @@ using System.Linq;
 using Autofac;
 using FluentAssertions;
 using NUnit.Framework;
-using NUnit.Mocks;
 using Moq;
-using Mock = Moq.Mock;
 
 namespace DotNetDesign.Substrate.Tests
 {
