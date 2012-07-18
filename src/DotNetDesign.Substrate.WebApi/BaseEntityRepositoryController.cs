@@ -322,7 +322,7 @@ namespace DotNetDesign.Substrate.WebApi
             }
         }
 
-        private bool IsPropertyIncluded(PropertyInfo x)
+        protected bool IsPropertyIncluded(PropertyInfo x)
         {
             using (Logger.Scope())
             {
@@ -330,7 +330,7 @@ namespace DotNetDesign.Substrate.WebApi
             }
         }
 
-        private void Authorize(EntityPermissions requiredPermissions)
+        protected void Authorize(EntityPermissions requiredPermissions)
         {
             using(Logger.Scope())
             {

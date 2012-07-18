@@ -137,7 +137,7 @@ namespace <#=namespaceName#>
 	foreach(var entity in entities)
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
-		
+		WriteLine("[ServiceContract]");
 		if(useDefaultIdType){
 			WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
 		}
