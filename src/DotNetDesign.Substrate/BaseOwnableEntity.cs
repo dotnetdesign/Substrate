@@ -96,9 +96,7 @@ namespace DotNetDesign.Substrate
             {
                 using (Logger.Scope())
                 {
-                    //TODO FIX THIS
-                    //return (!IsInitialized) ? default(TId) : EntityData.OwnerId;
-                    return EntityData.OwnerId;
+                    return (!IsInitialized) ? default(TId) : EntityData.OwnerId;
                 }
             }
             set
