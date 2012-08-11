@@ -32,6 +32,8 @@
             </xs:sequence>
             <xs:attribute name="name" type="xs:string" use="required" />
             <xs:attribute name="idType" type="xs:string" use="required" />
+            <xs:attribute name="isOwnable" type="xs:boolean" use="optional" default="false" />
+            <xs:attribute name="ownerType" type="xs:string" use="optional" />
           </xs:complexType>
         </xs:element>
       </xs:sequence>
