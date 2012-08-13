@@ -26,6 +26,8 @@ using DotNetDesign.Substrate;
 					{
 						Name = entity.Attribute("name").Value,
 						IdType = entity.Attribute("idType").Value,
+						IsOwnable = bool.Parse(entity.Attribute("isOwnable").Value),
+						OwnerType = entity.Attribute("ownerType").Value,
 						Properties = properties.Select(p => new 
 							{ 
 								Name = p.Attribute("name").Value, 
@@ -51,12 +53,20 @@ namespace <#=namespaceName#>
 	foreach(var entity in entities)
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
-		
-		if(useDefaultIdType){
-			WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, I{0}Repository>", entity.Name, entity);
-		}
-		else{
-			WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0}Data : IOwnableEntityData<I{0}Data, I{0}, I{0}Repository, I{1}, I{1}Data, I{1}Repository>", entity.Name, entity.OwnerType);
+			}
+			else{
+				WriteLine("public partial interface I{0}Data : IOwnableEntityData<I{0}Data, I{0}, {1}, I{0}Repository, I{2}, I{2}Data, I{2}Repository>", entity.Name, entity.IdType, entity.OwnerType);
+			}
+		} else {
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, I{0}Repository>", entity.Name, entity);
+			}
+			else{
+				WriteLine("public partial interface I{0}Data : IEntityData<I{0}Data, I{0}, {1}, I{0}Repository>", entity.Name, entity.IdType);
+			}
 		}
 		WriteLine("{");
 		
@@ -98,11 +108,20 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		if(useDefaultIdType){
-			WriteLine("public partial interface I{0} : IEntity<I{0}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name);
-		}
-		else{
-			WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0} : IOwnableEntity<I{0}, I{0}Data, I{1}, I{0}Repository, I{1}Data, I{1}Repository>, I{0}Data {{}}", entity.Name, entity.OwnerType);
+			}
+			else{
+				WriteLine("public partial interface I{0} : IOwnableEntity<I{0}, {1}, I{0}Data, I{2}, I{0}Repository, I{2}Data, IRepository>, I{0}Data {{}}", entity.Name, entity.IdType, entity.OwnerType);
+			}
+		} else {
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0} : IEntity<I{0}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name);
+			}
+			else{
+				WriteLine("public partial interface I{0} : IEntity<I{0}, {1}, I{0}Data, I{0}Repository>, I{0}Data {{}}", entity.Name, entity.IdType);
+			}
 		}
 	}
 	PopIndent();
@@ -118,11 +137,20 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		if(useDefaultIdType){
-			WriteLine("public partial interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, I{0}Data> {{}}", entity.Name);
-		}
-		else{
-			WriteLine("public partial interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0}Repository : IOwnableEntityRepository<I{0}Repository, I{0}, I{0}Data, I{1}, I{1}Data, I{1}Repository> {{}}", entity.Name, entity.OwnerType);
+			}
+			else{
+				WriteLine("public partial interface I{0}Repository : IOwnableEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data, I{2}, I{2}Data, I{2}Repository> {{}}", entity.Name, entity.IdType, entity.OwnerType);
+			}
+		} else {
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, I{0}Data> {{}}", entity.Name);
+			}
+			else{
+				WriteLine("public partial interface I{0}Repository : IEntityRepository<I{0}Repository, I{0}, {1}, I{0}Data> {{}}", entity.Name, entity.IdType);
+			}
 		}
 	}
 	PopIndent();
@@ -138,11 +166,20 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		WriteLine("[ServiceContract]");
-		if(useDefaultIdType){
-			WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
-		}
-		else{
-			WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0}RepositoryService : IOwnableEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data, I{1}, I{1}Data, I{1}Repository> {{}}", entity.Name, entity.OwnerType);
+			}
+			else{
+				WriteLine("public partial interface I{0}RepositoryService : IOwnableEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data, I{2}, I{2}Data, I{2}Repository> {{}}", entity.Name, entity.IdType, entity.OwnerType);
+			}
+		} else {
+			if(useDefaultIdType){
+				WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {0}Data> {{}}", entity.Name);
+			}
+			else{
+				WriteLine("public partial interface I{0}RepositoryService : IEntityRepositoryService<I{0}Data, I{0}, I{0}Repository, {1}, {0}Data> {{}}", entity.Name, entity.IdType);
+			}
 		}
 	}
 	PopIndent();
@@ -160,11 +197,20 @@ namespace <#=namespaceName#>
 		
 		WriteLine("[DataContract]");
 		WriteLine("[Serializable]");
-		if(useDefaultIdType){
-			WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, I{0}Repository>, I{0}Data", entity.Name);
-		}
-		else{
-			WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+				WriteLine("public partial class {0}Data : BaseOwnableEntityData<I{0}Data, I{0}, I{0}Repository, I{1}, I{1}Data, I{1}Repository>, I{0}Data", entity.Name, entity.OwnerType);
+			}
+			else{
+				WriteLine("public partial class {0}Data : BaseOwnableEntityData<I{0}Data, I{0}, {1}, I{0}Repository, I{2}, I{2}Data, I{2}Repository>, I{0}Data", entity.Name, entity.IdType, entity.OwnerType);
+			}
+		} else {
+			if(useDefaultIdType){
+				WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, I{0}Repository>, I{0}Data", entity.Name);
+			}
+			else{
+				WriteLine("public partial class {0}Data : BaseEntityData<I{0}Data, I{0}, {1}, I{0}Repository>, I{0}Data", entity.Name, entity.IdType);
+			}
 		}
 		WriteLine("{");
 		
@@ -199,39 +245,79 @@ namespace <#=namespaceName#>
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
 		
-		if(useDefaultIdType){
-#>
-	public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
-	{
-		public <#=entity.Name#>(
-			Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
-			Func<I<#=entity.Name#>Data> entityDataFactory,
-			Func<IConcurrencyManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
-			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityValidators,
-            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory)
-			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+	#>
+		public partial class <#=entity.Name#> : BaseOwnableEntity<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.OwnerType#>, I<#=entity.OwnerType#>Data, I<#=entity.OwnerType#>Repository>, I<#=entity.Name#>
 		{
-		}
+			public <#=entity.Name#>(
+				Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<IConcurrencyManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
+				IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityValidators,
+	            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory,
+	            Func<I<#=entity.OwnerType#>Repository> ownerRepositoryFactory)
+				: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory, ownerRepositoryFactory)
+			{
+			}
 
-		#region I<#=entity.Name#>Data Properties
-<#
-		}
-		else{
-#>
-	public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
-	{
-		public <#=entity.Name#>(
-			Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
-			Func<I<#=entity.Name#>Data> entityDataFactory,
-			Func<IConcurrencyManager<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
-			IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> entityValidators,
-            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory)
-			: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
+			#region I<#=entity.Name#>Data Properties
+	<#
+			}
+			else{
+	#>
+		public partial class <#=entity.Name#> : BaseOwnableEntity<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.OwnerType#>, I<#=entity.OwnerType#>Data, I<#=entity.OwnerType#>Repository>>, I<#=entity.Name#>
 		{
-		}
+			public <#=entity.Name#>(
+				Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<IConcurrencyManager<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
+				IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> entityValidators,
+	            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory,
+	            Func<I<#=entity.OwnerType#>Repository> ownerRepositoryFactory)
+				: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory, ownerRepositoryFactory)
+			{
+			}
 
-		#region I<#=entity.Name#>Data Properties
-<#
+			#region I<#=entity.Name#>Data Properties
+	<#
+			}
+		} else {
+
+			if(useDefaultIdType){
+	#>
+		public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
+		{
+			public <#=entity.Name#>(
+				Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<IConcurrencyManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
+				IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityValidators,
+	            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory)
+				: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
+			{
+			}
+
+			#region I<#=entity.Name#>Data Properties
+	<#
+			}
+			else{
+	#>
+		public partial class <#=entity.Name#> : BaseEntity<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>, I<#=entity.Name#>
+		{
+			public <#=entity.Name#>(
+				Func<I<#=entity.Name#>Repository> entityRepositoryFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<IConcurrencyManager<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityConcurrencyManagerFactory,
+				IEnumerable<IEntityValidator<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> entityValidators,
+	            Func<IPermissionAuthorizationManager<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, I<#=entity.Name#>Repository>> permissionAuthorizationManagerFactory)
+				: base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
+			{
+			}
+
+			#region I<#=entity.Name#>Data Properties
+	<#
+			}
 		}
 	foreach(var property in entity.Properties)
 	{
@@ -240,14 +326,14 @@ namespace <#=namespaceName#>
 		{
 			get 
 			{
-				using(Logger.Scope())
+				using(TraceTopics.Entities.Scope())
 				{ 
 					return EntityData.<#=property.Name#>; 
 				}
 			}
 			set
 			{
-				using(Logger.Scope())
+				using(TraceTopics.Entities.Scope())
 				{ 
 					if (EntityData.<#=property.Name#> == value) return;
 
@@ -275,40 +361,76 @@ namespace <#=namespaceName#>
 	foreach(var entity in entities)
 	{
 		var useDefaultIdType = entity.IdType == "Guid";
-		
-		if(useDefaultIdType){
-#>
-	public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
-	{
-		public <#=entity.Name#>Repository(
-			Func<I<#=entity.Name#>> entityFactory,
-			Func<I<#=entity.Name#>Data> entityDataFactory,
-			Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
-			IEnumerable<IEntityObserver<I<#=entity.Name#>>> entityObservers,
-			Func<IEntityCache<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
-			Func<IScopeManager> scopeManagerFactory)
-			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+		if(entity.IsOwnable){
+			if(useDefaultIdType){
+	#>
+		public partial class <#=entity.Name#>Repository : OwnableEntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService, I<#=entity.OwnerType#>, I<#=entity.OwnerType#>Data, I<#=entity.OwnerType#>Repository>, I<#=entity.Name#>Repository
 		{
+			public <#=entity.Name#>Repository(
+				Func<I<#=entity.Name#>> entityFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
+				IEnumerable<IEntityObserver<I<#=entity.Name#>>> entityObservers,
+				Func<IEntityCache<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
+				Func<IScopeManager> scopeManagerFactory)
+				: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+			{
+			}
 		}
-	}
-<#  
-		}
-		else{
-#>
-	public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
-	{
-		public <#=entity.Name#>Repository(
-			Func<I<#=entity.Name#>> entityFactory,
-			Func<I<#=entity.Name#>Data> entityDataFactory,
-			Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
-			IEnumerable<IEntityObserver<I<#=entity.Name#>, <#=entity.IdType#>>> entityObservers,
-			Func<IEntityCache<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
-			Func<IScopeManager> scopeManagerFactory)
-			: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+	<#  
+			}
+			else{
+	#>
+		public partial class <#=entity.Name#>Repository : OwnableEntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService, I<#=entity.OwnerType#>, I<#=entity.OwnerType#>Data, I<#=entity.OwnerType#>Repository>, I<#=entity.Name#>Repository
 		{
+			public <#=entity.Name#>Repository(
+				Func<I<#=entity.Name#>> entityFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
+				IEnumerable<IEntityObserver<I<#=entity.Name#>, <#=entity.IdType#>>> entityObservers,
+				Func<IEntityCache<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
+				Func<IScopeManager> scopeManagerFactory)
+				: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+			{
+			}
 		}
-	}
-<#  
+	<#  
+			}
+		} else {
+			if(useDefaultIdType){
+	#>
+		public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
+		{
+			public <#=entity.Name#>Repository(
+				Func<I<#=entity.Name#>> entityFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
+				IEnumerable<IEntityObserver<I<#=entity.Name#>>> entityObservers,
+				Func<IEntityCache<I<#=entity.Name#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
+				Func<IScopeManager> scopeManagerFactory)
+				: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+			{
+			}
+		}
+	<#  
+			}
+			else{
+	#>
+		public partial class <#=entity.Name#>Repository : EntityRepository<I<#=entity.Name#>, I<#=entity.Name#>Data, <#=entity.IdType#>, <#=entity.Name#>Data, I<#=entity.Name#>Repository, I<#=entity.Name#>RepositoryService>, I<#=entity.Name#>Repository
+		{
+			public <#=entity.Name#>Repository(
+				Func<I<#=entity.Name#>> entityFactory,
+				Func<I<#=entity.Name#>Data> entityDataFactory,
+				Func<I<#=entity.Name#>RepositoryService> entityRepositoryServiceFactory,
+				IEnumerable<IEntityObserver<I<#=entity.Name#>, <#=entity.IdType#>>> entityObservers,
+				Func<IEntityCache<I<#=entity.Name#>, <#=entity.IdType#>, I<#=entity.Name#>Data, I<#=entity.Name#>Repository>> entityCacheFactory,
+				Func<IScopeManager> scopeManagerFactory)
+				: base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+			{
+			}
+		}
+	<#  
+			}
 		}
 	}
 #>

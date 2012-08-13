@@ -56,7 +56,6 @@ namespace DotNetDesign.Substrate
     {
         #region Private Members
 
-        private bool _init;
         private bool _isDirty;
         private bool _propertyChangedSinceIsDirtySet;
         private bool _propertyChangedSinceValidationResultsPopulated;
@@ -67,6 +66,7 @@ namespace DotNetDesign.Substrate
 
         #region Protected Members
 
+        protected bool IsInitialized;
         protected bool BypassReadPermissionCheck;
         protected bool BypassInsertPermissionCheck;
         protected bool BypassUpdatePermissionCheck;
@@ -210,7 +210,7 @@ namespace DotNetDesign.Substrate
                     returnedEntity = EntityRepositoryFactory().Save(this as TEntity);
 
                     // reset entity state now that it has been saved.
-                    _init = false;
+                    IsInitialized = false;
                     Initialize(returnedEntity.EntityData);
 
                     OnSaved();
@@ -259,7 +259,7 @@ namespace DotNetDesign.Substrate
             {
                 using (Logger.Scope())
                 {
-                    return (!_init) ? default(TId) : EntityData.Id;
+                    return (!IsInitialized) ? default(TId) : EntityData.Id;
                 }
             }
             set
@@ -288,7 +288,7 @@ namespace DotNetDesign.Substrate
             {
                 using (Logger.Scope())
                 {
-                    return (!_init) ? default(int) : EntityData.Version;
+                    return (!IsInitialized) ? default(int) : EntityData.Version;
                 }
             }
             set
@@ -317,7 +317,7 @@ namespace DotNetDesign.Substrate
             {
                 using (Logger.Scope())
                 {
-                    return (!_init) ? DateTime.MinValue : EntityData.CreatedAt;
+                    return (!IsInitialized) ? DateTime.MinValue : EntityData.CreatedAt;
                 }
             }
             set
@@ -346,7 +346,7 @@ namespace DotNetDesign.Substrate
             {
                 using (Logger.Scope())
                 {
-                    return (!_init) ? DateTime.MinValue : EntityData.LastUpdatedAt;
+                    return (!IsInitialized) ? DateTime.MinValue : EntityData.LastUpdatedAt;
                 }
             }
             set
@@ -372,7 +372,7 @@ namespace DotNetDesign.Substrate
             {
                 using (Logger.Scope())
                 {
-                    return (!_init) ? "NOT INITIALIZED" : EntityData.VersionId;
+                    return (!IsInitialized) ? "NOT INITIALIZED" : EntityData.VersionId;
                 }
             }
         }
@@ -562,7 +562,7 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Scope())
             {
-                if (_init)
+                if (IsInitialized)
                 {
                     var invalidOperationException = new InvalidOperationException(
                         "Initialize has already been called on this instance. This can only be called once per instance.");
@@ -584,7 +584,7 @@ namespace DotNetDesign.Substrate
                 _propertyChangedSinceIsDirtySet = false;
                 _isDirty = false;
                 _validationResults = null;
-                _init = true;
+                IsInitialized = true;
 
                 OnInitialized();
             }
@@ -627,7 +627,7 @@ namespace DotNetDesign.Substrate
             {
                 ThrowIfNotInitialized();
 
-                _init = false;
+                IsInitialized = false;
                 Initialize(OriginalEntityData);
             }
         }
@@ -875,7 +875,7 @@ namespace DotNetDesign.Substrate
         {
             using(Logger.Scope())
             {
-                if(!_init)
+                if(!IsInitialized)
                 {
                     var exception =
                         new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
