@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?mso-infoPathSolution solutionVersion="1.0.0.28" PIVersion="1.0.0.0" href="file:///D:\builds\caascommon_helium_systest\products\caascommon\src\common.substrate\tools\EntitiesFormTemplate.xsn" name="urn:schemas-microsoft-com:office:infopath:EntitiesFormTemplate:" language="en-us" productVersion="15.0.0" ?>
+<?mso-application progid="InfoPath.Document" versionProgid="InfoPath.Document.3"?>
+<Entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:my="http://schemas.microsoft.com/office/infopath/2003/myXSD/2011-09-23T16:26:05" xmlns:xd="http://schemas.microsoft.com/office/infopath/2003">
+  <Entity name="User" idType="Guid" isOwnable="false" ownerType="">
+    <Property name="FirstName" displayName="First Name" type="string" required="true">
+      <Attribute includeOnEntityData="false"></Attribute>
+    </Property>
+    <Property name="LastName" displayName="Last Name" type="string" required="true">
+      <Attribute includeOnEntityData="false"></Attribute>
+    </Property>
+    <Property name="EmailAddress" displayName="E-mail Address" type="string" required="true">
+      <Attribute includeOnEntityData="false"></Attribute>
+    </Property>
+  </Entity>
+</Entities>
