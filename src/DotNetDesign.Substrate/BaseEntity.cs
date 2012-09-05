@@ -193,7 +193,7 @@ namespace DotNetDesign.Substrate
                         // Inserting, verify permissions
                         if (!BypassInsertPermissionCheck)
                         {
-                            PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Insert);
+                            PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Insert, this as TEntity);
                         }
                     }
                     else
@@ -201,7 +201,7 @@ namespace DotNetDesign.Substrate
                         // Updating, verify permissions
                         if (!BypassUpdatePermissionCheck)
                         {
-                            PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Update);
+                            PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Update, this as TEntity);
                         }
                     }
                     LastUpdatedAt = DateTime.Now;
@@ -238,7 +238,7 @@ namespace DotNetDesign.Substrate
                 // Deleting, verify permissions
                 if (!BypassDeletePermissionCheck)
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Delete);
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Delete, this as TEntity);
                 }
 
                 OnDeleting();
@@ -575,7 +575,7 @@ namespace DotNetDesign.Substrate
                 // Initializing, verify read permissions
                 if (!BypassReadPermissionCheck)
                 {
-                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read);
+                    PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Read, this as TEntity);
                 }
 
                 OriginalEntityData = entityData;

@@ -43,14 +43,6 @@ namespace DotNetDesign.Substrate
         where TOwnerRepository : class, IEntityRepository<TOwnerRepository, TOwner, TId, TOwnerData>
     {
         /// <summary>
-        /// Gets or sets the owner id.
-        /// </summary>
-        /// <value>
-        /// The owner id.
-        /// </value>
-        TId OwnerId { get; set; }
-
-        /// <summary>
         /// Gets the owner.
         /// </summary>
         /// <value>
