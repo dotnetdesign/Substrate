@@ -34,7 +34,7 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TOwnerData">The type of the owner data.</typeparam>
     /// <typeparam name="TOwnerRepository">The type of the owner repository.</typeparam>
     public interface IOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository> :
-        IEntity<TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository>
+        IEntity<TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository>, IOwnable
         where TOwnableEntityData : class, IOwnableEntityData<TOwnableEntityData, TOwnableEntity, TId, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
         where TOwnableEntity : class, IOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>, TOwnableEntityData
         where TOwnableEntityRepository : class, IOwnableEntityRepository<TOwnableEntityRepository, TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
