@@ -87,6 +87,7 @@
     <Compile Include="IIdentifiable.cs" />
     <Compile Include="IObjectCache.cs" />
     <Compile Include="IObservableEntity.cs" />
+    <Compile Include="IOwnable.cs" />
     <Compile Include="IOwnableEntity.cs" />
     <Compile Include="IOwnableEntityData.cs" />
     <Compile Include="IOwnableEntityRepository.cs" />

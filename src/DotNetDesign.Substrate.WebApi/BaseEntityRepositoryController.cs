@@ -77,7 +77,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// Gets all entity data.
         /// </summary>
         /// <returns></returns>
-        public IQueryable<TEntityDataImplementation> Get()
+        public virtual IQueryable<TEntityDataImplementation> Get()
         {
             using(Logger.Scope())
             {
@@ -104,7 +104,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// </summary>
         /// <param name="id">The id.</param>
         /// <returns></returns>
-        public TEntityDataImplementation Get(TId id)
+        public virtual TEntityDataImplementation Get(TId id)
         {
             using (Logger.Scope())
             {
@@ -134,7 +134,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// <param name="id">The id.</param>
         /// <param name="version">The version.</param>
         /// <returns></returns>
-        public TEntityDataImplementation Get(TId id, int version)
+        public virtual TEntityDataImplementation Get(TId id, int version)
         {
             using (Logger.Scope())
             {
@@ -163,7 +163,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// </summary>
         /// <param name="entityData">The entity data.</param>
         /// <returns></returns>
-        public HttpResponseMessage Post(TEntityDataImplementation entityData)
+        public virtual HttpResponseMessage Post(TEntityDataImplementation entityData)
         {
             using (Logger.Scope())
             {
@@ -212,7 +212,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// <param name="id">The entity ID.</param>
         /// <param name="entityData">The entity data.</param>
         /// <returns></returns>
-        public HttpResponseMessage Put(TId id, TEntityDataImplementation entityData)
+        public virtual HttpResponseMessage Put(TId id, TEntityDataImplementation entityData)
         {
             using (Logger.Scope())
             {
@@ -265,7 +265,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// Deletes the specified id.
         /// </summary>
         /// <param name="id">The id.</param>
-        public HttpResponseMessage Delete(TId id)
+        public virtual HttpResponseMessage Delete(TId id)
         {
             using (Logger.Scope())
             {

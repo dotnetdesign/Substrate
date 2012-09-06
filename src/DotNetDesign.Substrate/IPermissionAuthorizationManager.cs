@@ -28,5 +28,15 @@ namespace DotNetDesign.Substrate
         ///   <c>true</c> if the authenticated user is authorized with the specified required permissions; otherwise, <c>false</c>.
         /// </returns>
         bool IsAuthorized(EntityPermissions requiredPermissions);
+
+        /// <summary>
+        /// Determines whether the authenticated user is authorized with the specified required permissions.
+        /// </summary>
+        /// <param name="requiredPermissions">The required permissions.</param>
+        /// <param name="entity">The entity to be authorized.</param>
+        /// <returns>
+        ///   <c>true</c> if the authenticated user is authorized with the specified required permissions; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsAuthorized(EntityPermissions requiredPermissions, TEntity entity);
     }
 }
