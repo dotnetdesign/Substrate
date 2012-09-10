@@ -40,5 +40,22 @@ namespace DotNetDesign.Substrate
                 return true;
             }
         }
+
+        /// <summary>
+        /// Determines whether the authenticated user is authorized with the specified required permissions.
+        /// </summary>
+        /// <param name="requiredPermissions">The required permissions.</param>
+        /// <param name="entity">The entity to be authorized.</param>
+        /// <returns>
+        ///   <c>true</c> if the authenticated user is authorized with the specified required permissions; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsAuthorized(EntityPermissions requiredPermissions, TEntity entity)
+        {
+            using (Logger.Scope())
+            {
+                Logger.InfoFormat("Returning true for IsAuthrozied call for required permissions {0}", requiredPermissions);
+                return true;
+            }
+        }
     }
 }
