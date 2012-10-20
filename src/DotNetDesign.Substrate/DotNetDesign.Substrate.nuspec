@@ -10,6 +10,11 @@
     <projectUrl>https://github.com/dotnetdesign/Substrate</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.ComponentModel.DataAnnotations" targetFramework="net40" />
+      <frameworkAssembly assemblyName="System.ServiceModel" targetFramework="net40" />
+      <frameworkAssembly assemblyName="System.Runtime.Serialization" targetFramework="net40" />
+    </frameworkAssemblies>
     <copyright>Copyright 2012</copyright>
     <tags>dal</tags>
   </metadata>
