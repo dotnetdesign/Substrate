@@ -26,7 +26,6 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public class DictionaryEntityCache<TEntity, TId, TEntityData, TEntityRepository> :
-        BaseLogger<DictionaryEntityCache<TEntity, TId, TEntityData, TEntityRepository>>,
         IEntityCache<TEntity, TId, TEntityData, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -42,7 +41,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         public DictionaryEntityCache()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 DictionaryCache = new Dictionary<string, IEnumerable<TEntityData>>();
             }
@@ -55,9 +54,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<TEntityData> Get(string key)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting cached value for key [{0}].", key);
+                Logger.Assembly.Debug(m => m("Getting cached value for key [{0}].", key));
                 return DictionaryCache.ContainsKey(key) ? DictionaryCache[key] : null;
             }
         }
@@ -69,9 +68,9 @@ namespace DotNetDesign.Substrate
         /// <param name="entityData">The entity data.</param>
         public void Add(string key, IEnumerable<TEntityData> entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TEntityData), key, string.Join(",", entityData));
+                Logger.Assembly.Debug(m => m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TEntityData), key, string.Join(",", entityData)));
 
                 if (DictionaryCache.ContainsKey(key))
                 {
@@ -90,9 +89,9 @@ namespace DotNetDesign.Substrate
         /// <param name="key">The key.</param>
         public void Remove(string key)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Removing cached value for key [{0}].", key);
+                Logger.Assembly.Debug(m => m("Removing cached value for key [{0}].", key));
                 DictionaryCache.Remove(key);
             }
         }
@@ -103,7 +102,7 @@ namespace DotNetDesign.Substrate
         /// <param name="entityData">The entity data.</param>
         public void RemoveIfDataContains(TEntityData entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 if (entityData != null)
                 {
@@ -118,17 +117,17 @@ namespace DotNetDesign.Substrate
         /// <param name="entityData">The entity data.</param>
         public void RemoveIfDataContains(IEnumerable<TEntityData> entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Removing cached value if data contains entity data [{0}].", string.Join(",", entityData));
+                Logger.Assembly.Debug(m => m("Removing cached value if data contains entity data [{0}].", string.Join(",", entityData)));
                 foreach (var cacheKeyValuePair in DictionaryCache)
                 {
                     if (cacheKeyValuePair.Value.Any(x => entityData.Contains(x)))
                     {
-                        Logger.DebugFormat("Removing cached value. Cached key [{0}]. Cached value [{1}]. Entity data [{2}].", 
-                            cacheKeyValuePair.Key, 
-                            string.Join(",", cacheKeyValuePair.Value), 
-                            string.Join(",", entityData));
+                        Logger.Assembly.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Entity data [{2}].",
+                            cacheKeyValuePair.Key,
+                            string.Join(",", cacheKeyValuePair.Value),
+                            string.Join(",", entityData)));
 
                         DictionaryCache.Remove(cacheKeyValuePair.Key);
                     }

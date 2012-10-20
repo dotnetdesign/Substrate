@@ -109,9 +109,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<TOwnableEntity> GetByOwner(TOwner owner, bool forceNew = false)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.Debug(m => m("Getting [{0}] by owner ID [{1}]. ForceNew [{2}].", typeof(TOwnableEntity), owner.Id, forceNew));
+                Logger.Assembly.Debug(m => m("Getting [{0}] by owner ID [{1}]. ForceNew [{2}].", typeof(TOwnableEntity), owner.Id, forceNew));
                 var cacheKey = string.Format("GetByOwner_{0}_{1}", typeof(TOwnableEntity), owner.Id);
 
                 var entityData = EntityCacheFactory().Get(cacheKey);

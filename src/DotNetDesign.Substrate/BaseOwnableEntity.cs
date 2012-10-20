@@ -23,6 +23,15 @@ namespace DotNetDesign.Substrate
         where TOwner : class, IEntity<TOwner, TOwnerData, TOwnerRepository>, TOwnerData
         where TOwnerRepository : class, IEntityRepository<TOwnerRepository, TOwner, TOwnerData>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseOwnableEntity&lt;TOwnableEntity, TOwnableEntityData, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository&gt;" /> class.
+        /// </summary>
+        /// <param name="entityRepositoryFactory">The entity repository factory.</param>
+        /// <param name="entityDataFactory">The entity data factory.</param>
+        /// <param name="entityConcurrencyManagerFactory">The entity concurrency manager factory.</param>
+        /// <param name="entityValidators">The entity validators.</param>
+        /// <param name="permissionAuthorizationManagerFactory">The permission authorization manager factory.</param>
+        /// <param name="ownerRepositoryFactory">The owner repository factory.</param>
         protected BaseOwnableEntity(
             Func<TOwnableEntityRepository> entityRepositoryFactory, 
             Func<TOwnableEntityData> entityDataFactory, 
@@ -55,6 +64,15 @@ namespace DotNetDesign.Substrate
         where TOwner : class, IEntity<TOwner, TId, TOwnerData, TOwnerRepository>, TOwnerData
         where TOwnerRepository : class, IEntityRepository<TOwnerRepository, TOwner, TId, TOwnerData>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BaseOwnableEntity&lt;TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository&gt;" /> class.
+        /// </summary>
+        /// <param name="entityRepositoryFactory">The entity repository factory.</param>
+        /// <param name="entityDataFactory">The entity data factory.</param>
+        /// <param name="entityConcurrencyManagerFactory">The entity concurrency manager factory.</param>
+        /// <param name="entityValidators">The entity validators.</param>
+        /// <param name="permissionAuthorizationManagerFactory">The permission authorization manager factory.</param>
+        /// <param name="ownerRepositoryFactory">The owner repository factory.</param>
         protected BaseOwnableEntity(
             Func<TOwnableEntityRepository> entityRepositoryFactory,
             Func<TOwnableEntityData> entityDataFactory,
@@ -64,7 +82,7 @@ namespace DotNetDesign.Substrate
             Func<TOwnerRepository> ownerRepositoryFactory) :
             base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 OwnerRepositoryFactory = ownerRepositoryFactory;
             }
@@ -78,6 +96,9 @@ namespace DotNetDesign.Substrate
 
         #region Protected Members
 
+        /// <summary>
+        /// The owner repository factory
+        /// </summary>
         protected readonly Func<TOwnerRepository> OwnerRepositoryFactory; 
 
         #endregion Protected Members
@@ -94,14 +115,14 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     return (!IsInitialized) ? default(TId) : EntityData.OwnerId;
                 }
             }
             set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     if (EntityData.Id.Equals(value)) return;
 
@@ -121,7 +142,7 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     ThrowIfNotInitialized();
                     if (_lazyOwner == null)
@@ -134,7 +155,7 @@ namespace DotNetDesign.Substrate
             }
             set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     OwnerId = value.Id;
                 }
@@ -147,7 +168,7 @@ namespace DotNetDesign.Substrate
 
         private void InitializeLazyOwner()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 _lazyOwner = new Lazy<TOwner>(LazyOwnerInitializationHandler, LazyThreadSafetyMode.ExecutionAndPublication);
             }
@@ -155,9 +176,9 @@ namespace DotNetDesign.Substrate
 
         private TOwner LazyOwnerInitializationHandler()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.Debug(m => m("Getting owner for {0}", this));
+                Logger.Assembly.Debug(m => m("Getting owner for {0}", this));
                 
                 return OwnerRepositoryFactory().GetById(OwnerId);
             }

@@ -48,7 +48,6 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public abstract class BaseEntity<TEntity, TId, TEntityData, TEntityRepository> :
-        BaseLogger<BaseEntity<TEntity, TId, TEntityData, TEntityRepository>>,
         IEntity<TEntity, TId, TEntityData, TEntityRepository>, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -66,10 +65,25 @@ namespace DotNetDesign.Substrate
 
         #region Protected Members
 
+        /// <summary>
+        /// The is initialized
+        /// </summary>
         protected bool IsInitialized;
+        /// <summary>
+        /// The bypass read permission check
+        /// </summary>
         protected bool BypassReadPermissionCheck;
+        /// <summary>
+        /// The bypass insert permission check
+        /// </summary>
         protected bool BypassInsertPermissionCheck;
+        /// <summary>
+        /// The bypass update permission check
+        /// </summary>
         protected bool BypassUpdatePermissionCheck;
+        /// <summary>
+        /// The bypass delete permission check
+        /// </summary>
         protected bool BypassDeletePermissionCheck;
 
         /// <summary>
@@ -103,7 +117,7 @@ namespace DotNetDesign.Substrate
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TEntityPermission, TId, TEntityData, TEntityRepository&gt;"/> class.
+        /// Initializes a new instance of the <see cref="BaseEntity&lt;TEntity, TId, TEntityData, TEntityRepository&gt;"/> class.
         /// </summary>
         /// <param name="entityRepositoryFactory">The entity repository factory.</param>
         /// <param name="entityDataFactory">The entity data factory.</param>
@@ -117,7 +131,7 @@ namespace DotNetDesign.Substrate
             IEnumerable<IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>> entityValidators,
             Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> permissionAuthorizationManagerFactory)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 EntityDataFactory = entityDataFactory;
                 EntityRepositoryFactory = entityRepositoryFactory;
@@ -139,7 +153,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntityData Clone()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 var newEntity = EntityRepositoryFactory().GetNew();
                 newEntity.Initialize(OriginalEntityData);
@@ -153,7 +167,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public bool Save()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 TEntity returnedEntity;
                 return Save(out returnedEntity);
@@ -166,22 +180,19 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public bool Save(out TEntity returnedEntity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 if (IsDirty)
                 {
-                    Logger.DebugFormat("Entity [{0}] is dirty.", this);
+                    Logger.Assembly.Debug(m => m("Entity [{0}] is dirty.", this));
                     if (!IsValid && Validate().Any(x => x.StatusType == ValidationResultStatusType.Error))
                     {
-                        Logger.DebugFormat("Entity [{0}] is not valid.", this);
+                        Logger.Assembly.Debug(m => m("Entity [{0}] is not valid.", this));
                         returnedEntity = this as TEntity;
                         return false;
                     }
-                    
-                    if (Logger.IsInfoEnabled)
-                    {
-                        Logger.DebugFormat("Entity [{0}] is valid.", this);
-                    }
+
+                    Logger.Assembly.Info(m => m("Entity [{0}] is valid.", this));
 
                     EntityConcurrencyManagerFactory().Verify(this as TEntity);
 
@@ -217,11 +228,8 @@ namespace DotNetDesign.Substrate
                     
                     return true;
                 }
-                
-                if(Logger.IsInfoEnabled)
-                {
-                    Logger.DebugFormat("Entity [{0}] is not dirty.", this);
-                }
+
+                Logger.Assembly.Info(m => m("Entity [{0}] is not dirty.", this));
 
                 returnedEntity = this as TEntity;
                 return true;
@@ -233,7 +241,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         public void Delete()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 // Deleting, verify permissions
                 if (!BypassDeletePermissionCheck)
@@ -257,14 +265,14 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     return (!IsInitialized) ? default(TId) : EntityData.Id;
                 }
             }
             set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     if (EntityData.Id.Equals(value)) return;
 
@@ -286,14 +294,14 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     return (!IsInitialized) ? default(int) : EntityData.Version;
                 }
             }
             set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     if (EntityData.Version.Equals(value)) return;
 
@@ -315,14 +323,14 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     return (!IsInitialized) ? DateTime.MinValue : EntityData.CreatedAt;
                 }
             }
             set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     if (EntityData.CreatedAt.Equals(value)) return;
 
@@ -344,14 +352,14 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     return (!IsInitialized) ? DateTime.MinValue : EntityData.LastUpdatedAt;
                 }
             }
             set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     if (EntityData.LastUpdatedAt.Equals(value)) return;
 
@@ -370,7 +378,7 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     return (!IsInitialized) ? "NOT INITIALIZED" : EntityData.VersionId;
                 }
@@ -383,7 +391,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntity GetPreviousVersion()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -398,7 +406,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntity GetVersion(int version)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -432,7 +440,7 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     ThrowIfNotInitialized();
                     return _entityData;
@@ -440,7 +448,7 @@ namespace DotNetDesign.Substrate
             }
             private set
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     _entityData = value;
                 }
@@ -456,7 +464,7 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public virtual bool HasPropertyChanged(string propertyName)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -475,7 +483,7 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public virtual bool HasPropertyChanged(string propertyName, out object originalValue)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -499,11 +507,8 @@ namespace DotNetDesign.Substrate
                 hasPropertyChanged = originalValue == null || !originalValue.Equals(currentValue);
             }
 
-            if (Logger.IsInfoEnabled)
-            {
-                Logger.DebugFormat("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName,
-                                   hasPropertyChanged, currentValue, originalValue);
-            }
+            Logger.Assembly.Info(m => m("Property [{0}] has changed [{1}]. Current value [{2}]. Original value [{3}].", propertyName,
+                               hasPropertyChanged, currentValue, originalValue));
 
             return hasPropertyChanged;
         }
@@ -518,7 +523,7 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public virtual bool HasPropertyChanged<TProperty>(Expression<Func<TEntityData, TProperty>> property)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -540,7 +545,7 @@ namespace DotNetDesign.Substrate
             Expression<Func<TEntityData, TProperty>> property,
             out TProperty originalValue)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -560,13 +565,13 @@ namespace DotNetDesign.Substrate
         /// <param name="entityData">The entity data.</param>
         public void Initialize(TEntityData entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 if (IsInitialized)
                 {
                     var invalidOperationException = new InvalidOperationException(
                         "Initialize has already been called on this instance. This can only be called once per instance.");
-                    Logger.Error(invalidOperationException.Message);
+                    Logger.Assembly.Error(invalidOperationException.Message, invalidOperationException);
                     throw invalidOperationException;
                 }
 
@@ -600,17 +605,16 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     ThrowIfNotInitialized();
 
                     if (_propertyChangedSinceIsDirtySet)
                     {
                         _propertyChangedSinceIsDirtySet = false;
-                        _isDirty =
-                            typeof(TEntityData).GetProperties().Any(
-                                x =>
-                                x.GetValue(OriginalEntityData, null) != x.GetValue(EntityData, null));
+                        _isDirty = typeof(TEntityData)
+                            .GetProperties()
+                            .Any(x => x.GetValue(OriginalEntityData, null) != x.GetValue(EntityData, null));
                     }
 
                     return _isDirty;
@@ -623,7 +627,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         public virtual void RevertChanges()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -642,7 +646,7 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 {
                     ThrowIfNotInitialized();
 
@@ -662,7 +666,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<ValidationResult> Validate()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
 
@@ -684,7 +688,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public string GetPropertyDisplayName<TProperty>(Expression<Func<TEntityData, TProperty>> property)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 var propertyName = ((MemberExpression)property.Body).Member.Name;
 
@@ -699,7 +703,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public string GetPropertyDisplayName(string propertyName)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 var propertyInfo = typeof(TEntityData).GetProperty(propertyName);
 
@@ -728,7 +732,7 @@ namespace DotNetDesign.Substrate
         /// <param name="newValue">The new value.</param>
         protected virtual void OnPropertyChanging(string propertyName, object oldValue, object newValue)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 PropertyChanging.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
             }
@@ -747,7 +751,7 @@ namespace DotNetDesign.Substrate
         /// <param name="newValue">The new value.</param>
         protected virtual void OnPropertyChanged(string propertyName, object oldValue, object newValue)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 PropertyChanged.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
             }
@@ -763,7 +767,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected virtual void OnSaving()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Saving.Invoke(this, EventArgs.Empty);
             }
@@ -779,7 +783,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected virtual void OnSaved()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Saved.Invoke(this, EventArgs.Empty);
             }
@@ -795,7 +799,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected virtual void OnDeleting()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Deleting.Invoke(this, EventArgs.Empty);
             }
@@ -811,7 +815,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected virtual void OnDeleted()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Deleted.Invoke(this, EventArgs.Empty);
             }
@@ -827,7 +831,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected virtual void OnInitializing()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Initializing.Invoke(this, EventArgs.Empty);
             }
@@ -843,7 +847,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected virtual void OnInitialized()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Initialized.Invoke(this, EventArgs.Empty);
             }
@@ -860,7 +864,7 @@ namespace DotNetDesign.Substrate
         /// <param name="e">The <see cref="System.ComponentModel.PropertyChangedEventArgs"/> instance containing the event data.</param>
         private void BaseEntityPropertyChanged(object sender, PropertyChangeEventArgs e)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 _propertyChangedSinceIsDirtySet = true;
                 _propertyChangedSinceValidationResultsPopulated = true;
@@ -873,13 +877,12 @@ namespace DotNetDesign.Substrate
         /// <exception cref="InvalidOperationException">InvalidOperationException if entity hasn't been initialized.</exception>
         protected void ThrowIfNotInitialized()
         {
-            using(Logger.Scope())
+            using(Logger.Assembly.Scope())
             {
                 if(!IsInitialized)
                 {
-                    var exception =
-                        new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
-                    Logger.Error(exception.Message);
+                    var exception = new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
+                    Logger.Assembly.Error(exception.Message, exception);
                     throw exception;
                 }
             }
@@ -895,7 +898,7 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public override string ToString()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return string.Format("{0}::{1}::{2}", typeof(TEntity), Id, Version);
             }
@@ -909,7 +912,7 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public override int GetHashCode()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return ToString().GetHashCode();
             }

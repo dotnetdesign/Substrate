@@ -42,9 +42,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Common.Logging.2.1.1\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
-    <Reference Include="DotNetDesign.Common, Version=0.5.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="DotNetDesign.Common, Version=0.9.0.7, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\DotNetDesign.Common.0.5.2.0\lib\net40\DotNetDesign.Common.dll</HintPath>
+      <HintPath>..\packages\DotNetDesign.Common.0.9.0.7\lib\net40\DotNetDesign.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -96,6 +96,7 @@
     <Compile Include="IScopeManager.cs" />
     <Compile Include="IValidatable.cs" />
     <Compile Include="IVersionable.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="OwnableEntityRepository.cs" />
     <Compile Include="PermissionAuthrozationManagerExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

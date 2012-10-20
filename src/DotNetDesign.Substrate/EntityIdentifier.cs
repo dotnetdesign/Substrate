@@ -23,7 +23,7 @@ namespace DotNetDesign.Substrate
         /// <param name="id">The id.</param>
         public EntityIdentifier(Guid id)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Id = id;
             }
@@ -38,7 +38,10 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public static implicit operator EntityIdentifier(Guid guid)
         {
-            return new EntityIdentifier(guid);
+            using (Logger.Assembly.Scope())
+            {
+                return new EntityIdentifier(guid);
+            }
         }
     }
 
@@ -47,7 +50,6 @@ namespace DotNetDesign.Substrate
     /// </summary>
     [Serializable]
     public class EntityIdentifier<TId> :
-        BaseLogger<EntityIdentifier<TId>>,
         IIdentifiable<TId>
     {
         /// <summary>

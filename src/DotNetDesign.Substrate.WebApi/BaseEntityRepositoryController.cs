@@ -37,8 +37,6 @@ namespace DotNetDesign.Substrate.WebApi
         where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
         where TEntityDataImplementation : class, TEntityData
     {
-        protected readonly ILog Logger = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        
         /// <summary>
         /// Property names to excluded when comparing changes by default.
         /// </summary>
@@ -57,7 +55,7 @@ namespace DotNetDesign.Substrate.WebApi
             string rootUri,
             params string[] excludedPropertyNames)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 PermissionAuthorizationManagerFactory = permissionAuthorizationManagerFactory;
                 EntityRepositoryFactory = entityRepositoryFactory;
@@ -79,9 +77,9 @@ namespace DotNetDesign.Substrate.WebApi
         /// <returns></returns>
         public virtual IQueryable<TEntityDataImplementation> Get()
         {
-            using(Logger.Scope())
+            using(Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting all entities of type {0}", typeof(TEntity));
+                Logger.Assembly.Debug(m => m("Getting all entities of type {0}", typeof(TEntity)));
 
                 try
                 {
@@ -89,7 +87,7 @@ namespace DotNetDesign.Substrate.WebApi
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    Logger.Assembly.Error(m => m("Unauthorized. {0}", ex.Message), ex);
                     throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Unauthorized));
                 }
 
@@ -106,9 +104,9 @@ namespace DotNetDesign.Substrate.WebApi
         /// <returns></returns>
         public virtual TEntityDataImplementation Get(TId id)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting entity of type {0} by id {1}", typeof(TEntity), id);
+                Logger.Assembly.Debug(m => m("Getting entity of type {0} by id {1}", typeof(TEntity), id));
 
                 try
                 {
@@ -116,7 +114,7 @@ namespace DotNetDesign.Substrate.WebApi
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    Logger.Assembly.Error(m => m("Unauthorized. {0}", ex.Message), ex);
                     throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Unauthorized));
                 }
 
@@ -136,9 +134,9 @@ namespace DotNetDesign.Substrate.WebApi
         /// <returns></returns>
         public virtual TEntityDataImplementation Get(TId id, int version)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting entity of type {0} by id {1} and version {2}", typeof(TEntity), id, version);
+                Logger.Assembly.Debug(m => m("Getting entity of type {0} by id {1} and version {2}", typeof(TEntity), id, version));
 
                 try
                 {
@@ -146,7 +144,7 @@ namespace DotNetDesign.Substrate.WebApi
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    Logger.Assembly.Error(m => m("Unauthorized. {0}", ex.Message), ex);
                     throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Unauthorized));
                 }
 
@@ -165,13 +163,13 @@ namespace DotNetDesign.Substrate.WebApi
         /// <returns></returns>
         public virtual HttpResponseMessage Post(TEntityDataImplementation entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Adding the entity {0}", entityData);
+                Logger.Assembly.Debug(m => m("Adding the entity {0}", entityData));
 
                 if (entityData == null)
                 {
-                    Logger.Info("No data posted.");
+                    Logger.Assembly.Info("No data posted.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
 
@@ -181,7 +179,7 @@ namespace DotNetDesign.Substrate.WebApi
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    Logger.Assembly.Error(m => m("Unauthorized. {0}", ex.Message), ex);
                     var unauthorizedResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
                     unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
                     throw new HttpResponseException(unauthorizedResponse);
@@ -194,11 +192,11 @@ namespace DotNetDesign.Substrate.WebApi
                 TEntity savedEntity;
                 if (!existingEntity.Save(out savedEntity))
                 {
-                    Logger.Info("Validation failed.");
+                    Logger.Assembly.Info("Validation failed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, existingEntity);
                 }
 
-                Logger.Info("Save succeeded.");
+                Logger.Assembly.Info("Save succeeded.");
                 var response = Request.CreateResponse(HttpStatusCode.Created, savedEntity.EntityData);
                 response.Headers.Location = new Uri(Request.RequestUri, _rootUri + "/" + savedEntity.Id);
 
@@ -214,13 +212,13 @@ namespace DotNetDesign.Substrate.WebApi
         /// <returns></returns>
         public virtual HttpResponseMessage Put(TId id, TEntityDataImplementation entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Saving the entity {0}", entityData);
+                Logger.Assembly.Debug(m => m("Saving the entity {0}", entityData));
 
                 if (entityData == null)
                 {
-                    Logger.Info("No data posted.");
+                    Logger.Assembly.Info("No data posted.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest);
                 }
 
@@ -230,7 +228,7 @@ namespace DotNetDesign.Substrate.WebApi
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    Logger.Assembly.Error(m => m("Unauthorized. {0}", ex.Message), ex);
                     var unauthorizedResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
                     unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
                     throw new HttpResponseException(unauthorizedResponse);
@@ -240,7 +238,7 @@ namespace DotNetDesign.Substrate.WebApi
 
                 if (existingEntity == null)
                 {
-                    Logger.Info("Existing entity not found.");
+                    Logger.Assembly.Info("Existing entity not found.");
                     return Request.CreateResponse(HttpStatusCode.NotFound);
                 }
 
@@ -249,11 +247,11 @@ namespace DotNetDesign.Substrate.WebApi
                 TEntity savedEntity;
                 if (!existingEntity.Save(out savedEntity))
                 {
-                    Logger.Info("Validation failed.");
+                    Logger.Assembly.Info("Validation failed.");
                     return Request.CreateResponse(HttpStatusCode.BadRequest, existingEntity);
                 }
 
-                Logger.Info("Save succeeded.");
+                Logger.Assembly.Info("Save succeeded.");
                 var response = Request.CreateResponse(HttpStatusCode.OK, savedEntity.EntityData);
                 response.Headers.Location = new Uri(Request.RequestUri, _rootUri + "/" + savedEntity.Id);
 
@@ -267,13 +265,13 @@ namespace DotNetDesign.Substrate.WebApi
         /// <param name="id">The id.</param>
         public virtual HttpResponseMessage Delete(TId id)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Deleting the entity with ID {0}", id);
+                Logger.Assembly.Debug(m => m("Deleting the entity with ID {0}", id));
 
                 if (id.Equals(default(TId)))
                 {
-                    Logger.Info("No data posted.");
+                    Logger.Assembly.Info("No data posted.");
                     return
                         new HttpResponseMessage(HttpStatusCode.BadRequest);
                 }
@@ -284,7 +282,7 @@ namespace DotNetDesign.Substrate.WebApi
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    Logger.ErrorFormat("Unauthorized. {0}", ex.Message);
+                    Logger.Assembly.Error(m => m("Unauthorized. {0}", ex.Message), ex);
                     var unauthorizedResponse = new HttpResponseMessage(HttpStatusCode.Unauthorized);
                     unauthorizedResponse.Headers.Add(SuppressFormsAuthenticationRedirectModule.SuppressFormsHeaderName, "true");
                     throw new HttpResponseException(unauthorizedResponse);
@@ -294,7 +292,7 @@ namespace DotNetDesign.Substrate.WebApi
 
                 if (existingEntity == null)
                 {
-                    Logger.Info("Existing entity not found.");
+                    Logger.Assembly.Info("Existing entity not found.");
                     return
                         new HttpResponseMessage(HttpStatusCode.NotFound);
                 }
@@ -313,7 +311,7 @@ namespace DotNetDesign.Substrate.WebApi
         /// <param name="existingEntityData">The existing entity data.</param>
         protected void ApplyChanges(TEntityData newEntityData, TEntityData existingEntityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 foreach (var propertyInfo in typeof (TEntityData).GetProperties().Where(IsPropertyIncluded))
                 {
@@ -324,7 +322,7 @@ namespace DotNetDesign.Substrate.WebApi
 
         protected bool IsPropertyIncluded(PropertyInfo x)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return !_excludedPropertyNames.Contains(x.Name, StringComparer.InvariantCultureIgnoreCase);
             }
@@ -332,7 +330,7 @@ namespace DotNetDesign.Substrate.WebApi
 
         protected void Authorize(EntityPermissions requiredPermissions)
         {
-            using(Logger.Scope())
+            using(Logger.Assembly.Scope())
             {
                 var authManager = PermissionAuthorizationManagerFactory();
                 authManager.Authorize(requiredPermissions);

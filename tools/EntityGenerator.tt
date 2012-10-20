@@ -46,14 +46,14 @@ using Common.Logging;
 #>
 namespace <#=namespaceName#>
 {
-	internal static class TraceTopics
+	internal static class Logger
     {
-        static TraceTopics()
+        static Logger()
         {
-            Entities = LogManager.GetLogger("<#=namespaceName#>");
+            Assembly = LogManager.GetLogger("<#=namespaceName#>");
         }
 
-        internal static ILog Entities;
+        internal static ILog Assembly;
     }
 
 	#region Entity Data Interfaces
@@ -337,14 +337,14 @@ namespace <#=namespaceName#>
 		{
 			get 
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					return EntityData.<#=property.Name#>; 
 				}
 			}
 			set
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					if (EntityData.<#=property.Name#> == value) return;
 

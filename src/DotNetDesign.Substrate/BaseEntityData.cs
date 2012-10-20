@@ -22,7 +22,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected BaseEntityData()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Id = Guid.NewGuid();
             }
@@ -39,7 +39,6 @@ namespace DotNetDesign.Substrate
     [DataContract]
     [Serializable]
     public abstract class BaseEntityData<TEntityData, TEntity, TId, TEntityRepository> :
-        BaseLogger<BaseEntityData<TEntityData, TEntity, TId, TEntityRepository>>,
         IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -50,7 +49,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         protected BaseEntityData()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 Version = 0;
             }
@@ -99,7 +98,7 @@ namespace DotNetDesign.Substrate
         {
             get
             {
-                using (Logger.Scope())
+                using (Logger.Assembly.Scope())
                 { 
                     return Id + "::" + Version; 
                 }
@@ -112,7 +111,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntityData Clone()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return ObjectCopier.Clone(this) as TEntityData;
             }

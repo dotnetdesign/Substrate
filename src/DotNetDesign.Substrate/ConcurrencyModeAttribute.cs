@@ -10,15 +10,13 @@ namespace DotNetDesign.Substrate
     [AttributeUsage(AttributeTargets.Interface)]
     public class ConcurrencyModeAttribute : Attribute
     {
-        protected readonly ILog Logger = LogManager.GetLogger(typeof(ConcurrencyModeAttribute));
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrencyModeAttribute"/> class.
         /// </summary>
         /// <param name="concurrencyMode">The concurrency mode.</param>
         public ConcurrencyModeAttribute(ConcurrencyMode concurrencyMode)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 ConcurrencyMode = concurrencyMode;
             }

@@ -10,14 +10,14 @@ using Common.Logging;
 
 namespace DotNetDesign.Substrate.Example.Entities
 {
-	internal static class TraceTopics
+	internal static class Logger
     {
-        static TraceTopics()
+        static Logger()
         {
-            Entities = LogManager.GetLogger("DotNetDesign.Substrate.Example.Entities");
+            Assembly = LogManager.GetLogger("DotNetDesign.Substrate.Example.Entities");
         }
 
-        internal static ILog Entities;
+        internal static ILog Assembly;
     }
 
 	#region Entity Data Interfaces
@@ -82,14 +82,14 @@ namespace DotNetDesign.Substrate.Example.Entities
 		{
 			get 
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					return EntityData.FirstName; 
 				}
 			}
 			set
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					if (EntityData.FirstName == value) return;
 
@@ -104,14 +104,14 @@ namespace DotNetDesign.Substrate.Example.Entities
 		{
 			get 
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					return EntityData.LastName; 
 				}
 			}
 			set
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					if (EntityData.LastName == value) return;
 
@@ -126,14 +126,14 @@ namespace DotNetDesign.Substrate.Example.Entities
 		{
 			get 
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					return EntityData.EmailAddress; 
 				}
 			}
 			set
 			{
-				using(TraceTopics.Entities.Scope())
+				using(Logger.Assembly.Scope())
 				{ 
 					if (EntityData.EmailAddress == value) return;
 

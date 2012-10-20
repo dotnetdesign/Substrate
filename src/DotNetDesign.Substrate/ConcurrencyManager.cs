@@ -35,7 +35,6 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TEntityData">The type of the entity data.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public class ConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository> :
-        BaseLogger<ConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository>>,
         IConcurrencyManager<TEntity, TId, TEntityData, TEntityRepository> 
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
@@ -60,7 +59,7 @@ namespace DotNetDesign.Substrate
         /// <param name="excludedPropertyNames">The excluded property names.</param>
         public ConcurrencyManager(TEntityRepository entityRepository, IEnumerable<string> excludedPropertyNames = null)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 EntityRepository = entityRepository;
                 var excludedPropertyNamesList = new List<string>(DefaultExcludedPropertyNames);
@@ -86,7 +85,7 @@ namespace DotNetDesign.Substrate
         /// <param name="entity">The entity.</param>
         public void Verify(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 // we need to determine the concurrency mode for this entity.
                 // concurrency mode should be assigned via an attribute on the entity data interface.
@@ -105,7 +104,7 @@ namespace DotNetDesign.Substrate
                 // now, we either need that distinct concurrency mode or the default concurrency mode in order to proceed.
                 var concurrencyMode = distinctConcurrencyModes.FirstOrDefault();
 
-                Logger.DebugFormat("Concurrency Mode [{0}].", concurrencyMode);
+                Logger.Assembly.Debug(m => m("Concurrency Mode [{0}].", concurrencyMode));
 
                 if (concurrencyMode == ConcurrencyMode.Overwrite)
                 {
@@ -116,11 +115,11 @@ namespace DotNetDesign.Substrate
 
                 if (!HasEntityChanged(entity, out retrievedEntity))
                 {
-                    Logger.DebugFormat("Entity [{0}] hasn't changed.", entity);
+                    Logger.Assembly.Debug(m => m("Entity [{0}] hasn't changed.", entity));
                     return;
                 }
 
-                Logger.DebugFormat("Entity [{0}] has changed.", entity);
+                Logger.Assembly.Debug(m => m("Entity [{0}] has changed.", entity));
 
                 // entity has changed.
                 if (concurrencyMode == ConcurrencyMode.Fail)
@@ -133,12 +132,12 @@ namespace DotNetDesign.Substrate
                     IList<string> conflictingPropertyNames;
                     if (!TryMergeChanges(entity, retrievedEntity, out conflictingPropertyNames))
                     {
-                        Logger.DebugFormat("Merge failed for entity [{0}]. Conflicting property names [{1}].", entity, string.Join(",", conflictingPropertyNames));
+                        Logger.Assembly.Debug(m => m("Merge failed for entity [{0}]. Conflicting property names [{1}].", entity, string.Join(",", conflictingPropertyNames)));
 
                         throw new ConcurrencyConflictException(typeof(TEntityData), concurrencyMode, conflictingPropertyNames);
                     }
 
-                    Logger.DebugFormat("Merge succeeded for entity [{0}].", entity);
+                    Logger.Assembly.Debug(m => m("Merge succeeded for entity [{0}].", entity));
 
                     // merge was successful so we should update the current version to that of the retrieved entity.
                     // it will then be incremented by 1 by the base entity before persisting.
@@ -149,13 +148,13 @@ namespace DotNetDesign.Substrate
 
         private bool HasEntityChanged(TEntity entity, out TEntity retrievedEntity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 retrievedEntity = EntityRepository.GetById(entity.Id, true);
 
                 if (retrievedEntity == null)
                 {
-                    Logger.DebugFormat("No entity of type [{0}] returned for id [{1}]", typeof(TEntity), entity.Id);
+                    Logger.Assembly.Debug(m => m("No entity of type [{0}] returned for id [{1}]", typeof(TEntity), entity.Id));
                     return false;
                 }
 
@@ -163,8 +162,8 @@ namespace DotNetDesign.Substrate
                 var lastUpdatedAtChanged = entity.LastUpdatedAt != retrievedEntity.LastUpdatedAt;
                 var entityChanged = versionChanged || lastUpdatedAtChanged;
 
-                Logger.DebugFormat("Version Changed [{0}]. Last Updated At Changed [{1}]. Entity Changed [{2}].",
-                    versionChanged, lastUpdatedAtChanged, entityChanged);
+                Logger.Assembly.Debug(m => m("Version Changed [{0}]. Last Updated At Changed [{1}]. Entity Changed [{2}].",
+                    versionChanged, lastUpdatedAtChanged, entityChanged));
 
                 return entityChanged;
             }
@@ -172,7 +171,7 @@ namespace DotNetDesign.Substrate
 
         private bool TryMergeChanges(TEntity currentEntity, TEntity retrievedEntity, out IList<string> conflictingPropertyNames)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 // we need to try to merge the changes to the current entity into the retrieved entity
                 // we will do this by going through each property in the current entity
@@ -203,8 +202,8 @@ namespace DotNetDesign.Substrate
                     {
                         if (retrievedValueChangedFromOriginal)
                         {
-                            Logger.DebugFormat("Property [{0}] has changed in both current value [{1}] and retrieved value [{2}] is different from the original value of the current entity [{3}].",
-                                propertyInfo.Name, currentValue, retrievedValue, originalValue);
+                            Logger.Assembly.Debug(m => m("Property [{0}] has changed in both current value [{1}] and retrieved value [{2}] is different from the original value of the current entity [{3}].",
+                                propertyInfo.Name, currentValue, retrievedValue, originalValue));
 
                             // property has changed so we cannot merge
                             conflictingPropertyNames.Add(propertyInfo.Name);
@@ -212,8 +211,8 @@ namespace DotNetDesign.Substrate
                     }
                     else if (retrievedValueChangedFromOriginal)
                     {
-                        Logger.DebugFormat("Property [{0}] hasn't changed in the current entity but the recieved entity value [{1}] changed from the current entity original value [{2}].",
-                            propertyInfo.Name, retrievedValue, originalValue);
+                        Logger.Assembly.Debug(m => m("Property [{0}] hasn't changed in the current entity but the recieved entity value [{1}] changed from the current entity original value [{2}].",
+                            propertyInfo.Name, retrievedValue, originalValue));
 
                         // this means the current property hasn't changed since before so go ahead and merge new value
                         propertyInfo.SetValue(currentEntity, propertyInfo.GetValue(retrievedEntity, null), null);
@@ -226,7 +225,7 @@ namespace DotNetDesign.Substrate
 
         private bool IsPropertyIncluded(PropertyInfo x)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return !_excludedPropertyNames.Contains(x.Name, StringComparer.InvariantCultureIgnoreCase);
             }

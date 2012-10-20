@@ -12,9 +12,5 @@
     <description>$description$</description>
     <copyright>Copyright 2012</copyright>
     <tags>dal web-api</tags>
-    <dependencies>
-      <dependency id="DotNetDesign.Substrate" version="0.5.2.0" />
-      <dependency id="aspnet.suppressformsredirect" version="0.0.1.4" />
-    </dependencies>
   </metadata>
 </package>

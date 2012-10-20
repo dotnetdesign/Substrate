@@ -9,7 +9,6 @@ namespace DotNetDesign.Substrate
     /// </summary>
     /// <typeparam name="TObject">The type of the object.</typeparam>
     public class DictionaryObjectCache<TObject> :
-        BaseLogger<DictionaryObjectCache<TObject>>,
         IObjectCache<TObject>
     {
         /// <summary>
@@ -22,7 +21,7 @@ namespace DotNetDesign.Substrate
         /// </summary>
         public DictionaryObjectCache()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 DictionaryCache = new Dictionary<string, IEnumerable<TObject>>();
             }
@@ -35,9 +34,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<TObject> Get(string key)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.Debug(m => m("Getting cached value for key [{0}].", key));
+                Logger.Assembly.Debug(m => m("Getting cached value for key [{0}].", key));
                 return DictionaryCache.ContainsKey(key) ? DictionaryCache[key] : null;
             }
         }
@@ -49,9 +48,9 @@ namespace DotNetDesign.Substrate
         /// <param name="objectData">The object data.</param>
         public void Add(string key, IEnumerable<TObject> objectData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.Debug(m => m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TObject), key, string.Join(",", objectData)));
+                Logger.Assembly.Debug(m => m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TObject), key, string.Join(",", objectData)));
 
                 if (DictionaryCache.ContainsKey(key))
                 {
@@ -70,9 +69,9 @@ namespace DotNetDesign.Substrate
         /// <param name="key">The key.</param>
         public void Remove(string key)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.Debug(m => m("Removing cached value for key [{0}].", key));
+                Logger.Assembly.Debug(m => m("Removing cached value for key [{0}].", key));
                 DictionaryCache.Remove(key);
             }
         }
@@ -83,7 +82,7 @@ namespace DotNetDesign.Substrate
         /// <param name="objectData">The object data.</param>
         public void RemoveIfDataContains(TObject objectData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 if (objectData != null)
                 {
@@ -98,14 +97,14 @@ namespace DotNetDesign.Substrate
         /// <param name="objectData">The object data.</param>
         public void RemoveIfDataContains(IEnumerable<TObject> objectData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.Debug(m => m("Removing cached value if data contains object data [{0}].", string.Join(",", objectData)));
+                Logger.Assembly.Debug(m => m("Removing cached value if data contains object data [{0}].", string.Join(",", objectData)));
                 foreach (var cacheKeyValuePair in DictionaryCache)
                 {
                     if (cacheKeyValuePair.Value.Any(objectData.Contains))
                     {
-                        Logger.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Object data [{2}].", 
+                        Logger.Assembly.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Object data [{2}].", 
                             cacheKeyValuePair.Key, 
                             string.Join(",", cacheKeyValuePair.Value),
                             string.Join(",", objectData)));

@@ -15,8 +15,6 @@ namespace DotNetDesign.Substrate
         private const string ERROR_MESSAGE_FORMAT =
             "A entity data type cannot be assigned multiple and differing concurrency modes. Entity data type {0}. Assigned concurrency modes [{1}].";
 
-        protected readonly ILog Logger = LogManager.GetLogger(typeof(ConflictingConcurrencyModesException));
-
         /// <summary>
         /// Gets or sets the type of the entity data.
         /// </summary>
@@ -41,7 +39,7 @@ namespace DotNetDesign.Substrate
         public ConflictingConcurrencyModesException(Type entityDataType, IEnumerable<ConcurrencyMode> conflictingConcurrencyModes)
             : base(string.Format(ERROR_MESSAGE_FORMAT, entityDataType, string.Join(", ", conflictingConcurrencyModes)))
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 EntityDataType = entityDataType;
                 ConflictingConcurrencyModes = conflictingConcurrencyModes;

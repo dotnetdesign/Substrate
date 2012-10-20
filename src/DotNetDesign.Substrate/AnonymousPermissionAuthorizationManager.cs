@@ -19,7 +19,6 @@ namespace DotNetDesign.Substrate
     /// Basic implementation of IPermissionAuthorizationManager that always returns true for IsAuthorized.
     ///</summary>
     public class AnonymousPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository> :
-        BaseLogger<AnonymousPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>>, 
         IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
@@ -34,9 +33,9 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public bool IsAuthorized(EntityPermissions requiredPermissions)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.InfoFormat("Returning true for IsAuthrozied call for required permissions {0}", requiredPermissions);
+                Logger.Assembly.Info(m => m("Returning true for IsAuthrozied call for required permissions {0}", requiredPermissions));
                 return true;
             }
         }
@@ -51,9 +50,9 @@ namespace DotNetDesign.Substrate
         /// </returns>
         public bool IsAuthorized(EntityPermissions requiredPermissions, TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.InfoFormat("Returning true for IsAuthrozied call for required permissions {0}", requiredPermissions);
+                Logger.Assembly.Info(m => m("Returning true for IsAuthrozied call for required permissions {0}", requiredPermissions));
                 return true;
             }
         }

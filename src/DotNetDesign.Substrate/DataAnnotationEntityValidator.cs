@@ -30,7 +30,6 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TId">The type of the id.</typeparam>
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     public class DataAnnotationEntityValidator<TEntity, TEntityData, TId, TEntityRepository> :
-        BaseLogger<DataAnnotationEntityValidator<TEntity, TEntityData, TId, TEntityRepository>>,
         IEntityValidator<TEntity, TEntityData, TId, TEntityRepository>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
@@ -45,7 +44,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<ValidationResult> Validate(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 var validationResults = new List<ValidationResult>();
 
@@ -66,7 +65,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         private IEnumerable<ValidationResult> ValidateType<TValidatableType>(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return from property in typeof(TValidatableType).GetProperties()
                        from validationAttribute in

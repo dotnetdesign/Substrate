@@ -11,8 +11,8 @@
     <description>Tools to help generate entities and their supporting classes.</description>
     <tags>dal</tags>
     <dependencies>
-      <dependency id="DotNetDesign.Common" version="0.5.2.0" />
-      <dependency id="DotNetDesign.Substrate" version="0.5.2.0" />
+      <dependency id="DotNetDesign.Common" version="0.9.0.1" />
+      <dependency id="DotNetDesign.Substrate" version="0.9.0.1" />
     </dependencies>
   </metadata>
   <files>

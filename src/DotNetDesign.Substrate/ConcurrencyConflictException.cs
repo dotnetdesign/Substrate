@@ -15,8 +15,6 @@ namespace DotNetDesign.Substrate
         private const string ERROR_MESSAGE_FORMAT =
             "One or more concurrency conflicts were encountered and prevented this entity from saving. Entity data type {0}. Assigned concurrency mode {1}. Conflicting property name(s) [{2}].";
 
-        protected readonly ILog Logger = LogManager.GetLogger(typeof(ConcurrencyConflictException));
-
         /// <summary>
         /// Gets or sets the type of the entity data.
         /// </summary>
@@ -50,7 +48,7 @@ namespace DotNetDesign.Substrate
         public ConcurrencyConflictException(Type entityDataType, ConcurrencyMode concurrencyMode, IEnumerable<string> conflictingPropertyNames = null)
             : base(string.Format(ERROR_MESSAGE_FORMAT, entityDataType, concurrencyMode, (conflictingPropertyNames == null) ? "" : string.Join(", ", conflictingPropertyNames)))
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 EntityDataType = entityDataType;
                 ConcurrencyMode = concurrencyMode;
@@ -58,6 +56,11 @@ namespace DotNetDesign.Substrate
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConcurrencyConflictException" /> class.
+        /// </summary>
+        /// <param name="info">The info.</param>
+        /// <param name="context">The context.</param>
         protected ConcurrencyConflictException(
             SerializationInfo info,
             StreamingContext context) : base(info, context)

@@ -9,8 +9,6 @@ namespace DotNetDesign.Substrate
     /// </summary>
     public class PropertyChangeEventArgs : EventArgs
     {
-        protected readonly ILog Logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyChangeEventArgs"/> class.
         /// </summary>
@@ -19,7 +17,7 @@ namespace DotNetDesign.Substrate
         /// <param name="newValue">The new value.</param>
         public PropertyChangeEventArgs(string propertyName, object originalValue, object newValue)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 PropertyName = propertyName;
                 OriginalValue = originalValue;
@@ -58,7 +56,10 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public static EventArgs ToEventArgs(PropertyChangeEventArgs propertyChangeEventArgs)
         {
-            return propertyChangeEventArgs;
+            using (Logger.Assembly.Scope())
+            {
+                return propertyChangeEventArgs;
+            }
         }
     }
 }

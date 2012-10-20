@@ -1,12 +1,14 @@
 using System;
 using Common.Logging;
+using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {
+    /// <summary>
+    /// Extensions for IPermissionAuthorizationManagers.
+    /// </summary>
     public static class PermissionAuthrozationManagerExtensions
     {
-        private readonly static ILog Logger = LogManager.GetLogger(typeof(PermissionAuthrozationManagerExtensions));
-
         /// <summary>
         /// Authorizes the authenticated user is authorized with the specified required permissions.
         /// </summary>
@@ -21,12 +23,15 @@ namespace DotNetDesign.Substrate
             where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
             where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
         {
-            if (!permissionAuthorizationManager.IsAuthorized(requiredPermissions))
+            using (Logger.Assembly.Scope())
             {
-                var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                    "User not authorized with required permissions [{0}] on entity of type {1}.", requiredPermissions, typeof(TEntity)));
-                Logger.Error(unauthorizedException.Message);
-                throw unauthorizedException;
+                if (!permissionAuthorizationManager.IsAuthorized(requiredPermissions))
+                {
+                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                        "User not authorized with required permissions [{0}] on entity of type {1}.", requiredPermissions, typeof(TEntity)));
+                    Logger.Assembly.Error(unauthorizedException.Message, unauthorizedException);
+                    throw unauthorizedException;
+                }
             }
         }
 
@@ -45,12 +50,15 @@ namespace DotNetDesign.Substrate
             where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
             where TEntityRepository : class, IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
         {
-            if (!permissionAuthorizationManager.IsAuthorized(requiredPermissions, entity))
+            using(Logger.Assembly.Scope())
             {
-                var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                    "User not authorized with required permissions [{0}] on entity {1}.", requiredPermissions, entity));
-                Logger.Error(unauthorizedException.Message);
-                throw unauthorizedException;
+                if (!permissionAuthorizationManager.IsAuthorized(requiredPermissions, entity))
+                {
+                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                        "User not authorized with required permissions [{0}] on entity {1}.", requiredPermissions, entity));
+                    Logger.Assembly.Error(unauthorizedException.Message, unauthorizedException);
+                    throw unauthorizedException;
+                }
             }
         }
     }

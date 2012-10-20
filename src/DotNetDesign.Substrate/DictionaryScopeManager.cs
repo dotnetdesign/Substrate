@@ -4,8 +4,14 @@ using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
 {
-    public class DictionaryScopeManager : BaseLogger<DictionaryScopeManager>, IScopeManager
+    /// <summary>
+    /// Dictionary based scope manager.
+    /// </summary>
+    public class DictionaryScopeManager : IScopeManager
     {
+        /// <summary>
+        /// Backing dictionary for DictionaryScopeManager.
+        /// </summary>
         protected Dictionary<string, string> ScopeManagerDictionary = new Dictionary<string, string>();
 
         /// <summary>
@@ -15,7 +21,7 @@ namespace DotNetDesign.Substrate
         /// <param name="value">The value.</param>
         public void Add(string key, string value)
         {
-            using(Logger.Scope())
+            using(Logger.Assembly.Scope())
             {
                 if(ScopeManagerDictionary.ContainsKey(key))
                 {
@@ -34,7 +40,7 @@ namespace DotNetDesign.Substrate
         /// <param name="key">The key.</param>
         public void Remove(string key)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 if (ScopeManagerDictionary.ContainsKey(key))
                 {
@@ -49,7 +55,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public Dictionary<string, string> GetScopeContext()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return new Dictionary<string, string>(ScopeManagerDictionary);
             }

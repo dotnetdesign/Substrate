@@ -58,12 +58,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotNetDesign.Substrate\DotNetDesign.Substrate.csproj">
-      <Project>{0219feaf-e377-46cb-b775-afd912e051a5}</Project>
-      <Name>DotNetDesign.Substrate</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="EntityGenerator.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>EntityGenerator.generated.cs</LastGenOutput>
@@ -75,6 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="EntityMetaData.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetDesign.Substrate\DotNetDesign.Substrate.csproj">
+      <Project>{0219feaf-e377-46cb-b775-afd912e051a5}</Project>
+      <Name>DotNetDesign.Substrate</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

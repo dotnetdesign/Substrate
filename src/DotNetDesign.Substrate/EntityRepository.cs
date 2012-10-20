@@ -55,9 +55,7 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TEntityRepository">The type of the entity repository.</typeparam>
     /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
     public class EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository,
-                                  TEntityRepositoryService>
-        :
-        BaseLogger<EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository, TEntityRepositoryService>>,
+                                  TEntityRepositoryService> :
         IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
@@ -120,7 +118,7 @@ namespace DotNetDesign.Substrate
             Func<IEntityCache<TEntity, TId, TEntityData, TEntityRepository>> entityCacheFactory,
             Func<IScopeManager> scopeManagerFactory)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 EntityFactory = entityFactory;
                 EntityDataFactory = entityDataFactory;
@@ -141,11 +139,11 @@ namespace DotNetDesign.Substrate
         /// <param name="entity">The entity.</param>
         protected virtual void AttachObservers(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 foreach (var entityObserver in EntityObservers)
                 {
-                    Logger.DebugFormat("Attaching entity observer [{0}] to entity [{1}].", entityObserver, entity);
+                    Logger.Assembly.Debug(m => m("Attaching entity observer [{0}] to entity [{1}].", entityObserver, entity));
                     entityObserver.Attach(entity);
                 }
             }
@@ -157,7 +155,7 @@ namespace DotNetDesign.Substrate
         /// <param name="entities">The entities.</param>
         protected virtual void AttachObservers(IEnumerable<TEntity> entities)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 foreach (var entity in entities)
                 {
@@ -172,11 +170,11 @@ namespace DotNetDesign.Substrate
         /// <param name="entity">The entity.</param>
         protected virtual void DetatchObservers(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 foreach (var entityObserver in EntityObservers)
                 {
-                    Logger.DebugFormat("Detaching entity observer [{0}] to entity [{1}].", entityObserver, entity);
+                    Logger.Assembly.Debug(m => m("Detaching entity observer [{0}] to entity [{1}].", entityObserver, entity));
                     entityObserver.Detach(entity);
                 }
             }
@@ -188,7 +186,7 @@ namespace DotNetDesign.Substrate
         /// <param name="entities">The entities.</param>
         protected virtual void DetatchObservers(IEnumerable<TEntity> entities)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 foreach (var entity in entities)
                 {
@@ -220,7 +218,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         protected virtual TEntity InitializeEntities(TEntityData entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return entityData == null
                            ? null
@@ -235,7 +233,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         protected virtual IEnumerable<TEntity> InitializeEntities(IEnumerable<TEntityData> entityData)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 if (entityData == null)
                 {
@@ -246,16 +244,16 @@ namespace DotNetDesign.Substrate
                 {
                     var entity = EntityFactory();
 
-                    Logger.Debug("Attaching Entity Observers");
+                    Logger.Assembly.Debug("Attaching Entity Observers");
                     AttachObservers(entity);
 
-                    Logger.Debug("Pre-initializing Entity");
+                    Logger.Assembly.Debug("Pre-initializing Entity");
                     PreInitializeEntity(entity);
 
-                    Logger.Debug("Initializing Entity");
+                    Logger.Assembly.Debug("Initializing Entity");
                     entity.Initialize(entityDataInstance);
 
-                    Logger.Debug("Post-initializing Entity");
+                    Logger.Assembly.Debug("Post-initializing Entity");
                     PostInitializeEntity(entity);
 
                     yield return entity;
@@ -275,7 +273,7 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntity GetNew()
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
                 return InitializeEntities(EntityDataFactory());
             }
@@ -288,9 +286,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<TEntity> GetAll(bool forceNew = false)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting all [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew);
+                Logger.Assembly.Debug(m => m("Getting all [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew));
                 var cacheKey = string.Format("GetAll_{0}", typeof(TEntity));
 
                 var entityData = EntityCacheFactory().Get(cacheKey);
@@ -313,9 +311,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntity GetById(TId id, bool forceNew = false)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting [{0}] by ID [{1}]. ForceNew [{2}].", typeof(TEntity), id, forceNew);
+                Logger.Assembly.Debug(m => m("Getting [{0}] by ID [{1}]. ForceNew [{2}].", typeof(TEntity), id, forceNew));
                 var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), id);
 
                 var entityData = EntityCacheFactory().Get(cacheKey);
@@ -338,9 +336,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<TEntity> GetByIds(IEnumerable<TId> ids, bool forceNew = false)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting [{0}] by ID(s) [{1}]. ForceNew [{2}].", typeof(TEntity), string.Join(",", ids), forceNew);
+                Logger.Assembly.Debug(m => m("Getting [{0}] by ID(s) [{1}]. ForceNew [{2}].", typeof(TEntity), string.Join(",", ids), forceNew));
                 var cacheKey = string.Format("GetByIds_{0}_{1}", typeof(TEntity), string.Join("_", ids.OrderBy(x => x)));
 
                 var entityData = EntityCacheFactory().Get(cacheKey);
@@ -364,9 +362,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntity GetVersion(TId id, int version, bool forceNew = false)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Getting [{0}] by version [{1}]. ForceNew [{2}].", typeof(TEntity), version, forceNew);
+                Logger.Assembly.Debug(m => m("Getting [{0}] by version [{1}]. ForceNew [{2}].", typeof(TEntity), version, forceNew));
                 var cacheKey = string.Format("GetVersion_{0}_{1}_{2}", typeof(TEntity), id, version);
 
                 var entityData = EntityCacheFactory().Get(cacheKey);
@@ -396,9 +394,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public TEntity Save(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Saving [{0}].", entity);
+                Logger.Assembly.Debug(m => m("Saving [{0}].", entity));
                 var entityData = EntityRepositoryServiceFactory().Save(entity.EntityData as TEntityDataImplementation, ScopeManagerFactory().GetScopeContext());
 
                 EntityCacheFactory().RemoveIfDataContains(entityData);
@@ -416,9 +414,9 @@ namespace DotNetDesign.Substrate
         /// <returns></returns>
         public IEnumerable<TEntity> SaveAll(IEnumerable<TEntity> entities)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Saving all [{0}].", string.Join(",", entities));
+                Logger.Assembly.Debug(m => m("Saving all [{0}].", string.Join(",", entities)));
                 var entityData =
                     EntityRepositoryServiceFactory().SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>(), ScopeManagerFactory().GetScopeContext());
 
@@ -439,9 +437,9 @@ namespace DotNetDesign.Substrate
         /// <param name="entity">The entity.</param>
         public void Delete(TEntity entity)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Deleting [{0}].", entity);
+                Logger.Assembly.Debug(m => m("Deleting [{0}].", entity));
                 EntityRepositoryServiceFactory().Delete(entity.Id, ScopeManagerFactory().GetScopeContext());
 
                 DetatchObservers(entity);
@@ -456,9 +454,9 @@ namespace DotNetDesign.Substrate
         /// <param name="entities">The entities.</param>
         public void DeleteAll(IEnumerable<TEntity> entities)
         {
-            using (Logger.Scope())
+            using (Logger.Assembly.Scope())
             {
-                Logger.DebugFormat("Deleting all [{0}].", string.Join(",", entities));
+                Logger.Assembly.Debug(m => m("Deleting all [{0}].", string.Join(",", entities)));
 
                 EntityRepositoryServiceFactory().DeleteAll(entities.Select(x => x.Id), ScopeManagerFactory().GetScopeContext());
                 DetatchObservers(entities);
