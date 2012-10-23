@@ -196,8 +196,7 @@ namespace DotNetDesign.Substrate
 
                     EntityConcurrencyManagerFactory().Verify(this as TEntity);
 
-                    Version++;
-                    if (Version == 1)
+                    if (IsNew)
                     {
                         CreatedAt = DateTime.Now;
 
@@ -215,6 +214,8 @@ namespace DotNetDesign.Substrate
                             PermissionAuthorizationManagerFactory().Authorize(EntityPermissions.Update, this as TEntity);
                         }
                     }
+
+                    Version++; //Should not increment version until after authrozation checks occur.
                     LastUpdatedAt = DateTime.Now;
 
                     OnSaving();
