@@ -37,6 +37,7 @@ namespace DotNetDesign.Substrate.Tests
             _personData = _container.Resolve<IPersonData>();
             _personData.FirstName = "John";
             _personData.LastName = "Doe";
+            _personData.Version = 1;
         }
 
         #endregion

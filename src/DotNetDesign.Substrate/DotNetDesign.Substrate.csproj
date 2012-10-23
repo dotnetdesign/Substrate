@@ -105,7 +105,9 @@
     <Compile Include="ValidationResultStatusType.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DotNetDesign.Substrate.nuspec" />
+    <None Include="DotNetDesign.Substrate.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

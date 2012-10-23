@@ -182,7 +182,7 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                if (IsDirty)
+                if (IsNew || IsDirty)
                 {
                     Logger.Assembly.Debug(m => m("Entity [{0}] is dirty.", this));
                     if (!IsValid && Validate().Any(x => x.StatusType == ValidationResultStatusType.Error))
@@ -884,6 +884,23 @@ namespace DotNetDesign.Substrate
                     var exception = new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
                     Logger.Assembly.Error(exception.Message, exception);
                     throw exception;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is new.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if this instance is new; otherwise, <c>false</c>.
+        /// </value>
+        protected virtual bool IsNew
+        {
+            get
+            {
+                using (Logger.Assembly.Scope())
+                {
+                    return Version == 0;
                 }
             }
         }
