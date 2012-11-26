@@ -1,5 +1,4 @@
 using System;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -48,18 +47,5 @@ namespace DotNetDesign.Substrate
         /// The new value.
         /// </value>
         public object NewValue { get; private set; }
-
-        /// <summary>
-        /// Converts <see cref="DotNetDesign.Substrate.PropertyChangeEventArgs"/> to <see cref="System.EventArgs"/>.
-        /// </summary>
-        /// <param name="propertyChangeEventArgs">The <see cref="DotNetDesign.Substrate.PropertyChangeEventArgs"/> instance containing the event data.</param>
-        /// <returns></returns>
-        public static EventArgs ToEventArgs(PropertyChangeEventArgs propertyChangeEventArgs)
-        {
-            using (Logger.Assembly.Scope())
-            {
-                return propertyChangeEventArgs;
-            }
-        }
     }
 }

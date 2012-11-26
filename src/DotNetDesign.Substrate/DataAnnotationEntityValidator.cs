@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Reflection;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -46,6 +44,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entity, "entity");
+
                 var validationResults = new List<ValidationResult>();
 
                 validationResults.AddRange(ValidateType<TEntityData>(entity));
@@ -67,6 +67,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entity, "entity");
+
                 return from property in typeof(TValidatableType).GetProperties()
                        from validationAttribute in
                            property.GetCustomAttributes(typeof(ValidationAttribute), true).OfType<ValidationAttribute>()

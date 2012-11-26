@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DotNetDesign.Common;
 
@@ -23,6 +22,9 @@ namespace DotNetDesign.Substrate
         {
             using(Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+                Guard.ArgumentNotNullOrEmpty(value, "value");
+
                 if(ScopeManagerDictionary.ContainsKey(key))
                 {
                     ScopeManagerDictionary[key] = value;
@@ -42,6 +44,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+
                 if (ScopeManagerDictionary.ContainsKey(key))
                 {
                     ScopeManagerDictionary.Remove(key);

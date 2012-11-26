@@ -14,6 +14,6 @@ namespace DotNetDesign.Substrate.WebApi
         /// <summary>
         /// DotNetDesign.Substrate.WebApi assembly logger.
         /// </summary>
-        internal static ILog Assembly = LogManager.GetLogger("DotNetDesign.Substrate.WebApi");
+        internal static readonly ILog Assembly = LogManager.GetLogger("DotNetDesign.Substrate.WebApi");
     }
 }

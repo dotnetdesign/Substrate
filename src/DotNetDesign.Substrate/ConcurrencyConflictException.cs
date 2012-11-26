@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -45,14 +44,21 @@ namespace DotNetDesign.Substrate
         /// <param name="entityDataType">Type of the entity data.</param>
         /// <param name="concurrencyMode">The concurrency mode.</param>
         /// <param name="conflictingPropertyNames">The conflicting property names.</param>
-        public ConcurrencyConflictException(Type entityDataType, ConcurrencyMode concurrencyMode, IEnumerable<string> conflictingPropertyNames = null)
-            : base(string.Format(ERROR_MESSAGE_FORMAT, entityDataType, concurrencyMode, (conflictingPropertyNames == null) ? "" : string.Join(", ", conflictingPropertyNames)))
+        public ConcurrencyConflictException(Type entityDataType, ConcurrencyMode concurrencyMode,
+                                            IEnumerable<string> conflictingPropertyNames = null)
+            // ReSharper disable PossibleMultipleEnumeration
+            : base(
+                string.Format(ERROR_MESSAGE_FORMAT, entityDataType, concurrencyMode,
+                              (conflictingPropertyNames == null) ? "" : string.Join(", ", conflictingPropertyNames)))
+            // ReSharper restore PossibleMultipleEnumeration
         {
             using (Logger.Assembly.Scope())
             {
                 EntityDataType = entityDataType;
                 ConcurrencyMode = concurrencyMode;
+                // ReSharper disable PossibleMultipleEnumeration
                 ConflictingPropertyNames = conflictingPropertyNames;
+                // ReSharper restore PossibleMultipleEnumeration
             }
         }
 
@@ -63,7 +69,8 @@ namespace DotNetDesign.Substrate
         /// <param name="context">The context.</param>
         protected ConcurrencyConflictException(
             SerializationInfo info,
-            StreamingContext context) : base(info, context)
+            StreamingContext context)
+            : base(info, context)
         {
         }
     }

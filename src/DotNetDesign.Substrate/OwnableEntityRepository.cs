@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -16,19 +15,28 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TOwner">The type of the owner.</typeparam>
     /// <typeparam name="TOwnerData">The type of the owner data.</typeparam>
     /// <typeparam name="TOwnerRepository">The type of the owner repository.</typeparam>
-    public class OwnableEntityRepository<TOwnableEntity, TOwnableEntityData, TEntityDataImplementation, TOwnableEntityRepository,
+    public class OwnableEntityRepository<TOwnableEntity, TOwnableEntityData, TEntityDataImplementation,
+                                         TOwnableEntityRepository,
                                          TOwnableEntityRepositoryService, TOwner, TOwnerData, TOwnerRepository> :
-        OwnableEntityRepository<TOwnableEntity, TOwnableEntityData, Guid, TEntityDataImplementation, TOwnableEntityRepository, TOwnableEntityRepositoryService, TOwner,
-        TOwnerData, TOwnerRepository>
-        where TOwnableEntity : class, IOwnableEntity<TOwnableEntity, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>,
-        TOwnableEntityData
-        where TOwnableEntityData : class, IOwnableEntityData<TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
+                                             OwnableEntityRepository
+                                                 <TOwnableEntity, TOwnableEntityData, Guid, TEntityDataImplementation,
+                                                 TOwnableEntityRepository, TOwnableEntityRepositoryService, TOwner,
+                                                 TOwnerData, TOwnerRepository>
+        where TOwnableEntity : class,
+            IOwnableEntity
+                <TOwnableEntity, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>,
+            TOwnableEntityData
+        where TOwnableEntityData : class,
+            IOwnableEntityData
+                <TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
         where TEntityDataImplementation : class, TOwnableEntityData
         where TOwnableEntityRepository : class, IOwnableEntityRepository<TOwnableEntityRepository, TOwnableEntity,
-        TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
+                                                    TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
         where TOwnableEntityRepositoryService : class,
-            IOwnableEntityRepositoryService<TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TEntityDataImplementation, TOwner, TOwnerData, TOwnerRepository>
-        where TOwnerData : class,IEntityData<TOwnerData, TOwner, TOwnerRepository>
+            IOwnableEntityRepositoryService
+                <TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TEntityDataImplementation, TOwner,
+                TOwnerData, TOwnerRepository>
+        where TOwnerData : class, IEntityData<TOwnerData, TOwner, TOwnerRepository>
         where TOwner : class, IEntity<TOwner, TOwnerData, TOwnerRepository>, TOwnerData
         where TOwnerRepository : class, IEntityRepository<TOwnerRepository, TOwner, TOwnerData>
     {
@@ -48,7 +56,9 @@ namespace DotNetDesign.Substrate
             IEnumerable<IEntityObserver<TOwnableEntity, Guid>> entityObservers,
             Func<IEntityCache<TOwnableEntity, Guid, TOwnableEntityData, TOwnableEntityRepository>> entityCacheFactory,
             Func<IScopeManager> scopeManagerFactory) :
-            base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+                base(
+                entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory,
+                scopeManagerFactory)
         {
         }
     }
@@ -65,17 +75,33 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TOwner">The type of the owner.</typeparam>
     /// <typeparam name="TOwnerData">The type of the owner data.</typeparam>
     /// <typeparam name="TOwnerRepository">The type of the owner repository.</typeparam>
-    public class OwnableEntityRepository<TOwnableEntity, TOwnableEntityData, TId, TEntityDataImplementation, TOwnableEntityRepository,
-                                  TOwnableEntityRepositoryService, TOwner, TOwnerData, TOwnerRepository> :
-        EntityRepository<TOwnableEntity, TOwnableEntityData, TId, TEntityDataImplementation, TOwnableEntityRepository, TOwnableEntityRepositoryService>,
-        IOwnableEntityRepository<TOwnableEntityRepository, TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
-        where TOwnableEntity : class, IOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>, TOwnableEntityData
-        where TOwnableEntityData : class, IOwnableEntityData<TOwnableEntityData, TOwnableEntity, TId, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
+    public class OwnableEntityRepository<TOwnableEntity, TOwnableEntityData, TId, TEntityDataImplementation,
+                                         TOwnableEntityRepository,
+                                         TOwnableEntityRepositoryService, TOwner, TOwnerData, TOwnerRepository> :
+                                             EntityRepository
+                                                 <TOwnableEntity, TOwnableEntityData, TId, TEntityDataImplementation,
+                                                 TOwnableEntityRepository, TOwnableEntityRepositoryService>,
+                                             IOwnableEntityRepository
+                                                 <TOwnableEntityRepository, TOwnableEntity, TId, TOwnableEntityData,
+                                                 TOwner, TOwnerData, TOwnerRepository>
+        where TOwnableEntity : class,
+            IOwnableEntity
+                <TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository
+                >, TOwnableEntityData
+        where TOwnableEntityData : class,
+            IOwnableEntityData
+                <TOwnableEntityData, TOwnableEntity, TId, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository
+                >
         where TEntityDataImplementation : class, TOwnableEntityData
-        where TOwnableEntityRepository : class, IOwnableEntityRepository<TOwnableEntityRepository, TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
+        where TOwnableEntityRepository : class,
+            IOwnableEntityRepository
+                <TOwnableEntityRepository, TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository
+                >
         where TOwnableEntityRepositoryService : class,
-            IOwnableEntityRepositoryService<TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TId, TEntityDataImplementation, TOwner, TOwnerData, TOwnerRepository>
-        where TOwnerData : class,IEntityData<TOwnerData, TOwner, TId, TOwnerRepository>
+            IOwnableEntityRepositoryService
+                <TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TId, TEntityDataImplementation, TOwner,
+                TOwnerData, TOwnerRepository>
+        where TOwnerData : class, IEntityData<TOwnerData, TOwner, TId, TOwnerRepository>
         where TOwner : class, IEntity<TOwner, TId, TOwnerData, TOwnerRepository>, TOwnerData
         where TOwnerRepository : class, IEntityRepository<TOwnerRepository, TOwner, TId, TOwnerData>
     {
@@ -95,7 +121,9 @@ namespace DotNetDesign.Substrate
             IEnumerable<IEntityObserver<TOwnableEntity, TId>> entityObservers,
             Func<IEntityCache<TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository>> entityCacheFactory,
             Func<IScopeManager> scopeManagerFactory) :
-            base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+                base(
+                entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory,
+                scopeManagerFactory)
         {
         }
 
@@ -111,19 +139,17 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Getting [{0}] by owner ID [{1}]. ForceNew [{2}].", typeof(TOwnableEntity), owner.Id, forceNew));
-                var cacheKey = string.Format("GetByOwner_{0}_{1}", typeof(TOwnableEntity), owner.Id);
+                Guard.ArgumentNotNull(owner, "owner");
 
-                var entityData = EntityCacheFactory().Get(cacheKey);
+                // ReSharper disable ImplicitlyCapturedClosure
+                Logger.Assembly.Debug(
+                    m =>
+                    m("Getting [{0}] by owner ID [{1}]. ForceNew [{2}].", typeof (TOwnableEntity), owner.Id, forceNew));
+                // ReSharper restore ImplicitlyCapturedClosure
+                var cacheKey = string.Format("GetByOwner_{0}_{1}", typeof (TOwnableEntity), owner.Id);
 
-                if (forceNew || entityData == null)
-                {
-                    entityData = EntityRepositoryServiceFactory().GetByOwner(owner.Id, ScopeManagerFactory().GetScopeContext()).RemoveNulls();
-                    EntityCacheFactory().Add(cacheKey, entityData.Select(x => x.Clone()));
-                }
-
-                return InitializeEntities(entityData.RemoveNulls().Select(x => x.Clone()));
-
+                return ProcessRequestForEnumerable(forceNew, cacheKey,
+                                                   x => EntityRepositoryServiceFactory().GetByOwner(owner.Id, x));
             }
         }
 

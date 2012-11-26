@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.ServiceModel;
 using DotNetDesign.Common;
 using System.Data;
 
 namespace DotNetDesign.Substrate.Example.Entities.SqlServer
 {
-    public class UserRepositoryService : BaseRepositoryService, IUserRepositoryService
+    public class UserRepositoryService : BaseRepositoryService, IUserRepositoryService, IEntityRepositoryService<IUserData, IUser, IUserRepository, UserData>
     {
-        public UserRepositoryService()
-            : base()
-        {
-
-        }
-
         public void Delete(Guid id, Dictionary<string, string> scopeContext)
         {
             using (TraceTopics.SqlServer.Scope())

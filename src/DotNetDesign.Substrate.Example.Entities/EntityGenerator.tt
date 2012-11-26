@@ -53,7 +53,7 @@ namespace <#=namespaceName#>
             Assembly = LogManager.GetLogger("<#=namespaceName#>");
         }
 
-        internal static ILog Assembly;
+        internal static readonly ILog Assembly;
     }
 
 	#region Entity Data Interfaces

@@ -16,7 +16,7 @@ namespace DotNetDesign.Substrate
     public class EntityRepository<TEntity, TEntityData, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService>
         : EntityRepository<TEntity, TEntityData, Guid, TEntityDataImplementation, TEntityRepository,
-                                  TEntityRepositoryService>
+              TEntityRepositoryService>
         where TEntity : class, IEntity<TEntity, TEntityData, TEntityRepository>, TEntityData, IObservableEntity
         where TEntityData : class, IEntityData<TEntityData, TEntity, TEntityRepository>
         where TEntityDataImplementation : class, TEntityData
@@ -34,13 +34,15 @@ namespace DotNetDesign.Substrate
         /// <param name="entityCacheFactory">The entity cache factory.</param>
         /// <param name="scopeManagerFactory">The scope manager factory.</param>
         public EntityRepository(
-            Func<TEntity> entityFactory, 
-            Func<TEntityData> entityDataFactory, 
+            Func<TEntity> entityFactory,
+            Func<TEntityData> entityDataFactory,
             Func<TEntityRepositoryService> entityRepositoryServiceFactory,
             IEnumerable<IEntityObserver<TEntity>> entityObservers,
             Func<IEntityCache<TEntity, TEntityData, TEntityRepository>> entityCacheFactory,
-            Func<IScopeManager> scopeManagerFactory) 
-            : base(entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory, scopeManagerFactory)
+            Func<IScopeManager> scopeManagerFactory)
+            : base(
+                entityFactory, entityDataFactory, entityRepositoryServiceFactory, entityObservers, entityCacheFactory,
+                scopeManagerFactory)
         {
         }
     }
@@ -56,7 +58,7 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TEntityRepositoryService">The type of the entity repository service.</typeparam>
     public class EntityRepository<TEntity, TEntityData, TId, TEntityDataImplementation, TEntityRepository,
                                   TEntityRepositoryService> :
-        IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
+                                      IEntityRepository<TEntityRepository, TEntity, TId, TEntityData>
         where TEntity : class, IEntity<TEntity, TId, TEntityData, TEntityRepository>, TEntityData
         where TEntityData : class, IEntityData<TEntityData, TEntity, TId, TEntityRepository>
         where TEntityDataImplementation : class, TEntityData
@@ -120,12 +122,21 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entityFactory, "entityFactory");
+                Guard.ArgumentNotNull(entityDataFactory, "entityDataFactory");
+                Guard.ArgumentNotNull(entityRepositoryServiceFactory, "entityRepositoryServiceFactory");
+                Guard.ArgumentNotNull(entityObservers, "entityObservers");
+                Guard.ArgumentNotNull(entityCacheFactory, "entityCacheFactory");
+                Guard.ArgumentNotNull(scopeManagerFactory, "scopeManagerFactory");
+
                 EntityFactory = entityFactory;
                 EntityDataFactory = entityDataFactory;
                 EntityRepositoryServiceFactory = entityRepositoryServiceFactory;
                 EntityObservers = entityObservers;
                 EntityCacheFactory = entityCacheFactory;
                 ScopeManagerFactory = scopeManagerFactory;
+                // ReSharper restore PossibleMultipleEnumeration
             }
         }
 
@@ -141,9 +152,14 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entity, "entity");
+
                 foreach (var entityObserver in EntityObservers)
                 {
-                    Logger.Assembly.Debug(m => m("Attaching entity observer [{0}] to entity [{1}].", entityObserver, entity));
+                    // ReSharper disable AccessToForEachVariableInClosure
+                    Logger.Assembly.Debug(
+                        m => m("Attaching entity observer [{0}] to entity [{1}].", entityObserver, entity));
+                    // ReSharper restore AccessToForEachVariableInClosure
                     entityObserver.Attach(entity);
                 }
             }
@@ -157,10 +173,14 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entities, "entities");
+
                 foreach (var entity in entities)
                 {
                     AttachObservers(entity);
                 }
+                // ReSharper restore PossibleMultipleEnumeration
             }
         }
 
@@ -172,9 +192,14 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entity, "entity");
+
                 foreach (var entityObserver in EntityObservers)
                 {
-                    Logger.Assembly.Debug(m => m("Detaching entity observer [{0}] to entity [{1}].", entityObserver, entity));
+                    // ReSharper disable AccessToForEachVariableInClosure
+                    Logger.Assembly.Debug(
+                        m => m("Detaching entity observer [{0}] to entity [{1}].", entityObserver, entity));
+                    // ReSharper restore AccessToForEachVariableInClosure
                     entityObserver.Detach(entity);
                 }
             }
@@ -188,10 +213,14 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entities, "entities");
+
                 foreach (var entity in entities)
                 {
                     DetatchObservers(entity);
                 }
+                // ReSharper restore PossibleMultipleEnumeration
             }
         }
 
@@ -222,7 +251,7 @@ namespace DotNetDesign.Substrate
             {
                 return entityData == null
                            ? null
-                           : InitializeEntities(new[] { entityData }).Single();
+                           : InitializeEntities(new[] {entityData}).Single();
             }
         }
 
@@ -258,8 +287,60 @@ namespace DotNetDesign.Substrate
 
                     yield return entity;
                 }
+            }
+        }
 
-                yield break;
+        /// <summary>
+        /// Processes the request.
+        /// </summary>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
+        /// <param name="cacheKey">The cache key.</param>
+        /// <param name="repositoryCall">The repository call.</param>
+        /// <returns></returns>
+        protected virtual TEntity ProcessRequest(
+            bool forceNew,
+            string cacheKey,
+            Func<Dictionary<string, string>, TEntityData> repositoryCall)
+        {
+            using (Logger.Assembly.Scope())
+            {
+                Guard.ArgumentNotNullOrEmpty(cacheKey, "cacheKey");
+                Guard.ArgumentNotNull(repositoryCall, "repositoryCall");
+
+                return
+                    ProcessRequestForEnumerable(forceNew, cacheKey, x => (new[] {repositoryCall(x)})).FirstOrDefault();
+            }
+        }
+
+        /// <summary>
+        /// Processes the request.
+        /// </summary>
+        /// <param name="forceNew">if set to <c>true</c> [force new].</param>
+        /// <param name="cacheKey">The cache key.</param>
+        /// <param name="repositoryCall">The repository call.</param>
+        /// <returns></returns>
+        protected virtual IEnumerable<TEntity> ProcessRequestForEnumerable(
+            bool forceNew,
+            string cacheKey,
+            Func<Dictionary<string, string>, IEnumerable<TEntityData>> repositoryCall)
+        {
+            using (Logger.Assembly.Scope())
+            {
+                Guard.ArgumentNotNullOrEmpty(cacheKey, "cacheKey");
+                Guard.ArgumentNotNull(repositoryCall, "repositoryCall");
+
+                var entityData = EntityCacheFactory().Get(cacheKey);
+
+                // ReSharper disable PossibleMultipleEnumeration
+                if (forceNew || entityData == null)
+                {
+                    entityData = repositoryCall(ScopeManagerFactory().GetScopeContext()).RemoveNulls().ToArray();
+                    EntityCacheFactory()
+                        .Add(cacheKey, entityData.GetClones<TEntityData, TEntity, TId, TEntityRepository>());
+                }
+
+                return InitializeEntities(entityData.GetClones<TEntityData, TEntity, TId, TEntityRepository>());
+                // ReSharper restore PossibleMultipleEnumeration
             }
         }
 
@@ -288,18 +369,10 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Getting all [{0}]. ForceNew [{1}].", typeof(TEntity), forceNew));
-                var cacheKey = string.Format("GetAll_{0}", typeof(TEntity));
+                Logger.Assembly.Debug(m => m("Getting all [{0}]. ForceNew [{1}].", typeof (TEntity), forceNew));
+                var cacheKey = string.Format("GetAll_{0}", typeof (TEntity));
 
-                var entityData = EntityCacheFactory().Get(cacheKey);
-
-                if (forceNew || entityData == null)
-                {
-                    entityData = EntityRepositoryServiceFactory().GetAll(ScopeManagerFactory().GetScopeContext()).RemoveNulls();
-                    EntityCacheFactory().Add(cacheKey, entityData.Select(x => x.Clone()));
-                }
-
-                return InitializeEntities(entityData.Select(x => x.Clone()));
+                return ProcessRequestForEnumerable(forceNew, cacheKey, x => EntityRepositoryServiceFactory().GetAll(x));
             }
         }
 
@@ -313,18 +386,13 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Getting [{0}] by ID [{1}]. ForceNew [{2}].", typeof(TEntity), id, forceNew));
-                var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), id);
+                // ReSharper disable ImplicitlyCapturedClosure
+                Logger.Assembly.Debug(
+                    m => m("Getting [{0}] by ID [{1}]. ForceNew [{2}].", typeof (TEntity), id, forceNew));
+                // ReSharper restore ImplicitlyCapturedClosure
+                var cacheKey = string.Format("GetById_{0}_{1}", typeof (TEntity), id);
 
-                var entityData = EntityCacheFactory().Get(cacheKey);
-
-                if (forceNew || entityData == null)
-                {
-                    entityData = (new[] { EntityRepositoryServiceFactory().GetById(id, ScopeManagerFactory().GetScopeContext()) }).RemoveNulls();
-                    EntityCacheFactory().Add(cacheKey, entityData.Select(x => x.Clone()));
-                }
-
-                return InitializeEntities(entityData.Select(x => x.Clone())).FirstOrDefault();
+                return ProcessRequest(forceNew, cacheKey, x => EntityRepositoryServiceFactory().GetById(id, x));
             }
         }
 
@@ -338,18 +406,20 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Getting [{0}] by ID(s) [{1}]. ForceNew [{2}].", typeof(TEntity), string.Join(",", ids), forceNew));
-                var cacheKey = string.Format("GetByIds_{0}_{1}", typeof(TEntity), string.Join("_", ids.OrderBy(x => x)));
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(ids, "ids");
+                var idsArray = ids as TId[] ?? ids.ToArray();
+                // ReSharper restore PossibleMultipleEnumeration
 
-                var entityData = EntityCacheFactory().Get(cacheKey);
+                Logger.Assembly.Debug(
+                    m =>
+                    m("Getting [{0}] by ID(s) [{1}]. ForceNew [{2}].", typeof (TEntity), string.Join(",", idsArray),
+                      forceNew));
+                var cacheKey = string.Format("GetByIds_{0}_{1}", typeof (TEntity),
+                                             string.Join("_", idsArray.OrderBy(x => x)));
 
-                if (forceNew || entityData == null)
-                {
-                    entityData = EntityRepositoryServiceFactory().GetByIds(ids, ScopeManagerFactory().GetScopeContext()).RemoveNulls();
-                    EntityCacheFactory().Add(cacheKey, entityData.Select(x => x.Clone()));
-                }
-
-                return InitializeEntities(entityData.RemoveNulls().Select(x => x.Clone()));
+                return ProcessRequestForEnumerable(forceNew, cacheKey,
+                                                   x => EntityRepositoryServiceFactory().GetByIds(idsArray, x));
             }
         }
 
@@ -364,26 +434,14 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Getting [{0}] by version [{1}]. ForceNew [{2}].", typeof(TEntity), version, forceNew));
-                var cacheKey = string.Format("GetVersion_{0}_{1}_{2}", typeof(TEntity), id, version);
+                // ReSharper disable ImplicitlyCapturedClosure
+                Logger.Assembly.Debug(
+                    m => m("Getting [{0}] by version [{1}]. ForceNew [{2}].", typeof (TEntity), version, forceNew));
+                // ReSharper restore ImplicitlyCapturedClosure
+                var cacheKey = string.Format("GetVersion_{0}_{1}_{2}", typeof (TEntity), id, version);
 
-                var entityData = EntityCacheFactory().Get(cacheKey);
-
-                if (forceNew || entityData == null)
-                {
-                    var returnedEntityData = EntityRepositoryServiceFactory().GetVersion(id, version, ScopeManagerFactory().GetScopeContext());
-
-                    if (returnedEntityData == null)
-                    {
-                        return null;
-                    }
-
-                    entityData = (new[] { returnedEntityData }).RemoveNulls();
-
-                    EntityCacheFactory().Add(cacheKey, entityData.Select(x => x.Clone()));
-                }
-
-                return InitializeEntities(entityData.Select(x => x.Clone())).FirstOrDefault();
+                return ProcessRequest(forceNew, cacheKey,
+                                      x => EntityRepositoryServiceFactory().GetVersion(id, version, x));
             }
         }
 
@@ -396,12 +454,15 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entity, "entity");
+
                 Logger.Assembly.Debug(m => m("Saving [{0}].", entity));
-                var entityData = EntityRepositoryServiceFactory().Save(entity.EntityData as TEntityDataImplementation, ScopeManagerFactory().GetScopeContext());
+                var entityData = EntityRepositoryServiceFactory()
+                    .Save(entity.EntityData as TEntityDataImplementation, ScopeManagerFactory().GetScopeContext());
 
                 EntityCacheFactory().RemoveIfDataContains(entityData);
-                var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityData.Id);
-                EntityCacheFactory().Add(cacheKey, new[] { entityData.Clone() });
+                var cacheKey = string.Format("GetById_{0}_{1}", typeof (TEntity), entityData.Id);
+                EntityCacheFactory().Add(cacheKey, new[] {entityData.Clone()});
 
                 return InitializeEntities(entityData.Clone());
             }
@@ -416,18 +477,30 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Saving all [{0}].", string.Join(",", entities)));
-                var entityData =
-                    EntityRepositoryServiceFactory().SaveAll(entities.Select(x => x.EntityData).Cast<TEntityDataImplementation>(), ScopeManagerFactory().GetScopeContext());
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entities, "entities");
+                var entitiesArray = entities as TEntity[] ?? entities.ToArray();
+                // ReSharper restore PossibleMultipleEnumeration
 
-                EntityCacheFactory().RemoveIfDataContains(entityData);
-                foreach (var entityDataImplementation in entityData.Select(x => x.Clone()))
+                Logger.Assembly.Debug(m => m("Saving all [{0}].", string.Join<TEntity>(",", entitiesArray)));
+                var entityData =
+                    EntityRepositoryServiceFactory()
+                        .SaveAll(entitiesArray.Select(x => x.EntityData).Cast<TEntityDataImplementation>(),
+                                 ScopeManagerFactory().GetScopeContext());
+
+                var entityDataImplementations = entityData as TEntityDataImplementation[] ?? entityData.ToArray();
+                EntityCacheFactory().RemoveIfDataContains(entityDataImplementations);
+                foreach (
+                    var entityDataImplementation in
+                        entityDataImplementations.GetClones<TEntityData, TEntity, TId, TEntityRepository>())
                 {
-                    var cacheKey = string.Format("GetById_{0}_{1}", typeof(TEntity), entityDataImplementation.Id);
-                    EntityCacheFactory().Add(cacheKey, new[] { entityDataImplementation });
+                    var cacheKey = string.Format("GetById_{0}_{1}", typeof (TEntity), entityDataImplementation.Id);
+                    EntityCacheFactory().Add(cacheKey, new[] {entityDataImplementation});
                 }
 
-                return InitializeEntities(entityData.Select(x => x.Clone()));
+                return
+                    InitializeEntities(
+                        entityDataImplementations.GetClones<TEntityData, TEntity, TId, TEntityRepository>());
             }
         }
 
@@ -439,6 +512,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entity, "entity");
+
                 Logger.Assembly.Debug(m => m("Deleting [{0}].", entity));
                 EntityRepositoryServiceFactory().Delete(entity.Id, ScopeManagerFactory().GetScopeContext());
 
@@ -456,12 +531,18 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Deleting all [{0}].", string.Join(",", entities)));
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entities, "entities");
+                var entitiesArray = entities as TEntity[] ?? entities.ToArray();
+                // ReSharper restore PossibleMultipleEnumeration
 
-                EntityRepositoryServiceFactory().DeleteAll(entities.Select(x => x.Id), ScopeManagerFactory().GetScopeContext());
-                DetatchObservers(entities);
+                Logger.Assembly.Debug(m => m("Deleting all [{0}].", string.Join<TEntity>(",", entitiesArray)));
 
-                EntityCacheFactory().RemoveIfDataContains(entities.Select(x => x.EntityData));
+                EntityRepositoryServiceFactory()
+                    .DeleteAll(entitiesArray.Select(x => x.Id), ScopeManagerFactory().GetScopeContext());
+                DetatchObservers(entitiesArray);
+
+                EntityCacheFactory().RemoveIfDataContains(entitiesArray.Select(x => x.EntityData));
             }
         }
 

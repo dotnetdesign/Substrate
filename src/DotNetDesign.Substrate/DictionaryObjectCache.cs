@@ -10,6 +10,7 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TObject">The type of the object.</typeparam>
     public class DictionaryObjectCache<TObject> :
         IObjectCache<TObject>
+        where TObject : class
     {
         /// <summary>
         /// Dictionary for internal cache store.
@@ -36,6 +37,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+
                 Logger.Assembly.Debug(m => m("Getting cached value for key [{0}].", key));
                 return DictionaryCache.ContainsKey(key) ? DictionaryCache[key] : null;
             }
@@ -50,15 +53,21 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TObject), key, string.Join(",", objectData)));
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+// ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(objectData, "objectData");
+                var objectDataArray = objectData as TObject[] ?? objectData.ToArray();
+// ReSharper restore PossibleMultipleEnumeration
+
+                Logger.Assembly.Debug(m => m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TObject), key, string.Join<TObject>(",", objectDataArray)));
 
                 if (DictionaryCache.ContainsKey(key))
                 {
-                    DictionaryCache[key] = objectData;
+                    DictionaryCache[key] = objectDataArray;
                 }
                 else
                 {
-                    DictionaryCache.Add(key, objectData);
+                    DictionaryCache.Add(key, objectDataArray);
                 }
             }
         }
@@ -71,6 +80,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+
                 Logger.Assembly.Debug(m => m("Removing cached value for key [{0}].", key));
                 DictionaryCache.Remove(key);
             }
@@ -99,18 +110,25 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Removing cached value if data contains object data [{0}].", string.Join(",", objectData)));
+// ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(objectData, "objectData");
+                var objectDataArray = objectData as TObject[] ?? objectData.ToArray();
+// ReSharper restore PossibleMultipleEnumeration
+
+                var objectDataString = string.Join<TObject>(",", objectDataArray);
+
+                Logger.Assembly.Debug(m => m("Removing cached value if data contains object data [{0}].", objectDataString));
                 foreach (var cacheKeyValuePair in DictionaryCache)
                 {
-                    if (cacheKeyValuePair.Value.Any(objectData.Contains))
-                    {
-                        Logger.Assembly.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Object data [{2}].", 
-                            cacheKeyValuePair.Key, 
-                            string.Join(",", cacheKeyValuePair.Value),
-                            string.Join(",", objectData)));
+                    if (!cacheKeyValuePair.Value.Any(objectDataArray.Contains)) continue;
 
-                        DictionaryCache.Remove(cacheKeyValuePair.Key);
-                    }
+                    var pair = cacheKeyValuePair;
+                    Logger.Assembly.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Object data [{2}].", 
+                                                 pair.Key, 
+                                                 string.Join(",", pair.Value),
+                                                 objectDataString));
+
+                    DictionaryCache.Remove(cacheKeyValuePair.Key);
                 }
             }
         }

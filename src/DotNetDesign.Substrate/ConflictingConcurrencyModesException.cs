@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -36,15 +35,22 @@ namespace DotNetDesign.Substrate
         /// </summary>
         /// <param name="entityDataType">Type of the entity data.</param>
         /// <param name="conflictingConcurrencyModes">The conflicting concurrency modes.</param>
-        public ConflictingConcurrencyModesException(Type entityDataType, IEnumerable<ConcurrencyMode> conflictingConcurrencyModes)
+        // ReSharper disable PossibleMultipleEnumeration
+        public ConflictingConcurrencyModesException(Type entityDataType,
+                                                    IEnumerable<ConcurrencyMode> conflictingConcurrencyModes)
             : base(string.Format(ERROR_MESSAGE_FORMAT, entityDataType, string.Join(", ", conflictingConcurrencyModes)))
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entityDataType, "entityDataType");
+                Guard.ArgumentNotNull(conflictingConcurrencyModes, "conflictingConcurrencyModes");
+
                 EntityDataType = entityDataType;
                 ConflictingConcurrencyModes = conflictingConcurrencyModes;
             }
         }
+
+        // ReSharper restore PossibleMultipleEnumeration
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConflictingConcurrencyModesException"/> class.
@@ -56,7 +62,8 @@ namespace DotNetDesign.Substrate
         /// <exception cref="T:System.Runtime.Serialization.SerializationException">The class name is null or <see cref="P:System.Exception.HResult"/> is zero (0). </exception>
         protected ConflictingConcurrencyModesException(
             SerializationInfo info,
-            StreamingContext context) : base(info, context)
+            StreamingContext context)
+            : base(info, context)
         {
         }
     }

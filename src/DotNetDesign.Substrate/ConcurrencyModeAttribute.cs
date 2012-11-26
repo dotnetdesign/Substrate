@@ -1,5 +1,4 @@
 using System;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate

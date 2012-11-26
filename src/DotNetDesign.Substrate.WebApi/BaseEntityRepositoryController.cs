@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Reflection;
 using System.Web;
 using System.Web.Http;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate.WebApi
@@ -40,7 +39,11 @@ namespace DotNetDesign.Substrate.WebApi
         /// <summary>
         /// Property names to excluded when comparing changes by default.
         /// </summary>
-        public static readonly IEnumerable<string> DefaultExcludedPropertyNames = new[] { "Id", "CreatedAt", "UpdatedAt", "Version", "VersionId" };
+        public static IEnumerable<string> DefaultExcludedPropertyNames
+        {
+            get { return new[] {"Id", "CreatedAt", "UpdatedAt", "Version", "VersionId"}; }
+        }
+
         private readonly IEnumerable<string> _excludedPropertyNames;
 
         protected readonly Func<IPermissionAuthorizationManager<TEntity, TEntityData, TId, TEntityRepository>> PermissionAuthorizationManagerFactory;
@@ -57,6 +60,11 @@ namespace DotNetDesign.Substrate.WebApi
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(permissionAuthorizationManagerFactory, "permissionAuthorizationManagerFactory");
+                Guard.ArgumentNotNull(entityRepositoryFactory, "entityRepositoryFactory");
+                Guard.ArgumentNotNull(entityFactory, "entityFactory");
+                Guard.ArgumentNotNull(rootUri, "rootUri");
+
                 PermissionAuthorizationManagerFactory = permissionAuthorizationManagerFactory;
                 EntityRepositoryFactory = entityRepositoryFactory;
                 EntityFactory = entityFactory;
@@ -303,7 +311,6 @@ namespace DotNetDesign.Substrate.WebApi
             }
         }
 
-
         /// <summary>
         /// Applies the changes.
         /// </summary>
@@ -320,15 +327,28 @@ namespace DotNetDesign.Substrate.WebApi
             }
         }
 
-        protected bool IsPropertyIncluded(PropertyInfo x)
+        /// <summary>
+        /// Determines whether property is included.
+        /// </summary>
+        /// <param name="x">The x.</param>
+        /// <returns>
+        ///   <c>true</c> if property is included; otherwise, <c>false</c>.
+        /// </returns>
+        protected virtual bool IsPropertyIncluded(PropertyInfo x)
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(x, "x");
+
                 return !_excludedPropertyNames.Contains(x.Name, StringComparer.InvariantCultureIgnoreCase);
             }
         }
 
-        protected void Authorize(EntityPermissions requiredPermissions)
+        /// <summary>
+        /// Authorizes the specified required permissions.
+        /// </summary>
+        /// <param name="requiredPermissions">The required permissions.</param>
+        protected virtual void Authorize(EntityPermissions requiredPermissions)
         {
             using(Logger.Assembly.Scope())
             {

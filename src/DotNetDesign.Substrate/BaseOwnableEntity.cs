@@ -15,11 +15,11 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TOwnerData">The type of the owner data.</typeparam>
     /// <typeparam name="TOwnerRepository">The type of the owner repository.</typeparam>
     public abstract class BaseOwnableEntity<TOwnableEntity, TOwnableEntityData, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository> :
-        BaseOwnableEntity<TOwnableEntity, Guid, TOwnableEntityData, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
+                                                BaseOwnableEntity<TOwnableEntity, Guid, TOwnableEntityData, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
         where TOwnableEntityData : class, IOwnableEntityData<TOwnableEntityData, TOwnableEntity, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
-        where TOwnableEntity : class, IOwnableEntity<TOwnableEntity, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>, TOwnableEntityData
+        where TOwnableEntity : class, IOwnableEntity<TOwnableEntity, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>, TOwnableEntityData        
         where TOwnableEntityRepository : class, IOwnableEntityRepository<TOwnableEntityRepository, TOwnableEntity, TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
-        where TOwnerData : class,IEntityData<TOwnerData, TOwner, TOwnerRepository>
+        where TOwnerData : class, IEntityData<TOwnerData, TOwner, TOwnerRepository>
         where TOwner : class, IEntity<TOwner, TOwnerData, TOwnerRepository>, TOwnerData
         where TOwnerRepository : class, IEntityRepository<TOwnerRepository, TOwner, TOwnerData>
     {
@@ -33,13 +33,13 @@ namespace DotNetDesign.Substrate
         /// <param name="permissionAuthorizationManagerFactory">The permission authorization manager factory.</param>
         /// <param name="ownerRepositoryFactory">The owner repository factory.</param>
         protected BaseOwnableEntity(
-            Func<TOwnableEntityRepository> entityRepositoryFactory, 
-            Func<TOwnableEntityData> entityDataFactory, 
-            Func<IConcurrencyManager<TOwnableEntity, Guid, TOwnableEntityData, TOwnableEntityRepository>> entityConcurrencyManagerFactory, 
-            IEnumerable<IEntityValidator<TOwnableEntity, TOwnableEntityData, Guid, TOwnableEntityRepository>> entityValidators, 
-            Func<IPermissionAuthorizationManager<TOwnableEntity, TOwnableEntityData, Guid, TOwnableEntityRepository>> permissionAuthorizationManagerFactory, 
-            Func<TOwnerRepository> ownerRepositoryFactory) : 
-            base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory, ownerRepositoryFactory)
+            Func<TOwnableEntityRepository> entityRepositoryFactory,
+            Func<TOwnableEntityData> entityDataFactory,
+            Func<IConcurrencyManager<TOwnableEntity, Guid, TOwnableEntityData, TOwnableEntityRepository>> entityConcurrencyManagerFactory,
+            IEnumerable<IEntityValidator<TOwnableEntity, TOwnableEntityData, Guid, TOwnableEntityRepository>> entityValidators,
+            Func<IPermissionAuthorizationManager<TOwnableEntity, TOwnableEntityData, Guid, TOwnableEntityRepository>> permissionAuthorizationManagerFactory,
+            Func<TOwnerRepository> ownerRepositoryFactory) :
+                base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory, ownerRepositoryFactory)
         {
         }
     }
@@ -55,8 +55,8 @@ namespace DotNetDesign.Substrate
     /// <typeparam name="TOwnerRepository">The type of the owner repository.</typeparam>
     /// <typeparam name="TOwnerData">The type of the owner data.</typeparam>
     public abstract class BaseOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository> :
-        BaseEntity<TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository>,
-        IOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>
+                                                BaseEntity<TOwnableEntity, TId, TOwnableEntityData, TOwnableEntityRepository>,
+                                                IOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>
         where TOwnableEntityData : class, IOwnableEntityData<TOwnableEntityData, TOwnableEntity, TId, TOwnableEntityRepository, TOwner, TOwnerData, TOwnerRepository>
         where TOwnableEntity : class, IOwnableEntity<TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnableEntityRepository, TOwnerData, TOwnerRepository>, TOwnableEntityData
         where TOwnableEntityRepository : class, IOwnableEntityRepository<TOwnableEntityRepository, TOwnableEntity, TId, TOwnableEntityData, TOwner, TOwnerData, TOwnerRepository>
@@ -80,17 +80,20 @@ namespace DotNetDesign.Substrate
             IEnumerable<IEntityValidator<TOwnableEntity, TOwnableEntityData, TId, TOwnableEntityRepository>> entityValidators,
             Func<IPermissionAuthorizationManager<TOwnableEntity, TOwnableEntityData, TId, TOwnableEntityRepository>> permissionAuthorizationManagerFactory,
             Func<TOwnerRepository> ownerRepositoryFactory) :
-            base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
+                base(entityRepositoryFactory, entityDataFactory, entityConcurrencyManagerFactory, entityValidators, permissionAuthorizationManagerFactory)
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(ownerRepositoryFactory, "ownerRepositoryFactory");
+
                 OwnerRepositoryFactory = ownerRepositoryFactory;
+                PropertyChanged += (sender, args) => InitializeLazyOwner();
             }
         }
 
         #region Private Members
 
-        private Lazy<TOwner> _lazyOwner; 
+        private Lazy<TOwner> _lazyOwner;
 
         #endregion Private Members
 
@@ -99,7 +102,7 @@ namespace DotNetDesign.Substrate
         /// <summary>
         /// The owner repository factory
         /// </summary>
-        protected readonly Func<TOwnerRepository> OwnerRepositoryFactory; 
+        protected readonly Func<TOwnerRepository> OwnerRepositoryFactory;
 
         #endregion Protected Members
 
@@ -150,7 +153,9 @@ namespace DotNetDesign.Substrate
                         InitializeLazyOwner();
                     }
 
+                    // ReSharper disable PossibleNullReferenceException
                     return _lazyOwner.IsValueCreated ? _lazyOwner.Value : null;
+                    // ReSharper restore PossibleNullReferenceException
                 }
             }
             set
@@ -179,7 +184,7 @@ namespace DotNetDesign.Substrate
             using (Logger.Assembly.Scope())
             {
                 Logger.Assembly.Debug(m => m("Getting owner for {0}", this));
-                
+
                 return OwnerRepositoryFactory().GetById(OwnerId);
             }
         }

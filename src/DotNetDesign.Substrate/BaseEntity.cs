@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Diagnostics;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -133,10 +131,20 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(entityDataFactory, "entityDataFactory");
+                Guard.ArgumentNotNull(entityRepositoryFactory, "entityRepositoryFactory");
+                Guard.ArgumentNotNull(entityConcurrencyManagerFactory, "entityConcurrencyManagerFactory");
+// ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entityValidators, "entityValidators");
+// ReSharper restore PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(permissionAuthorizationManagerFactory, "permissionAuthorizationManagerFactory");
+
                 EntityDataFactory = entityDataFactory;
                 EntityRepositoryFactory = entityRepositoryFactory;
                 EntityConcurrencyManagerFactory = entityConcurrencyManagerFactory;
+// ReSharper disable PossibleMultipleEnumeration
                 EntityValidators = entityValidators;
+// ReSharper restore PossibleMultipleEnumeration
                 PermissionAuthorizationManagerFactory = permissionAuthorizationManagerFactory;
 
                 PropertyChanged += BaseEntityPropertyChanged;
@@ -469,6 +477,8 @@ namespace DotNetDesign.Substrate
             {
                 ThrowIfNotInitialized();
 
+                Guard.ArgumentNotNullOrEmpty(propertyName, "propertyName");
+
                 object originalValue;
                 return HasPropertyChanged(propertyName, out originalValue);
             }
@@ -487,6 +497,8 @@ namespace DotNetDesign.Substrate
             using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
+
+                Guard.ArgumentNotNullOrEmpty(propertyName, "propertyName");
 
                 originalValue = typeof(TEntityData).GetProperty(propertyName).GetValue(OriginalEntityData, null);
                 var currentValue = typeof(TEntityData).GetProperty(propertyName).GetValue(EntityData, null);
@@ -528,6 +540,8 @@ namespace DotNetDesign.Substrate
             {
                 ThrowIfNotInitialized();
 
+                Guard.ArgumentNotNull(property, "property");
+
                 TProperty originalValue;
                 return HasPropertyChanged(property, out originalValue);
             }
@@ -549,6 +563,8 @@ namespace DotNetDesign.Substrate
             using (Logger.Assembly.Scope())
             {
                 ThrowIfNotInitialized();
+
+                Guard.ArgumentNotNull(property, "property");
 
                 var propertyName = ((MemberExpression)property.Body).Member.Name;
 
@@ -575,6 +591,9 @@ namespace DotNetDesign.Substrate
                     Logger.Assembly.Error(invalidOperationException.Message, invalidOperationException);
                     throw invalidOperationException;
                 }
+
+
+                Guard.ArgumentNotNull(entityData, "entityData");
 
                 OnInitializing();
                 
@@ -691,6 +710,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNull(property, "property");
+
                 var propertyName = ((MemberExpression)property.Body).Member.Name;
 
                 return GetPropertyDisplayName(propertyName);
@@ -706,6 +727,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(propertyName, "propertyName");
+
                 var propertyInfo = typeof(TEntityData).GetProperty(propertyName);
 
                 var displayNameAttribute =
@@ -735,6 +758,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(propertyName, "propertyName");
+
                 PropertyChanging.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
             }
         }
@@ -754,6 +779,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(propertyName, "propertyName");
+
                 PropertyChanged.Invoke(this, new PropertyChangeEventArgs(propertyName, oldValue, newValue));
             }
         }
@@ -880,12 +907,11 @@ namespace DotNetDesign.Substrate
         {
             using(Logger.Assembly.Scope())
             {
-                if(!IsInitialized)
-                {
-                    var exception = new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
-                    Logger.Assembly.Error(exception.Message, exception);
-                    throw exception;
-                }
+                if (IsInitialized) return;
+
+                var exception = new InvalidOperationException(string.Format("Entity {0} has not been initialized.", this));
+                Logger.Assembly.Error(exception.Message, exception);
+                throw exception;
             }
         }
 

@@ -17,7 +17,7 @@ namespace DotNetDesign.Substrate.Example.Entities
             Assembly = LogManager.GetLogger("DotNetDesign.Substrate.Example.Entities");
         }
 
-        internal static ILog Assembly;
+        internal static readonly ILog Assembly;
     }
 
 	#region Entity Data Interfaces

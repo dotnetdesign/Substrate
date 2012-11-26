@@ -54,20 +54,20 @@ namespace DotNetDesign.Substrate.Example.ConsoleClient
             Console.Read();
         }
 
-        static void RegisterNetTcpService<TService>(ContainerBuilder builder, string address)
+        private static void RegisterNetTcpService<TService>(ContainerBuilder builder, string address)
         {
             builder.Register(
                 container =>
                 new ChannelFactory<TService>(new NetTcpBinding()
-                {
-                    SendTimeout = new TimeSpan(1, 0, 0),
-                    ReceiveTimeout = new TimeSpan(0, 5, 0)
-                },
-                new EndpointAddress(address))).SingleInstance();
+                    {
+                        SendTimeout = new TimeSpan(1, 0, 0),
+                        ReceiveTimeout = new TimeSpan(0, 5, 0)
+                    },
+                                             new EndpointAddress(address))).SingleInstance();
 
             builder.Register(
                 c => c.Resolve<ChannelFactory<TService>>().CreateChannel())
-                .UseWcfSafeRelease();
+                   .UseWcfSafeRelease();
         }
     }
 }

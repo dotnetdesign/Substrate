@@ -42,9 +42,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Common.Logging.2.1.1\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
-    <Reference Include="DotNetDesign.Common, Version=0.9.0.7, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\DotNetDesign.Common.0.9.0.7\lib\net40\DotNetDesign.Common.dll</HintPath>
+    <Reference Include="DotNetDesign.Common">
+      <HintPath>..\packages\DotNetDesign.Common.0.9.0.10\lib\net40\DotNetDesign.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -73,6 +72,7 @@
     <Compile Include="DictionaryEntityCache.cs" />
     <Compile Include="DictionaryObjectCache.cs" />
     <Compile Include="DictionaryScopeManager.cs" />
+    <Compile Include="EntityExtensions.cs" />
     <Compile Include="EntityIdentifier.cs" />
     <Compile Include="EntityPermissions.cs" />
     <Compile Include="EntityRepository.cs" />

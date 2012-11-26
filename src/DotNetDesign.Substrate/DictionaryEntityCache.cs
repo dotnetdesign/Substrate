@@ -56,6 +56,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+
                 Logger.Assembly.Debug(m => m("Getting cached value for key [{0}].", key));
                 return DictionaryCache.ContainsKey(key) ? DictionaryCache[key] : null;
             }
@@ -70,15 +72,25 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof(TEntityData), key, string.Join(",", entityData)));
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+
+                // ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entityData, "entityData");
+                var entityDataArray = entityData as TEntityData[] ?? entityData.ToArray();
+                // ReSharper restore PossibleMultipleEnumeration
+
+                Logger.Assembly.Debug(
+                    m =>
+                    m("Adding entities of type [{0}] to cache. Key [{1}]. Value(s) [{2}].", typeof (TEntityData), key,
+                      string.Join<TEntityData>(",", entityDataArray)));
 
                 if (DictionaryCache.ContainsKey(key))
                 {
-                    DictionaryCache[key] = entityData;
+                    DictionaryCache[key] = entityDataArray;
                 }
                 else
                 {
-                    DictionaryCache.Add(key, entityData);
+                    DictionaryCache.Add(key, entityDataArray);
                 }
             }
         }
@@ -91,6 +103,8 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
+                Guard.ArgumentNotNullOrEmpty(key, "key");
+
                 Logger.Assembly.Debug(m => m("Removing cached value for key [{0}].", key));
                 DictionaryCache.Remove(key);
             }
@@ -104,10 +118,9 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                if (entityData != null)
-                {
-                    RemoveIfDataContains(new[] { entityData });
-                }
+                Guard.ArgumentNotNull(entityData, "entityData");
+
+                RemoveIfDataContains(new[] {entityData});
             }
         }
 
@@ -119,18 +132,25 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                Logger.Assembly.Debug(m => m("Removing cached value if data contains entity data [{0}].", string.Join(",", entityData)));
-                foreach (var cacheKeyValuePair in DictionaryCache)
-                {
-                    if (cacheKeyValuePair.Value.Any(x => entityData.Contains(x)))
-                    {
-                        Logger.Assembly.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Entity data [{2}].",
-                            cacheKeyValuePair.Key,
-                            string.Join(",", cacheKeyValuePair.Value),
-                            string.Join(",", entityData)));
+// ReSharper disable PossibleMultipleEnumeration
+                Guard.ArgumentNotNull(entityData, "entityData"); 
+                var entityDataArray = entityData as TEntityData[] ?? entityData.ToArray();
+// ReSharper restore PossibleMultipleEnumeration
 
-                        DictionaryCache.Remove(cacheKeyValuePair.Key);
-                    }
+                var entityDataString = string.Join<TEntityData>(",", entityDataArray);
+
+                Logger.Assembly.Debug(m => m("Removing cached value if data contains entity data [{0}].", entityDataString));
+
+                foreach (var cacheKeyValuePair in DictionaryCache.Where(cacheKeyValuePair => cacheKeyValuePair.Value.Any(entityDataArray.Contains)))
+                {
+                    var pair = cacheKeyValuePair;
+
+                    Logger.Assembly.Debug(m => m("Removing cached value. Cached key [{0}]. Cached value [{1}]. Entity data [{2}].",
+                                                 pair.Key,
+                                                 string.Join(",", pair.Value),
+                                                 entityDataString));
+
+                    DictionaryCache.Remove(cacheKeyValuePair.Key);
                 }
             }
         }

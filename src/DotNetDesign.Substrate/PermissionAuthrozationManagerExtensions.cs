@@ -1,5 +1,4 @@
 using System;
-using Common.Logging;
 using DotNetDesign.Common;
 
 namespace DotNetDesign.Substrate
@@ -25,13 +24,14 @@ namespace DotNetDesign.Substrate
         {
             using (Logger.Assembly.Scope())
             {
-                if (!permissionAuthorizationManager.IsAuthorized(requiredPermissions))
-                {
-                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                        "User not authorized with required permissions [{0}] on entity of type {1}.", requiredPermissions, typeof(TEntity)));
-                    Logger.Assembly.Error(unauthorizedException.Message, unauthorizedException);
-                    throw unauthorizedException;
-                }
+                Guard.ArgumentNotNull(permissionAuthorizationManager, "permissionAuthorizationManager");
+
+                if (permissionAuthorizationManager.IsAuthorized(requiredPermissions)) return;
+
+                var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                    "User not authorized with required permissions [{0}] on entity of type {1}.", requiredPermissions, typeof(TEntity)));
+                Logger.Assembly.Error(unauthorizedException.Message, unauthorizedException);
+                throw unauthorizedException;
             }
         }
 
@@ -52,13 +52,14 @@ namespace DotNetDesign.Substrate
         {
             using(Logger.Assembly.Scope())
             {
-                if (!permissionAuthorizationManager.IsAuthorized(requiredPermissions, entity))
-                {
-                    var unauthorizedException = new UnauthorizedAccessException(string.Format(
-                        "User not authorized with required permissions [{0}] on entity {1}.", requiredPermissions, entity));
-                    Logger.Assembly.Error(unauthorizedException.Message, unauthorizedException);
-                    throw unauthorizedException;
-                }
+                Guard.ArgumentNotNull(permissionAuthorizationManager, "permissionAuthorizationManager");
+
+                if (permissionAuthorizationManager.IsAuthorized(requiredPermissions, entity)) return;
+
+                var unauthorizedException = new UnauthorizedAccessException(string.Format(
+                    "User not authorized with required permissions [{0}] on entity {1}.", requiredPermissions, entity));
+                Logger.Assembly.Error(unauthorizedException.Message, unauthorizedException);
+                throw unauthorizedException;
             }
         }
     }
