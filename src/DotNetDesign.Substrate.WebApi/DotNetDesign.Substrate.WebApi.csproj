@@ -40,15 +40,14 @@
     <Reference Include="AspNet.SuppressFormsRedirect">
       <HintPath>..\packages\aspnet.suppressformsredirect.0.0.1.4\lib\40\AspNet.SuppressFormsRedirect.dll</HintPath>
     </Reference>
-    <Reference Include="Common.Logging, Version=2.1.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Common.Logging.2.1.1\lib\net40\Common.Logging.dll</HintPath>
+    <Reference Include="Common.Logging">
+      <HintPath>..\packages\Common.Logging.2.1.2\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
     <Reference Include="DotNetDesign.Common">
-      <HintPath>..\packages\DotNetDesign.Common.0.9.0.10\lib\net40\DotNetDesign.Common.dll</HintPath>
+      <HintPath>..\packages\DotNetDesign.Common.0.9.0.70\lib\net40\DotNetDesign.Common.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.5.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
