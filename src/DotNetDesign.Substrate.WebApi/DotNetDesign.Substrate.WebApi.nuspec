@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/dotnetdesign/Substrate</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2012</copyright>
+    <copyright>Copyright 2013</copyright>
     <tags>dal web-api</tags>
   </metadata>
 </package>

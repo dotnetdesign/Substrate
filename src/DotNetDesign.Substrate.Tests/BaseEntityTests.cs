@@ -2,12 +2,11 @@ using System;
 using System.Linq;
 using Autofac;
 using FluentAssertions;
-using NUnit.Framework;
 using Moq;
+using Xunit;
 
 namespace DotNetDesign.Substrate.Tests
 {
-    [TestFixture]
     public class BaseEntityTests
     {
         private IPerson _person;
@@ -16,23 +15,12 @@ namespace DotNetDesign.Substrate.Tests
 
         #region Setup
 
-        [TestFixtureSetUp]
-        public void SetUpTestFixture()
+        public BaseEntityTests()
         {
             var builder = new ContainerBuilder();
             builder.RegisterModule(new TestModule());
             _container = builder.Build();
-        }
 
-        [TestFixtureTearDown]
-        public void TearDownTestFixture()
-        {
-            _container.Dispose();
-        }
-
-        [SetUp]
-        public void TestSetUp()
-        {
             _person = _container.Resolve<IPerson>();
             _personData = _container.Resolve<IPersonData>();
             _personData.FirstName = "John";
@@ -40,68 +28,67 @@ namespace DotNetDesign.Substrate.Tests
             _personData.Version = 1;
         }
 
+        ~BaseEntityTests()
+        {
+            _container.Dispose();
+        }
+
         #endregion
 
-        [Test]
+        [Fact]
         public void PersonPropertyValuesShouldMatchDataPropertyValuesAfterInitialization()
         {
             _person.Initialize(_personData);
 
-            Assert.AreEqual(_personData.FirstName, _person.FirstName);
-            Assert.AreEqual(_personData.LastName, _person.LastName);
-            Assert.IsFalse(_person.IsDirty);
+            _person.FirstName.Should().Be(_personData.FirstName);
+            _person.LastName.Should().Be(_personData.LastName);
+            _person.IsDirty.Should().BeFalse();
         }
-
-        [Test]
+        
+        [Fact]
         public void Person_NotInitialized_ShouldThrowExceptionWhenPropertyGetSet()
         {
-            Assert.Throws<InvalidOperationException>(() =>
-                                                         {
-                                                             var firstName = _person.FirstName;
-                                                         });
-            Assert.Throws<InvalidOperationException>(() =>
-                                                         {
-                                                             _person.FirstName = "First Name";
-                                                         });
+            Assert.Throws<InvalidOperationException>(() => { var firstName = _person.FirstName; });
+            Assert.Throws<InvalidOperationException>(() => { _person.FirstName = "First Name"; });
         }
 
-        [Test]
+        [Fact]
         public void GetPropertyDisplayName_Should_Return_Value_In_Attribute()
         {
             _person.GetPropertyDisplayName(e => e.FirstName).Should().Be("First Name");
             _person.GetPropertyDisplayName("FirstName").Should().Be("First Name");
         }
 
-        [Test]
+        [Fact]
         public void GetPropertyDisplayName_Should_Return_StringEmpty_If_Attribute_Is_Missing()
         {
             _person.GetPropertyDisplayName(e => e.LastName).Should().Be(string.Empty);
             _person.GetPropertyDisplayName("LastName").Should().Be(string.Empty);
         }
 
-        [Test]
+        [Fact]
         public void PersonShouldNotBeDirtyAfterInitializeAndAfterPropertySetToSameValue()
         {
             _person.Initialize(_personData);
 
-            Assert.IsFalse(_person.IsDirty);
+            _person.IsDirty.Should().BeFalse();
             _person.FirstName = _personData.FirstName;
-            Assert.IsFalse(_person.IsDirty);
+            _person.IsDirty.Should().BeFalse();
         }
 
-        [Test]
+        [Fact]
         public void PersonShouldNotBeDirtyAfterInitializeAndShouldBeAfterPropertySetToDifferentValue()
         {
             _person.Initialize(_personData);
 
-            Assert.IsFalse(_person.IsDirty);
+            _person.IsDirty.Should().BeFalse();
             var newFirstName = _personData.FirstName + " additional characters";
             _person.FirstName = newFirstName;
-            Assert.AreEqual(newFirstName, _person.FirstName);
-            Assert.IsTrue(_person.IsDirty);
+            _person.FirstName.Should().Be(newFirstName);
+            _person.IsDirty.Should().BeTrue();
         }
 
-        [Test]
+        [Fact]
         public void ValidPersonShouldCallSaveOnRepository()
         {
             _person.Initialize(_personData);
@@ -113,7 +100,7 @@ namespace DotNetDesign.Substrate.Tests
             _person.Save();
         }
 
-        [Test]
+        [Fact]
         public void InvalidPersonShouldNotCallSaveOnRepository()
         {
             _person.Initialize(_personData);
@@ -124,7 +111,7 @@ namespace DotNetDesign.Substrate.Tests
 
         }
 
-        [Test]
+        [Fact]
         public void VersionShouldNotIncrementIfNoChangesMade()
         {
             _person.Initialize(_personData);
@@ -132,10 +119,10 @@ namespace DotNetDesign.Substrate.Tests
             var expectedVersion = _person.Version;
             IPerson returnedPerson;
             _person.Save(out returnedPerson);
-            Assert.AreEqual(expectedVersion, returnedPerson.Version);
+            returnedPerson.Version.Should().Be(expectedVersion);
         }
 
-        [Test]
+        [Fact]
         public void VersionShouldIncrementIfChangesMade()
         {
             _person.Initialize(_personData);
@@ -159,34 +146,34 @@ namespace DotNetDesign.Substrate.Tests
 
             IPerson returnedPerson;
             _person.Save(out returnedPerson);
-            Assert.AreEqual(expectedVersion, returnedPerson.Version);
+            returnedPerson.Version.Should().Be(expectedVersion);
         }
 
-        [Test]
+        [Fact]
         public void HasPropertyChangedShouldReturnFalseIfNotChanged()
         {
             _person.Initialize(_personData);
-            Assert.IsFalse(_person.HasPropertyChanged(x => x.FirstName));
-            Assert.IsFalse(_person.HasPropertyChanged(x => x.LastName));
+            _person.HasPropertyChanged(x => x.FirstName).Should().BeFalse();
+            _person.HasPropertyChanged(x => x.LastName).Should().BeFalse();
         }
 
-        [Test]
+        [Fact]
         public void HasPropertyChangedShouldReturnTrueIfChanged()
         {
             _person.Initialize(_personData);
             _person.FirstName = _person.FirstName + " more info";
-            Assert.IsTrue(_person.HasPropertyChanged(x => x.FirstName));
-            Assert.IsFalse(_person.HasPropertyChanged(x => x.LastName));
+            _person.HasPropertyChanged(x => x.FirstName).Should().BeTrue();
+            _person.HasPropertyChanged(x => x.LastName).Should().BeFalse();
         }
 
-        [Test]
+        [Fact]
         public void InvalidOperationExceptionShouldBeThrownIfInitializeIsCalledTwice()
         {
             _person.Initialize(_personData);
             Assert.Throws(typeof (InvalidOperationException), () => _person.Initialize(_personData));
         }
 
-        [Test]
+        [Fact]
         public void CallToGetVersionShouldPassInstanceAndVersionToEntityRepository()
         {
             _person.Initialize(_personData);
@@ -200,7 +187,7 @@ namespace DotNetDesign.Substrate.Tests
             _person.GetVersion(version);
         }
 
-        [Test]
+        [Fact]
         public void CallToDeleteShouldPassInstanceToEntityRepository()
         {
             _person.Initialize(_personData);
@@ -213,7 +200,7 @@ namespace DotNetDesign.Substrate.Tests
             _person.Delete();   
         }
 
-        [Test]
+        [Fact]
         public void CallToRevertChangesShouldResetValuesAndSetIsDirtyToFalse()
         {
             _person.Initialize(_personData);
@@ -224,27 +211,27 @@ namespace DotNetDesign.Substrate.Tests
             var originalLastName = _person.LastName;
             var newLastName = "NewLastName";
 
-            Assert.IsFalse(_person.IsDirty);
+            _person.IsDirty.Should().BeFalse();
 
             var originalValidationResults = _person.Validate();
 
             _person.FirstName = newFirstName;
             _person.LastName = newLastName;
 
-            Assert.IsTrue(_person.IsDirty);
-            Assert.AreEqual(newFirstName, _person.FirstName);
-            Assert.AreEqual(newLastName, _person.LastName);
+            _person.IsDirty.Should().BeTrue();
+            _person.FirstName.Should().Be(newFirstName);
+            _person.LastName.Should().Be(newLastName);
 
             _person.RevertChanges();
 
-            Assert.IsFalse(_person.IsDirty);
-            Assert.AreEqual(originalFirstName, _person.FirstName);
-            Assert.AreEqual(originalLastName, _person.LastName);
+            _person.IsDirty.Should().BeFalse();
+            _person.FirstName.Should().Be(originalFirstName);
+            _person.LastName.Should().Be(originalLastName);
 
-            Assert.AreEqual(originalValidationResults.Count(), _person.Validate().Count());
+            _person.Validate().Count().Should().Be(originalValidationResults.Count());
         }
 
-        [Test]
+        [Fact]
         public void CallToInitializeShouldCallInitializingAndInitializeOnceEach()
         {
             var initializingCallCount = 0;
@@ -255,11 +242,11 @@ namespace DotNetDesign.Substrate.Tests
 
             _person.Initialize(_personData);
 
-            Assert.AreEqual(1, initializingCallCount);
-            Assert.AreEqual(1, initializedCallCount);
+            initializingCallCount.Should().Be(1);
+            initializedCallCount.Should().Be(1);
         }
 
-        [Test]
+        [Fact]
         public void WhenPropertyValueChangesPropertyChangingAndPropertyChangedEventsShouldBeTriggered()
         {
             var propertyChangingCallCount = 0;
@@ -285,17 +272,17 @@ namespace DotNetDesign.Substrate.Tests
 
             _person.FirstName = _personData.FirstName;
 
-            Assert.AreEqual(0, propertyChangingCallCount);
-            Assert.AreEqual(0, propertyChangedCallCount);
-            Assert.IsEmpty(propertyChangingPropertyName);
-            Assert.IsEmpty(propertyChangedPropertyName);
+            propertyChangingCallCount.Should().Be(0);
+            propertyChangedCallCount.Should().Be(0);
+            propertyChangingPropertyName.Should().BeEmpty();
+            propertyChangedPropertyName.Should().BeEmpty();
 
             _person.FirstName = _personData.FirstName + " more info";
 
-            Assert.AreEqual(1, propertyChangingCallCount);
-            Assert.AreEqual(1, propertyChangedCallCount);
-            Assert.AreEqual("FirstName", propertyChangingPropertyName);
-            Assert.AreEqual("FirstName", propertyChangedPropertyName);
+            propertyChangingCallCount.Should().Be(1);
+            propertyChangedCallCount.Should().Be(1);
+            propertyChangingPropertyName.Should().Be("FirstName");
+            propertyChangedPropertyName.Should().Be("FirstName");
         }
     }
 }

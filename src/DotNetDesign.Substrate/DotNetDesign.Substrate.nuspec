@@ -15,7 +15,7 @@
       <frameworkAssembly assemblyName="System.ServiceModel" targetFramework="net40" />
       <frameworkAssembly assemblyName="System.Runtime.Serialization" targetFramework="net40" />
     </frameworkAssemblies>
-    <copyright>Copyright 2012</copyright>
+    <copyright>Copyright 2013</copyright>
     <tags>dal</tags>
   </metadata>
 </package>

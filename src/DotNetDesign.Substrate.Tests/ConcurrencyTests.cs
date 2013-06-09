@@ -1,39 +1,32 @@
 using System;
 using Autofac;
 using Moq;
-using NUnit.Framework;
+using Xunit;
+using FluentAssertions;
 
 namespace DotNetDesign.Substrate.Tests
 {
-    [TestFixture]
     public class ConcurrencyTests
     {
         private IContainer _container;
 
         #region Setup
 
-        [TestFixtureSetUp]
-        public void SetUpTestFixture()
+        public ConcurrencyTests()
         {
             var builder = new ContainerBuilder();
             builder.RegisterModule(new TestModule());
             _container = builder.Build();
         }
 
-        [TestFixtureTearDown]
-        public void TearDownTestFixture()
+        ~ConcurrencyTests()
         {
             _container.Dispose();
         }
 
-        [SetUp]
-        public void TestSetUp()
-        {
-        }
-
         #endregion
         
-        [Test]
+        [Fact]
         public void EntityWithoutConcurrencyModeAttribute_ShouldDefaultToMergeMode()
         {
             // to test this out, we need a IEntityData without a concurrency mode attribute
@@ -69,10 +62,10 @@ namespace DotNetDesign.Substrate.Tests
             person.EntityConcurrencyManagerFactory = () => concurrencyManager;
 
             var exceptionThrown = Assert.Throws<ConcurrencyConflictException>(() => person.Save());
-            Assert.AreEqual(ConcurrencyMode.Merge, exceptionThrown.ConcurrencyMode);
+            exceptionThrown.ConcurrencyMode.Should().Be(ConcurrencyMode.Merge);
         }
 
-        [Test]
+        [Fact]
         public void MergeConcurrencyMode_WithoutConflictingPropertyChanges_ShouldSucceed()
         {
             var commonId = Guid.NewGuid();
@@ -114,13 +107,13 @@ namespace DotNetDesign.Substrate.Tests
             person.EntityRepositoryFactory = () => personRepositoryMock.Object;
 
             IPerson savedPerson;
-            Assert.IsTrue(person.Save(out savedPerson));
-            Assert.AreEqual(person.FirstName, savedPerson.FirstName);
-            Assert.AreEqual(updatedPersonData.LastName, savedPerson.LastName);
-            Assert.AreEqual(updatedPerson.Version + 1, savedPerson.Version);
+            person.Save(out savedPerson).Should().BeTrue();
+            savedPerson.FirstName.Should().Be(person.FirstName);
+            savedPerson.LastName.Should().Be(updatedPersonData.LastName);
+            savedPerson.Version.Should().Be(updatedPerson.Version + 1);
         }
 
-        [Test]
+        [Fact]
         public void OverwriteConcurrencyMode_WithConflictingPropertyChanges_ShouldSucceed()
         {
             var commonId = Guid.NewGuid();
@@ -164,13 +157,13 @@ namespace DotNetDesign.Substrate.Tests
             overwriteConcurrency.EntityRepositoryFactory = () => overwriteConcurrencyRepositoryMock.Object;
 
             IOverwriteConcurrency savedOverwriteConcurrency;
-            Assert.IsTrue(overwriteConcurrency.Save(out savedOverwriteConcurrency));
-            Assert.AreEqual("Jon", savedOverwriteConcurrency.FirstName);
-            Assert.AreEqual("Dooo!", savedOverwriteConcurrency.LastName);
-            Assert.AreEqual(newVersion, savedOverwriteConcurrency.Version);
+            overwriteConcurrency.Save(out savedOverwriteConcurrency).Should().BeTrue();
+            savedOverwriteConcurrency.FirstName.Should().Be("Jon");
+            savedOverwriteConcurrency.LastName.Should().Be("Dooo!");
+            savedOverwriteConcurrency.Version.Should().Be(newVersion);
         }
 
-        [Test]
+        [Fact]
         public void FailConcurrencyMode_WithoutConflictingPropertyChanges_ShouldThrowException()
         {
             var commonId = Guid.NewGuid();
@@ -201,7 +194,7 @@ namespace DotNetDesign.Substrate.Tests
             failConcurrency.EntityConcurrencyManagerFactory = () => concurrencyManager;
 
             var exceptionThrown = Assert.Throws<ConcurrencyConflictException>(() => failConcurrency.Save());
-            Assert.AreEqual(ConcurrencyMode.Fail, exceptionThrown.ConcurrencyMode);
+            exceptionThrown.ConcurrencyMode.Should().Be(ConcurrencyMode.Fail);
         }
     }
 }
